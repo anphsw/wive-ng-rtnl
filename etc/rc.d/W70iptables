@@ -407,10 +407,6 @@ startv6() {
     ip6tables -A INPUT -i $lan_if -j ACCEPT
     ip6tables -A FORWARD -i $lan_if -j ACCEPT
 
-    # allow multicast
-    ip6tables -A INPUT -d ff00::/8 -j ACCEPT
-    ip6tables -A FORWARD -d ff00::/8 -j ACCEPT
-
     if [ "$WANPingFilter" = "0" ] && [ "$ROUTE_MODE" = "on" ]; then
 	$LOG "Filter all ipv6 icmp echo requests for router and clients."
         ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -j DROP

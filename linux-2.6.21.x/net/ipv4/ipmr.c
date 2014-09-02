@@ -63,8 +63,6 @@
 #include <net/ipip.h>
 #include <net/checksum.h>
 
-#define FIND_MULTICAST_SOURCE_ZERO 	1
-
 #if defined(CONFIG_IP_PIMSM_V1) || defined(CONFIG_IP_PIMSM_V2)
 #define CONFIG_IP_PIMSM	1
 #endif
@@ -305,8 +303,8 @@ static void ipmr_destroy_unres(struct mfc_cache *c)
 
 	atomic_dec(&cache_resolve_queue_len);
 
-	while ((skb=skb_dequeue(&c->mfc_un.unres.unresolved))) {
-		if (skb->nh.iph->version == 0) {
+	while ((skb = skb_dequeue(&c->mfc_un.unres.unresolved))) {
+		if (skb && skb->nh.iph && skb->nh.iph->version == 0) {
 			struct nlmsghdr *nlh = (struct nlmsghdr *)skb_pull(skb, sizeof(struct iphdr));
 			nlh->nlmsg_type = NLMSG_ERROR;
 			nlh->nlmsg_len = NLMSG_LENGTH(sizeof(struct nlmsgerr));
@@ -354,8 +352,8 @@ static void ipmr_expire_process(unsigned long dummy)
 		}
 
 		*cp = c->next;
-
-		ipmr_destroy_unres(c);
+		if(c)
+		    ipmr_destroy_unres(c);
 	}
 
 	if (atomic_read(&cache_resolve_queue_len))
@@ -473,16 +471,6 @@ static struct mfc_cache *ipmr_cache_find(__be32 origin, __be32 mcastgrp)
 		if (c->mfc_origin==origin && c->mfc_mcastgrp==mcastgrp)
 			break;
 	}
-#ifdef FIND_MULTICAST_SOURCE_ZERO
-	if (!c) {
-		line=MFC_HASH(mcastgrp,0);
-
-		for (c=mfc_cache_array[line]; c; c = c->next) {
-			if (c->mfc_mcastgrp==mcastgrp)
-				break;
-		}
-	}
-#endif
 	return c;
 }
 
@@ -522,7 +510,7 @@ static void ipmr_cache_resolve(struct mfc_cache *uc, struct mfc_cache *c)
 	 */
 
 	while ((skb=__skb_dequeue(&uc->mfc_un.unres.unresolved))) {
-		if (skb->nh.iph->version == 0) {
+		if (skb && skb->nh.iph && skb->nh.iph->version == 0) {
 			struct nlmsghdr *nlh = (struct nlmsghdr *)skb_pull(skb, sizeof(struct iphdr));
 
 			if (ipmr_fill_mroute(skb, c, NLMSG_DATA(nlh)) > 0) {
@@ -845,8 +833,8 @@ static void mroute_clean_tables(struct sock *sk)
 			c = mfc_unres_queue;
 			mfc_unres_queue = c->next;
 			spin_unlock_bh(&mfc_unres_lock);
-
-			ipmr_destroy_unres(c);
+			if(c)
+			    ipmr_destroy_unres(c);
 
 			spin_lock_bh(&mfc_unres_lock);
 		}
