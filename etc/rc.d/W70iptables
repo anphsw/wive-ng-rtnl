@@ -411,18 +411,20 @@ startv6() {
     ip6tables -A INPUT -d ff00::/8 -j ACCEPT
     ip6tables -A FORWARD -d ff00::/8 -j ACCEPT
 
-    # allow ratelimit ping request to router
-    ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -m limit --limit 10/s -j ACCEPT
-    ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -j DROP
+    if [ "$WANPingFilter" = "0" ] && [ "$ROUTE_MODE" = "on" ]; then
+	$LOG "Filter all ipv6 icmp echo requests for router and clients."
+        ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -j DROP
+        ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -j DROP
+    else
+	$LOG "Allow ratelimited icmp echo requests to router and clients."
+	ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -m limit --limit 10/s -j ACCEPT
+	ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -j DROP
+	ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -m limit --limit 10/s -j ACCEPT
+	ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -j DROP
+    fi
 
-    # allow all others icmp messages (mtu probing and others) to router
+    # allow all others icmp messages (mtu probing and others) to router and clients
     ip6tables -A INPUT -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
-
-    # allow ratelimit ping request to clients
-    ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -m limit --limit 10/s -j ACCEPT
-    ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -j DROP
-
-    # allow all others icmp messages (mtu probing and others) to client
     ip6tables -A FORWARD -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
 
     # allow mupnp to open connection from earth to local
