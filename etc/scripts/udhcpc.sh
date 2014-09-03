@@ -264,8 +264,13 @@ case "$1" in
 			done
 		    else
 			$LOG "Server not send DNS. Please manual set DNS in wan config. Temp use google dns."
-	    		echo nameserver 8.8.8.8 >> $RESOLV_CONF
-	    		echo nameserver 8.8.4.4 >> $RESOLV_CONF
+	    		echo "nameserver 8.8.8.8" >> $RESOLV_CONF
+	    		echo "nameserver 8.8.4.4" >> $RESOLV_CONF
+		    fi
+		    if [ "$radvdEnabled" = "1" ]; then
+			$LOG "Add google ipv6 servers (need replace to ISP servers from dhcpv6 in future)"
+			echo "nameserver 2001:4860:4860::8888" >> $RESOLV_CONF
+			echo "nameserver 2001:4860:4860::8844" >> $RESOLV_CONF
 		    fi
 		    # read for all write by root
 		    chmod 644 "$RESOLV_CONF" > /dev/null 2>&1
@@ -300,9 +305,6 @@ case "$1" in
 	    $LOG "End renew procedure..."
 	fi
 	# reenable forward for paranoid users
-	echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
-	if [ "$radvdEnabled" = "1" ] && [ -f "/proc/sys/net/ipv6/conf/$interface/forwarding" ]; then
-	    echo 1 > "/proc/sys/net/ipv6/conf/$interface/forwarding"
-	fi
+	sysctl -w net.ipv4.conf.all.forwarding=1
     ;;
 esac
