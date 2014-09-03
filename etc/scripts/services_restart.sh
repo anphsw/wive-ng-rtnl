@@ -93,8 +93,8 @@ if [ "$MODE" = "dhcp" ] && [ -f /tmp/wins.dhcp ]; then
 fi
 
 # renew /etc/udhcpd.conf and restart dhcp server
-if [ "$dnsPEnabled" = "1" -o "$wan_static_dns" = "on" ] && [ "$MODE" != "pppd" -a "$MODE" != "dhcp" ]; then
-    # if dnsmasq or static dns enabled and mode=!pppd/!dhcp (aplly at web)
+if [ "$dnsPEnabled" = "1" -o "$wan_static_dns" = "on" ] && [ "$MODE" = "misc" -o "$MODE" = "all" ]; then
+    # if dnsmasq or static dns enabled and aplly at web or full reconfigure
     service dhcpd restart
 elif [ "$dnsPEnabled" != "1" -a "$wan_static_dns" != "on" ] && [ "$MODE" = "pppd" -o "$MODE" = "dhcp" ]; then
     # if dnsmasq or static dns disabled and mode=pppd/dhcp (renew/reconnect ISP)
