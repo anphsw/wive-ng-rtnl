@@ -458,7 +458,7 @@ static struct fib6_node * fib6_add_1(struct fib6_node *root, void *addr,
 
 		if (plen == fn->fn_bit) {
 			/* clean up an intermediate node */
-			if ((fn->fn_flags & RTN_RTINFO) == 0) {
+			if (!(fn->fn_flags & RTN_RTINFO)) {
 				rt6_release(fn->leaf);
 				fn->leaf = NULL;
 			}
@@ -1057,7 +1057,7 @@ static struct fib6_node * fib6_repair_tree(struct fib6_node *fn)
 
 		read_lock(&fib6_walker_lock);
 		FOR_WALKERS(w) {
-			if (child == NULL) {
+			if (!child) {
 				if (w->root == fn) {
 					w->root = w->node = NULL;
 					RT6_TRACE("W %p adjusted by delroot 1\n", w);
@@ -1229,7 +1229,7 @@ static int fib6_walk_continue(struct fib6_walker_t *w)
 
 	for (;;) {
 		fn = w->node;
-		if (fn == NULL)
+		if (!fn)
 			return 0;
 
 		if (w->prune && fn != w->root &&
