@@ -584,16 +584,12 @@ case "$1" in
 
         restart)
             stop
-            start
-            ;;
-
-        restartv6)
             stopv6
+            start
             startv6
             ;;
-
         *)
-            echo $"Usage: $0 {start|stop|restart|startv6|stopv6|restartv6}"
+            echo $"Usage: $0 {start|stop|restart}"
             CRETURN=1
 esac
 
