@@ -422,12 +422,6 @@ startv6() {
     # allow all others icmp messages (mtu probing and others) to router and clients
     ip6tables -A INPUT -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
     ip6tables -A FORWARD -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
-
-    # allow mupnp to open connection from earth to local
-    #if [ "$upnpEnabled" = "1" ]; then
-	#ip6tables -t filter -N MINIUPNPD
-	#ip6tables -t filter -A FORWARD -i $tunif ! -o $tunif -j MINIUPNPD
-    #fi
 #########################################ACCEPT_ESTABLISHED################################
     ip6tables -A FORWARD $STATE_EST -j ACCEPT
 ############################################ENDRULES#######################################

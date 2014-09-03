@@ -47,6 +47,7 @@ start() {
         # calculate and set mtu
         calculate_and_set_mtu
 
+	# addr del->add change need for notify kernel and regenerage arp table
         $LOG "Tunel ipv6 in ipv4 configure and up"
         if [ "$ipv6_mode" = "6RD" ]; then
 	    # this section for 6RD tunnel mode
@@ -54,37 +55,40 @@ start() {
 	    ipv6subnet="$(echo -n `printf '%02X:' ${real_wan_ipaddr//./ } | awk -F: '{print($1$2":"$3$4)}'`)"	# Calculate subnet from real ipv4 adress
     	    ipv6prefix="2a02:2560"										# Your ISP's IPv6-prefix
 	    $LOG "Tune and up 6rd interface"
+	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::abca/128 dev $real_wan_if	> /dev/null 2>&1
 	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/128 dev $real_wan_if
-	    ip tunnel add $tunif mode sit local $real_wan_ipaddr ttl 64
-	    ip tunnel 6rd dev $tunif 6rd-prefix ${ipv6prefix}::/32
-	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/32 dev $tunif
-	    ip link set $tunif up
-	    $LOG "Replace ipv6 dgw to ::${relay6to4} dev $tunif"
-	    ip -6 route replace ::/0 via ::${relay6to4} dev $tunif metric 1
-	    $LOG "Set mtu $sitmtu to $tunif"
-	    sysctl -wq net.ipv6.conf.$tunif.mtu="$sitmtu"
-	    ip link set mtu $sitmtu dev $tunif
+	    ip tunnel add $tun_if mode sit local $real_wan_ipaddr ttl 64
+	    ip tunnel 6rd dev $tun_if 6rd-prefix ${ipv6prefix}::/32
+	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::abca/32 dev $tun_if		> /dev/null 2>&1
+	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/32 dev $tun_if
+	    ip link set $tun_if up
+	    $LOG "Replace ipv6 dgw to ::${relay6to4} dev $tun_if"
+	    ip -6 route replace ::/0 via ::${relay6to4} dev $tun_if metric 1
+	    $LOG "Set mtu $sitmtu to $tun_if"
+	    sysctl -wq net.ipv6.conf.$tun_if.mtu="$sitmtu"
+	    ip link set mtu $sitmtu dev $tun_if
         elif [ "$ipv6_mode" = "6TO4" ]; then
 	    # this section for 6to4 tunnel mode
 	    relay6to4="192.88.99.1"										# The 6to4 IPv4-gateway
 	    ipv6subnet="2000"											# Default 6to4 subnet
     	    ipv6prefix=`echo $real_wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`	# Calculate prefix
-	    $LOG "Up $tunif interface"
-	    ip -6 link set $tunif up
-	    $LOG "Set mtu $sitmtu to $tunif"
-	    sysctl -wq net.ipv6.conf.$tunif.mtu="$sitmtu"
-	    ip link set mtu $sitmtu dev $tunif
-	    $LOG "Add adress ${ipv6prefix}::1/16 to $tunif"
-	    ip -6 addr add ${ipv6prefix}::1/16 dev $tunif
-	    $LOG "Add route to ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif"
-	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
+	    $LOG "Up $tun_if interface"
+	    ip -6 link set $tun_if up
+	    $LOG "Set mtu $sitmtu to $tun_if"
+	    sysctl -wq net.ipv6.conf.$tun_if.mtu="$sitmtu"
+	    ip link set mtu $sitmtu dev $tun_if
+	    $LOG "Add adress ${ipv6prefix}::1/16 to $tun_if"
+	    ip -6 addr del ${ipv6prefix}::1/16 dev $tun_if				> /dev/null 2>&1
+	    ip -6 addr add ${ipv6prefix}::1/16 dev $tun_if
+	    $LOG "Add route to ${ipv6subnet}::/3 via ::${relay6to4} dev $tun_if"
+	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tun_if metric 1
         elif [ "$ipv6_mode" = "NATIVE" ]; then
 	    # this section for native/dualstack mode
 	    :
 	fi
 
-	# set defaults
-        sysctl -w net.ipv6.conf.all.forwarding=1
+	# set defaults (this workaround, need review code in kernel)
+	sysctl -w net.ipv6.conf.all.forwarding=1
 	sysctl -w net.ipv6.conf.all.accept_ra=1
 	sysctl -w net.ipv6.conf.all.accept_ra_pinfo=1
 	sysctl -w net.ipv6.conf.all.autoconf=1
@@ -93,6 +97,11 @@ start() {
 	    $LOG "Always accept router advertisements for autoconfigure from wan $real_wan_if."
 	    sysctl -w net.ipv6.conf.$real_wan_if.accept_ra=2
 	else
+	    $LOG "Used $ipv6_mode mode, disable forward from real wan interfaces(security need)."
+    	    # disable forward from real_wan_if if used sit tunnels (security)
+    	    sysctl -w net.ipv6.conf.$real_wan_if.forwarding=0
+    	    sysctl -w net.ipv6.conf.$wan_if.forwarding=0
+    	    sysctl -w net.ipv6.conf.$tun_if.forwarding=1
 	    $LOG "Set ${ipv6prefix}:${ipv6subnet}::1/64 to $lan_if"
 	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if	> /dev/null 2>&1
 	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if
@@ -132,8 +141,12 @@ stop() {
 	$LOG  "Stop radvd daemon."
 
         # disable ra for all ifaces
-	sysctl -w net.ipv6.conf.all.accept_ra=0
-        sysctl -w net.ipv6.conf.all.forwarding=0
+	sysctl -w net.ipv6.conf.all.accept_ra=0			> /dev/null 2>&1
+        sysctl -w net.ipv6.conf.all.forwarding=0		> /dev/null 2>&1
+    	sysctl -w net.ipv6.conf.6rd.forwarding=0		> /dev/null 2>&1
+    	sysctl -w net.ipv6.conf.sit0.forwarding=0		> /dev/null 2>&1
+    	sysctl -w net.ipv6.conf.$lan_if.forwarding=0		> /dev/null 2>&1
+    	sysctl -w net.ipv6.conf.$real_wan_if.forwarding=0	> /dev/null 2>&1
 
 	# rebuild ipv6 rules
 	service iptables stopv6
@@ -141,15 +154,12 @@ stop() {
 	killall -q radvd
 	killall -q -SIGKILL radvd
 
-	ip -6 route flush dev 6rd		> /dev/null 2>&1
-	ip -6 addr flush dev 6rd		> /dev/null 2>&1
-	ip -6 route flush dev sit0		> /dev/null 2>&1
-	ip -6 addr flush dev sit0		> /dev/null 2>&1
-	ip -6 route flush dev $real_wan_if	> /dev/null 2>&1
-	ip -6 addr flush dev $real_wan_if	> /dev/null 2>&1
-	ip link set dev 6rd down		> /dev/null 2>&1
-	ip link set dev sit0 down		> /dev/null 2>&1
-	ip tunnel del 6rd			> /dev/null 2>&1
+	ip -6 route flush dev 6rd				> /dev/null 2>&1
+	ip -6 route flush dev sit0				> /dev/null 2>&1
+	ip -6 route flush dev $real_wan_if			> /dev/null 2>&1
+	ip link set dev 6rd down				> /dev/null 2>&1
+	ip link set dev sit0 down				> /dev/null 2>&1
+	ip tunnel del 6rd					> /dev/null 2>&1
     fi
 }
 

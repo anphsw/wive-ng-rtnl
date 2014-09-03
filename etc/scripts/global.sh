@@ -159,11 +159,11 @@ getWanIfName() {
 
 getTunIfName() {
     if [ "$ipv6_mode" = "6RD" ]; then
-	tunif="6rd"
+	tun_if="6rd"
     elif [ "$ipv6_mode" = "6TO4" ]; then
-	tunif="sit0"
+	tun_if="sit0"
     elif [ "$ipv6_mode" = "NATIVE" ]; then
-	tunif="$real_wan_if"
+	tun_if="$real_wan_if"
     fi
 }
 
