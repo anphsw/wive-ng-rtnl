@@ -89,10 +89,6 @@ function initTranslation()
 	_TR("lRadvdD", "inet disable");
 	_TR("lRadvdE", "inet enable");
 
-	_TR("lPppoer", "lan pppoer");
-	_TR("lPppoerD", "inet disable");
-	_TR("lPppoerE", "inet enable");
-
 	_TR("lDnsp", "lan dnsp");
 	_TR("lDnspD", "inet disable");
 	_TR("lDnspE", "inet enable");
@@ -110,7 +106,6 @@ function initValue()
 	var upnp = <% getCfgZero(1, "upnpEnabled"); %>;
 	var xupnpd = <% getCfgZero(1, "xupnpd"); %>;
 	var radvd = <% getCfgZero(1, "radvdEnabled"); %>;
-	var pppoe = <% getCfgZero(1, "pppoeREnabled"); %>;
 	var dns = <% getCfgZero(1, "dnsPEnabled"); %>;
 	var wan = "<% getCfgZero(1, "wanConnectionMode"); %>";
 	var cdp = "<% getCfgZero(1, "cdpEnabled"); %>";
@@ -124,7 +119,6 @@ function initValue()
 	var upnpb = "<% getUpnpBuilt(); %>";
 	var xupnpdb = "<% getXupnpdBuilt(); %>";
 	var radvdb = "<% getRadvdBuilt(); %>";
-	var pppoeb = "<% getPppoeRelayBuilt(); %>";
 	var dnsp = "<% getDnsmasqBuilt(); %>";
 	var snmpdb = "<% getSNMPDBuilt(); %>";
 	var krnl_pppoe = "<% getCfgZero(1, "pppoe_pass"); %>";
@@ -147,7 +141,6 @@ function initValue()
 	form.upnpEnbl.options.selectedIndex = 1*upnp;
 	form.xupnpdEnbl.options.selectedIndex = 1*xupnpd;
 	form.radvdEnbl.options.selectedIndex = 1*radvd;
-	form.pppoeREnbl.options.selectedIndex = 1*pppoe;
 	form.dnspEnbl.options.selectedIndex = 1*dns;
 	form.cdpEnbl.options.selectedIndex = 1*cdp;
 	form.lltdEnbl.options.selectedIndex = 1*lltd;
@@ -191,7 +184,6 @@ function initValue()
 	displayElement('upnp', upnpb == '1');
 	displayElement('xupnpd', xupnpdb == '1');
 	displayElement('radvd', radvdb == '1');
-	displayElement('pppoerelay', pppoeb == '1');
 	displayElement('dnsproxy', dnsp == '1');
 
 	// Set-up NAT fastpath
@@ -478,7 +470,6 @@ function displayServiceStatus()
                 <option value="1">Enable</option>
               </select></td>
           </tr>
-          
           <!-- Pass Through -->
           <tr>
             <td class="title" colspan="5">Pass Through</td>
@@ -592,13 +583,6 @@ function displayServiceStatus()
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-          </tr>
-          <tr id="pppoerelay">
-            <td class="head" id="lPppoer">PPPOE relay</td>
-            <td colspan="4"><select name="pppoeREnbl" class="half">
-                <option value="0" id="lPppoerD">Disable</option>
-                <option value="1" id="lPppoerE">Enable</option>
-              </select></td>
           </tr>
           <tr id="dnsproxy">
             <td class="head" id="lDnsp">DNS cached proxy</td>

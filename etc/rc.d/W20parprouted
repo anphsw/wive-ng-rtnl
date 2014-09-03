@@ -22,8 +22,8 @@ start() {
     parproutedEnabled=`nvram_get 2860 parproutedEnabled`
     if [ "$parproutedEnabled" = "1" ]; then
 	$LOG "Starting parprouted"
-	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/proxy_arp"
-	echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/proxy_arp"
+	sysctl -w net.ipv4.conf.$wan_if.proxy_arp=1
+	sysctl -w net.ipv4.conf.$lan_if.proxy_arp=1
         parprouted $wan_if $lan_if &
     fi
 }
@@ -32,8 +32,8 @@ stop() {
     pid=`pidof parprouted`
     if [ "$pid" != "" ]; then
 	$LOG "Stopping parprouted"
-	echo 0 > "/proc/sys/net/ipv4/conf/$wan_if/proxy_arp"
-	echo 0 > "/proc/sys/net/ipv4/conf/$lan_if/proxy_arp"
+	sysctl -w net.ipv4.conf.$wan_if.proxy_arp=0
+	sysctl -w net.ipv4.conf.$lan_if.proxy_arp=0
 	killall -q parprouted
 	killall -q -SIGKILL parprouted
     fi

@@ -52,8 +52,13 @@ fi
 
 case "$1" in
     deconfig)
-	# first stop vpn. prevent loop
+	# all tunnelss deconfig before modules reload - prevent loop
+	if [ -e /etc/init.d/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
+	    service radvd stop
+	fi
 	service vpnhelper stop_safe
+	# disable forward for paranoid users
+	sysctl -w net.ipv4.conf.all.forwarding=0
 	# generate random ip from zeroconfig range end set
 	# this is hack for some ISPs checked client alive by arping
 	# and prevent fake unset FULL_RENEW flag at next time bound
@@ -66,7 +71,13 @@ case "$1" in
     ;;
 
     leasefail)
+	# all tunnelss deconfig before modules reload - prevent loop
+	if [ -e /etc/init.d/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
+	    service radvd stop
+	fi
 	service vpnhelper stop_safe
+	# disable forward for paranoid users
+	sysctl -w net.ipv4.conf.all.forwarding=0
 	# Workaround for infinite OFFER wait
 	if [ "$OperationMode" != "2" ] && [ "$dhcpSwReset" = "1" ]; then
 	    if [ "$CONFIG_RT_3052_ESW" != "" ] && [ "$RALINK_MT7620" = "" ]; then

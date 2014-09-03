@@ -56,7 +56,6 @@ deconfig)
 	if [ x$ip = x ]; then
 	    exit 0
 	fi
-	exec ip address del dev $interface local $ip > /dev/null 2>&1
 	exit 0
 	;;
 esac

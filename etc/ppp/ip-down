@@ -17,7 +17,7 @@ LOG="logger -t pppd"
 eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask vpnPeerDNS chilli_net`
 
     $LOG "Disable forwarding for $PPP_IFACE interface"
-    echo 0 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
+    sysctl -w net.ipv4.conf.$PPP_IFACE.forwarding=0
 
     $LOG "Restore netfilter rules from pppd"
     iptables -D FORWARD -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
@@ -66,7 +66,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
     if [ -f /tmp/ip-down-route-reload ] || [ -f /tmp/default.gw ]; then
 	while ip route del default ; do
     	    :
-	done 
+	done
     fi
 
     #restore default gateway
@@ -81,6 +81,11 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 	    /tmp/ip-down-route-reload
 	    rm -f /tmp/ip-down-route-reload
 	fi
+    fi
+
+    # all tunnelss deconfig before reconfigure - prevent loop
+    if [ -e /etc/init.d/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
+        service radvd stop
     fi
 
     $LOG "Flush route cache"

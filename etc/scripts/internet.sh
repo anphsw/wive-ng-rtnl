@@ -174,6 +174,10 @@ ethcv_config() {
 # WiFi modules reloand and reconfigure
 if [ "$MODE" != "connect_sta" ]; then
     if [ "$MODE" != "wifionly" ]; then
+	# all tunnelst deconfig before modules reload
+	if [ -e /etc/init.d/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
+	    service radvd stop
+	fi
 	service vpnhelper stop_safe
     fi
     $LOG "Reload wireless modules..."

@@ -60,7 +60,6 @@
   <message msgid="lan igmpp" msgstr="Multicast route (IGMP Proxy)" />
   <message msgid="lan upnp" msgstr="Auto portmap service (UPNP)" />
   <message msgid="lan radvd" msgstr="Router Advertisement (RADVD+6to4 autoconfig)" />
-  <message msgid="lan pppoer" msgstr="PPPoE Relay" />
   <message msgid="lan dnsp" msgstr="DNS Proxy (DNSMASQ)" />
 
   <message msgid="dhcp title" msgstr="DHCP Client List" />

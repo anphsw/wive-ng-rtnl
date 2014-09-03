@@ -56,10 +56,8 @@ unload_ra0br0() {
 	    ip link set br0 down > /dev/null 2>&1
 	    brctl delbr br0 > /dev/null 2>&1
 	fi
-
 	# disable WAN and WLAN
 	unload_ra0
-
 	if [ "$1" != "" ]; then
 	    # mirror br0 to eth2x
 	    ip link set "$1" down > /dev/null 2>&1

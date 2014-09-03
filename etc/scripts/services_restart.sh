@@ -11,64 +11,44 @@ MODE="$1"
 $LOG "Restart needed services and scripts. Mode $MODE"
 
 ##########################################################
+# MODES:						 #
+# all -  call from internel.sh - full reconfigure	 #
+# dhcp - call from dhcp script after full renew		 #
+# pppd - call from ip-up/down scripts			 #
+# misc - call from goahead by apply change in misc page	 #
+##########################################################
+
+##########################################################
 # Always reload shaper and netfilter rules		 #
 ##########################################################
     service shaper restart
     service iptables restart
 
 ##########################################################
-# This is services restart always                        #
+# Always reload some services				 #
 ##########################################################
-if [ -f /etc/init.d/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
-    service radvd restart
-fi
-
-if [ -f /etc/init.d/zebra ]; then
-    service ripd restart
-    service zebra restart
-fi
-
     service dnsserver reload
-
-##########################################################
-# Need restart this services only:			 #
-# 1) if call not from ip-up				 #
-# 2) if call not from dhcp script			 #
-##########################################################
-if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
-    service kext start
-    # only misc reply
-    if [ "$MODE" = "misc" ]; then
-	if [ -e /etc/init.d/snmpd ]; then
-	    service snmpd restart
-	fi
-	if [ -e /etc/init.d/inetd ]; then
-	    service inetd restart
-	fi
-    else
-	# exclude misc reply
-	if [ -e /etc/init.d/pppoe-relay ]; then
-	    service pppoe-relay restart
-	fi
-	if [ -e /etc/init.d/chillispot ]; then
-	    service chillispot restart
-	fi
+    if [ -e /etc/init.d/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
+	service radvd restart
     fi
+    service ddns restart
+    service ntp restart
+    service miniupnpd restart
     if [ -e /etc/init.d/parprouted ]; then
 	service parprouted restart
     fi
-    if [ -e /etc/init.d/lld2d ]; then
-	service lld2d restart
+    if [ -e /etc/init.d/zebra ]; then
+	service ripd restart
+        service zebra restart
     fi
-    if [ -e /etc/init.d/transmission ]; then
-	service transmission restart
-    fi
-fi
 
-# restart this if wan ip adress change
-# or if apply changes from web
-# not need restart if pppd recall
-if [ "$MODE" != "pppd" ]; then
+##########################################################
+# Need restart this:					 #
+# 1) if physycal wan ip adress change			 #
+# 2) if apply changes from web				 #
+# 3) if full reconfigure				 #
+##########################################################
+if [ "$MODE" = "dhcp" ] || [ "$MODE" = "misc" ] || [ "$MODE" = "all" ]; then
     if [ -e /etc/init.d/igmp_proxy ]; then
         service igmp_proxy restart
     fi
@@ -81,16 +61,35 @@ if [ "$MODE" != "pppd" ]; then
 fi
 
 ##########################################################
-# Need restart this servieces only:                    	 #
-# 1) if not VPN enable                               	 #
-# 2) if VPN enable and this scripts called from ip-up	 #
-# 3) if DHCP full renew					 #
-# 4) if restart mode = all				 #
+# Need restart this:					 #
+# 1) if misc chane apply				 #
+# 2) full reconfigure					 #
 ##########################################################
-if [ "$MODE" = "pppd" ] || [ "$MODE" = "dhcp" ] || [ "$MODE" = "all" ] || [ "$vpnEnabled" != "on" ]; then
-    service ddns restart
-    service ntp restart
-    service miniupnpd restart
+if [ "$MODE" = "misc" ] || [ "$MODE" = "all" ]; then
+    service kext restart
+    if [ -e /etc/init.d/lld2d ]; then
+	service lld2d restart
+    fi
+    if [ -e /etc/init.d/snmpd ]; then
+        service snmpd restart
+    fi
+    if [ -e /etc/init.d/inetd ]; then
+        service inetd restart
+    fi
+    if [ -e /etc/init.d/chillispot ]; then
+        service chillispot restart
+    fi
+    if [ -e /etc/init.d/transmission ]; then
+	service transmission restart
+    fi
+fi
+
+##########################################################
+# Reconfigure and restart samba:			 #
+# 1) if recive wins server adress from dhcp		 #
+##########################################################
+if [ "$MODE" = "dhcp" ] && [ -f /tmp/wins.dhcp ]; then
+    service samba restart
 fi
 
 # renew /etc/udhcpd.conf and restart dhcp server
@@ -101,9 +100,4 @@ elif [ "$dnsPEnabled" != "1" -a "$wan_static_dns" != "on" ] && [ "$MODE" = "pppd
     # if dnsmasq or static dns disabled and mode=pppd/dhcp (renew/reconnect ISP)
     sleep 3
     service dhcpd restart
-fi
-
-# reconfigure and restart samba in recive wins server adress from dhcp
-if [ "$MODE" = "dhcp" ] && [ -f /tmp/wins.dhcp ]; then
-    service samba restart
 fi

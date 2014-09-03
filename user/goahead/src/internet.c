@@ -52,7 +52,6 @@ static int getDnsmasqBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getGWBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getCdpBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getLltdBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int getPppoeRelayBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getUpnpBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getXupnpdBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getRadvdBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -113,7 +112,6 @@ void formDefineInternet(void) {
 	websAspDefine(T("getGWBuilt"), getGWBuilt);
 	websAspDefine(T("getCdpBuilt"), getCdpBuilt);
 	websAspDefine(T("getLltdBuilt"), getLltdBuilt);
-	websAspDefine(T("getPppoeRelayBuilt"), getPppoeRelayBuilt);
 	websAspDefine(T("getUpnpBuilt"), getUpnpBuilt);
 	websAspDefine(T("getXupnpdBuilt"), getXupnpdBuilt);
 	websAspDefine(T("getRadvdBuilt"), getRadvdBuilt);
@@ -1122,15 +1120,6 @@ static int getCdpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 static int getLltdBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_USER_LLTD
-	return websWrite(wp, T("1"));
-#else
-	return websWrite(wp, T("0"));
-#endif
-}
-
-static int getPppoeRelayBuilt(int eid, webs_t wp, int argc, char_t **argv)
-{
-#ifdef CONFIG_USER_PPPPOE_RELAY
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));

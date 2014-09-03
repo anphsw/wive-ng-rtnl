@@ -266,68 +266,72 @@
 7) init.d: fs: add fs change_mac command for change/clone WAN mac adress.<br>
 8) init.d: udhcpc script: add support switch reinit on leasefail for devices with external rtl switch (example N56U).<br>
 9) init.d: try use original mac adresses for wan/lan if exist (now 3052 only).<br>
-10) webui: add enable/disable netfilter skip processing for filter established sessions and skip window check(netfilter fastpath mode).<br>
-11) webui/kext: rework offload engine and fastpath modes tune.<br>
-12) usb-modeswitch-data: up to 20140529.<br>
-13) pppd: version up to 2.4.7 (9 Aug 2014).<br>
-14) pppd: pppol2tp plugin: fix usage invalid handle.<br>
-15) openssl: version up to 0.9.8zb.<br>
-16) tools: fix eth_mac tool (manipulate mac in factory part, now tested only in 2.4Ghz 305x devices).<br>
-17) libcurl: up to 7.37.1 version.<br>
-18) uboot: up to 4.2.S.1 version.<br>
-19) dropbear: update to 2014.65.<br>
-20) dropbear: fix keepalive.<br>
-22) base_system: backports from new sdk for support MT7620 (process non end now).<br>
-23) dnsmasq: fix a race condition possibly leading to lockup.<br>
-24) goahead: fix handle reset/wps buttons.<br>
-25) system: replace ip tool from busybox to iproute2 version (need for 6rd tunnels based acess ipv6 support).<br>
-26) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
-27) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
-28) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
-29) kernel: net: ipv6: igmp6_event_query: use msecs_to_jiffies.<br>
-30) kernel: net: potential null skb->dev dereference.<br>
-31) kernel: net: optimize non-gso test checks.<br>
-32) kernel: net: linkwatch: allow vlans to get carrier changes faster.<br>
-33) kernel: net: fix memory leak in the proto_register function.<br>
-34) kernel: net: sendmsg: fix NULL pointer dereference.<br>
-35) kernel: net: unix: inherit SOCK_PASS{CRED, SEC} flags from socket to fix race.<br>
-36) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
-37) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
-38) kernel: ipv6: increase maximum lifetime of flow labels (RFC 3697).<br>
-39) kernel: ipv6: Check RA for sllao when configuring optimistic ipv6 address.<br>
-40) kernel: ipv6: enable RFC 4429 Optimistic DAD per default.<br>
-41) kernel: ipv6: prevent race between address creation and removal.<br>
-42) kernel: ipv6: fix preferred_lft not updating in some cases.<br>
-43) kernel: ipv6: don't accept multicast traffic with scope 0.<br>
-44) kernel: ipv6: udp: possible dst leak in udpv6_sendmsg.<br>
-45) kernel: ipv6: check the hop limit setting in ancillary data.<br>
-46) kernel: ipv6: remove optimistic DAD flag test in ipv6_add_addr() and enable by default.<br>
-47) kernel: ipv6: update Destination Cache entries when gateway turn into host(RFC 4861).<br>
-48) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
-49) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
-50) kernel: netfilter: don't use mutex_lock_interruptible().<br>
-51) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
-52) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
-53) kernel: option driver add new modems support (from 3.16 kernel).<br>
-54) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
-55) kernel: packet: add needed_tailroom to packet_sendmsg_spkt.<br>
-56) kernel: net_sched: qdisc_alloc_handle() can be too slow.<br>
-57) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
-58) kernel: tcp: set initial_ssthresh default to zero in Cubic and BIC.<br>
-59) kernel: imq: automatic exclude redirected to imq traffic from PPE and FastNat.<br>
-60) kernel: sched: decrease user max rt_prio to 10, this reducing the size of the O(1) scheduler arrays (small save ticks).<br>
-61) kernel: hw_nat: small optimize, fix need drop magic tag and mark unhit in ip6 local output.<br>
-62) kernel: hw_nat: conntrack: correct skip v6 packets in conntrack_in (for hw_nat v2).<br>
-63) kernel: raeth: implement ondemand wan status check for devices with external rtl switch (example N56U).<br>
-64) kernel: wifi drivers: fix RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT on RTxxxX driver 2.5.X.X.<br>
-65) kernel: ralink_spi: if flash not detected use stub depended from kernel config (4/8/16Mb select).<br>
-66) kernel: hw_nat: update code and dependecys(need for MT7620 support).<br>
-67) kernel: hw_nat: use global spinlock for serializing access to FoE DMA, extend module params.<br>
-68) kernel: speedhack: review section arrange and add some time critical code to fastpath section(up l2tp speed from ~130FDX to ~150FDX).<br>
-69) kernel: rewrite min3, max3 and clamp using min and max.<br>
-70) kernel: fix check and set ignore dont fragment flag in some cases.<br>
-71) kernel: spi_driver: add support MT762x support.<br>
-72) kernel: net_sched: avoid generating same handle for u32 filters.<br>
+10) init.d: rewrite reload services logic (more simple and more safe).<br>
+11) init.d: prevent loop if some ipv6 tunnels configured.<br>
+12) init.d: no need del address at zcip deconfig logic.<br>
+13) init.d: use sysctl in some cases instead of direct write to procfs.<br>
+14) webui: add enable/disable netfilter skip processing for filter established sessions and skip window check(netfilter fastpath mode).<br>
+15) webui/kext: rework offload engine and fastpath modes tune.<br>
+16) usb-modeswitch-data: up to 20140529.<br>
+17) pppd: version up to 2.4.7 (9 Aug 2014).<br>
+18) pppd: pppol2tp plugin: fix usage invalid handle.<br>
+19) openssl: version up to 0.9.8zb.<br>
+20) tools: fix eth_mac tool (manipulate mac in factory part, now tested only in 2.4Ghz 305x devices).<br>
+21) libcurl: up to 7.37.1 version.<br>
+22) uboot: up to 4.2.S.1 version.<br>
+23) dropbear: update to 2014.65.<br>
+24) dropbear: fix keepalive.<br>
+25) base_system: backports from new sdk for support MT7620 (process non end now).<br>
+26) dnsmasq: fix a race condition possibly leading to lockup.<br>
+27) goahead: fix handle reset/wps buttons.<br>
+28) system: replace ip tool from busybox to iproute2 version (need for 6rd tunnels based acess ipv6 support).<br>
+29) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
+30) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
+31) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
+32) kernel: net: ipv6: igmp6_event_query: use msecs_to_jiffies.<br>
+33) kernel: net: potential null skb->dev dereference.<br>
+34) kernel: net: optimize non-gso test checks.<br>
+35) kernel: net: linkwatch: allow vlans to get carrier changes faster.<br>
+36) kernel: net: fix memory leak in the proto_register function.<br>
+37) kernel: net: sendmsg: fix NULL pointer dereference.<br>
+38) kernel: net: unix: inherit SOCK_PASS{CRED, SEC} flags from socket to fix race.<br>
+39) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
+40) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
+41) kernel: ipv6: increase maximum lifetime of flow labels (RFC 3697).<br>
+42) kernel: ipv6: Check RA for sllao when configuring optimistic ipv6 address.<br>
+42) kernel: ipv6: enable RFC 4429 Optimistic DAD per default.<br>
+44) kernel: ipv6: prevent race between address creation and removal.<br>
+45) kernel: ipv6: fix preferred_lft not updating in some cases.<br>
+46) kernel: ipv6: don't accept multicast traffic with scope 0.<br>
+47) kernel: ipv6: udp: possible dst leak in udpv6_sendmsg.<br>
+48) kernel: ipv6: check the hop limit setting in ancillary data.<br>
+49) kernel: ipv6: remove optimistic DAD flag test in ipv6_add_addr() and enable by default.<br>
+50) kernel: ipv6: update Destination Cache entries when gateway turn into host(RFC 4861).<br>
+51) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
+52) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
+53) kernel: netfilter: don't use mutex_lock_interruptible().<br>
+54) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
+55) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
+56) kernel: option driver add new modems support (from 3.16 kernel).<br>
+57) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
+58) kernel: packet: add needed_tailroom to packet_sendmsg_spkt.<br>
+59) kernel: net_sched: qdisc_alloc_handle() can be too slow.<br>
+60) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
+61) kernel: tcp: set initial_ssthresh default to zero in Cubic and BIC.<br>
+62) kernel: imq: automatic exclude redirected to imq traffic from PPE and FastNat.<br>
+63) kernel: sched: decrease user max rt_prio to 10, this reducing the size of the O(1) scheduler arrays (small save ticks).<br>
+64) kernel: hw_nat: small optimize, fix need drop magic tag and mark unhit in ip6 local output.<br>
+65) kernel: hw_nat: conntrack: correct skip v6 packets in conntrack_in (for hw_nat v2).<br>
+66) kernel: raeth: implement ondemand wan status check for devices with external rtl switch (example N56U).<br>
+67) kernel: wifi drivers: fix RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT on RTxxxX driver 2.5.X.X.<br>
+68) kernel: ralink_spi: if flash not detected use stub depended from kernel config (4/8/16Mb select).<br>
+69) kernel: hw_nat: update code and dependecys(need for MT7620 support).<br>
+70) kernel: hw_nat: use global spinlock for serializing access to FoE DMA, extend module params.<br>
+71) kernel: speedhack: review section arrange and add some time critical code to fastpath section(up l2tp speed from ~130FDX to ~150FDX).<br>
+72) kernel: rewrite min3, max3 and clamp using min and max.<br>
+73) kernel: fix check and set ignore dont fragment flag in some cases.<br>
+74) kernel: spi_driver: add support MT762x support.<br>
+75) kernel: net_sched: avoid generating same handle for u32 filters.<br>
 <br>
 <br>
 <br>

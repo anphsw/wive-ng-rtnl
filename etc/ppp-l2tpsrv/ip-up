@@ -46,14 +46,11 @@ $LOG "Add low prio route to client $PPP_REMOTE network metric 100$PPP_NUM."
 ip route replace default dev $PPP_IFACE metric 100$PPP_NUM via $PPP_REMOTE > /dev/null 2>&1
 
 $LOG "Enable forwarding for $PPP_IFACE interface"
-echo 1 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
-if [ "$radvdEnabled" = "1" ] && [ -f "/proc/sys/net/ipv6/conf/$PPP_IFACE/forwarding" ]; then
-    echo 1 > "/proc/sys/net/ipv6/conf/$PPP_IFACE/forwarding"
-fi
+sysctl -w net.ipv4.conf.$PPP_IFACE.forwarding=1
 
 if [ "$l2tp_srv_proxyarp" = "1" ] || [ "$parproutedEnabled" = "1" ]; then
     $LOG "Enable proxyarp for $PPP_IFACE"
-    echo 1 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/proxy_arp"
+    sysctl -w net.ipv4.conf.$PPP_IFACE.proxy_arp=1
 fi
 
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

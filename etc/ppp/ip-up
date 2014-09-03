@@ -137,7 +137,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
     services_restart.sh pppd
 
     $LOG "Enable forwarding for $PPP_IFACE interface"
-    echo 1 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
+    sysctl -w net.ipv4.conf.$PPP_IFACE.forwarding=1
 
 #run scrips from /etc/ppp/ip-up.d/
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

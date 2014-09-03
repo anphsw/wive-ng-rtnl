@@ -11,11 +11,14 @@ PPP_REMOTE="$5"
 PPP_IPPARAM="$6"
 PPP_NUM=`echo $PPP_IFACE | sed 's/[^0-65535]//g'`
 
-# disable forward
-echo 0 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
-if [ "$radvdEnabled" = "1" ] && [ -f "/proc/sys/net/ipv6/conf/$PPP_IFACE/forwarding" ]; then
-    echo 0 > "/proc/sys/net/ipv6/conf/$PPP_IFACE/forwarding"
+# disable proxyarp
+if [ "$l2tp_srv_proxyarp" = "1" ] || [ "$parproutedEnabled" = "1" ]; then
+    $LOG "Enable proxyarp for $PPP_IFACE"
+    sysctl -w net.ipv4.conf.$PPP_IFACE.proxy_arp=0
 fi
+
+# disable forward
+sysctl -w net.ipv4.conf.$PPP_IFACE.forwarding=0
 
 # del rules
 iptables -D l2tpsrvfwd -i $PPP_IFACE -j ACCEPT > /dev/null 2>&1

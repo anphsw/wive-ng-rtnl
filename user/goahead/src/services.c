@@ -362,7 +362,6 @@ const parameter_fetch_t service_misc_flags[] =
 	{ T("upnpEnbl"), "upnpEnabled", 0, T("0") },
 	{ T("xupnpdEnbl"), "xupnpd", 0, T("0") },
 	{ T("radvdEnbl"), "radvdEnabled", 0, T("0") },
-	{ T("pppoeREnbl"), "pppoeREnabled", 0, T("0") },
 	{ T("dnspEnbl"), "dnsPEnabled", 0, T("0") },
 	{ T("rmtHTTP"), "RemoteManagement", 0, T("0") },
 	{ T("RemoteManagementPort"), "RemoteManagementPort", 0, T("80") },
