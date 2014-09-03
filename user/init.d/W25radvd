@@ -48,8 +48,6 @@ start() {
         calculate_and_set_mtu
 
         $LOG "Tunel ipv6 in ipv4 configure and up"
-        # disable ra for all ifaces
-	sysctl -w net.ipv6.conf.all.accept_ra=0
         if [ "$ipv6_mode" = "6RD" ]; then
 	    # this section for 6RD tunnel mode
 	    relay6to4="192.88.99.127"	# The 6rd IPv4-gateway
@@ -85,7 +83,8 @@ start() {
 	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
         elif [ "$ipv6_mode" = "NATIVE" ]; then
 	    # this section for native/dualstack mode
-	    $LOG "Accept router advertisements for autoconfigure from $real_wan_if interface."
+	    $LOG "Accept router advertisements for autoconfigure from wan $real_wan_if interface in route mode and for all in others."
+	    sysctl -w net.ipv6.conf.all.accept_ra=1
 	    sysctl -w net.ipv6.conf.$real_wan_if.accept_ra=2
 	    sysctl -w net.ipv6.conf.all.accept_ra_pinfo=1
 	    sysctl -w net.ipv6.conf.all.autoconf=1
@@ -130,7 +129,10 @@ start() {
 stop() {
     if [ -f /var/run/radvd.pid ]; then
 	$LOG  "Stop radvd daemon."
-	echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
+
+        # disable ra for all ifaces
+	sysctl -w net.ipv6.conf.all.accept_ra=0
+        sysctl -w net.ipv6.conf.all.forwarding=0
 
 	# rebuild ipv6 rules
 	service iptables stopv6
