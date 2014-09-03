@@ -28,6 +28,10 @@ $LOG "Restart needed services and scripts. Mode $MODE"
 # Always reload some services				 #
 ##########################################################
     service dnsserver reload
+    if [ -e /etc/init.d/zebra ]; then
+	service ripd restart
+        service zebra restart
+    fi
     if [ -e /etc/init.d/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
 	service radvd restart
     fi
@@ -36,10 +40,6 @@ $LOG "Restart needed services and scripts. Mode $MODE"
     service miniupnpd restart
     if [ -e /etc/init.d/parprouted ]; then
 	service parprouted restart
-    fi
-    if [ -e /etc/init.d/zebra ]; then
-	service ripd restart
-        service zebra restart
     fi
 
 ##########################################################
