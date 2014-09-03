@@ -53,18 +53,17 @@ start() {
 	    relay6to4="192.88.99.127"										# The 6rd IPv4-gateway
 	    ipv6subnet="$(echo -n `printf '%02X:' ${real_wan_ipaddr//./ } | awk -F: '{print($1$2":"$3$4)}'`)"	# Calculate subnet from real ipv4 adress
     	    ipv6prefix="2a02:2560"										# Your ISP's IPv6-prefix
-	    $LOG "Up 6rd interface"
+	    $LOG "Tune and up 6rd interface"
+	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/128 dev $real_wan_if
+	    ip tunnel add $tunif mode sit local $real_wan_ipaddr ttl 64
+	    ip tunnel 6rd dev $tunif 6rd-prefix ${ipv6prefix}::/32
+	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/32 dev $tunif
 	    ip link set $tunif up
+	    $LOG "Replace ipv6 dgw to ::${relay6to4} dev $tunif"
+	    ip -6 route replace ::/0 via ::${relay6to4} dev $tunif metric 1
 	    $LOG "Set mtu $sitmtu to $tunif"
 	    sysctl -wq net.ipv6.conf.$tunif.mtu="$sitmtu"
 	    ip link set mtu $sitmtu dev $tunif
-	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/128 dev $real_wan_if
-	    ip tunnel add $tunif mode sit ttl 64 remote any local $real_wan_ipaddr
-	    ip tunnel 6rd dev $tunif 6rd-prefix ${ipv6prefix}::/32
-	    $LOG "Add adress ${ipv6prefix}:${ipv6subnet}::abca/32 to $tunif"
-	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/32 dev $tunif
-	    $LOG "Add route to ::/0 via ::${relay6to4} dev $tunif"
-	    ip -6 route replace ::/0 via ::${relay6to4} dev $tunif metric 1
         elif [ "$ipv6_mode" = "6TO4" ]; then
 	    # this section for 6to4 tunnel mode
 	    relay6to4="192.88.99.1"										# The 6to4 IPv4-gateway
