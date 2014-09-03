@@ -44,13 +44,13 @@ start() {
     	igmpproxy $OPTS /etc/igmpproxy.conf &
 
 	# enable mc forwarding
-	sysctl -w net.ipv4.conf.$wan_if.forwarding=1
-	sysctl -w net.ipv4.conf.all.mc_forwarding=1
-	sysctl -w net.ipv4.conf.default.mc_forwarding=1
+	sysctl -wq net.ipv4.conf.$wan_if.forwarding=1
+	sysctl -wq net.ipv4.conf.all.mc_forwarding=1
+	sysctl -wq net.ipv4.conf.default.mc_forwarding=1
       ) & # send to background
     else
-	sysctl -w net.ipv4.conf.all.mc_forwarding=0
-	sysctl -w net.ipv4.conf.default.mc_forwarding=0
+	sysctl -wq net.ipv4.conf.all.mc_forwarding=0
+	sysctl -wq net.ipv4.conf.default.mc_forwarding=0
     fi
 }
 
@@ -104,8 +104,8 @@ stop() {
     pid=`pidof igmpproxy`
     if [ "$pid" != "" ]; then
 	$LOG "Stopping IGMPPROXY"
-	sysctl -w net.ipv4.conf.all.mc_forwarding=0
-	sysctl -w net.ipv4.conf.default.mc_forwarding=0
+	sysctl -wq net.ipv4.conf.all.mc_forwarding=0
+	sysctl -wq net.ipv4.conf.default.mc_forwarding=0
 	killall -q igmpproxy
 	killall -q -SIGKILL igmpproxy
     fi

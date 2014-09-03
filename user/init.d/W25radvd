@@ -88,19 +88,19 @@ start() {
 	fi
 
 	# set defaults (this workaround, need review code in kernel)
-	sysctl -w net.ipv6.conf.all.forwarding=1
-	sysctl -w net.ipv6.conf.all.accept_ra=1
-	sysctl -w net.ipv6.conf.all.accept_ra_pinfo=1
-	sysctl -w net.ipv6.conf.all.autoconf=1
+	sysctl -wq net.ipv6.conf.all.forwarding=1
+	sysctl -wq net.ipv6.conf.all.accept_ra=1
+	sysctl -wq net.ipv6.conf.all.accept_ra_pinfo=1
+	sysctl -wq net.ipv6.conf.all.autoconf=1
 
 	if [ "$ipv6_mode" = "NATIVE" ]; then
 	    $LOG "Always accept router advertisements for autoconfigure from wan $real_wan_if."
-	    sysctl -w net.ipv6.conf.$real_wan_if.accept_ra=2
+	    sysctl -wq net.ipv6.conf.$real_wan_if.accept_ra=2
 	else
 	    $LOG "Used $ipv6_mode mode, disable forward from real wan interfaces(security need)."
-    	    sysctl -w net.ipv6.conf.$real_wan_if.forwarding=0
-    	    sysctl -w net.ipv6.conf.$wan_if.forwarding=0
-    	    sysctl -w net.ipv6.conf.$tun_if.forwarding=1
+    	    sysctl -wq net.ipv6.conf.$real_wan_if.forwarding=0
+    	    sysctl -wq net.ipv6.conf.$wan_if.forwarding=0
+    	    sysctl -wq net.ipv6.conf.$tun_if.forwarding=1
 	    if [ "$ipv6_mode" = "6TO4" ]; then
 		$LOG "6to4 mode not need ipv6 adress and route at wan ifaces - drop it."
 		ip -6 route flush dev $wan_if					> /dev/null 2>&1
@@ -148,12 +148,12 @@ stop() {
 	$LOG  "Stop radvd daemon."
 
         # disable ra for all ifaces
-	sysctl -w net.ipv6.conf.all.accept_ra=0			> /dev/null 2>&1
-        sysctl -w net.ipv6.conf.all.forwarding=0		> /dev/null 2>&1
-    	sysctl -w net.ipv6.conf.6rd.forwarding=0		> /dev/null 2>&1
-    	sysctl -w net.ipv6.conf.sit0.forwarding=0		> /dev/null 2>&1
-    	sysctl -w net.ipv6.conf.$lan_if.forwarding=0		> /dev/null 2>&1
-    	sysctl -w net.ipv6.conf.$real_wan_if.forwarding=0	> /dev/null 2>&1
+	sysctl -wq net.ipv6.conf.all.accept_ra=0			> /dev/null 2>&1
+        sysctl -wq net.ipv6.conf.all.forwarding=0		> /dev/null 2>&1
+    	sysctl -wq net.ipv6.conf.6rd.forwarding=0		> /dev/null 2>&1
+    	sysctl -wq net.ipv6.conf.sit0.forwarding=0		> /dev/null 2>&1
+    	sysctl -wq net.ipv6.conf.$lan_if.forwarding=0		> /dev/null 2>&1
+    	sysctl -wq net.ipv6.conf.$real_wan_if.forwarding=0	> /dev/null 2>&1
 
 	# rebuild ipv6 rules
 	service iptables stopv6

@@ -17,7 +17,7 @@ LOG="logger -t pppd"
 eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask vpnPeerDNS chilli_net`
 
     $LOG "Disable forwarding for $PPP_IFACE interface"
-    sysctl -w net.ipv4.conf.$PPP_IFACE.forwarding=0
+    sysctl -wq net.ipv4.conf.$PPP_IFACE.forwarding=0
 
     $LOG "Restore netfilter rules from pppd"
     iptables -D FORWARD -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1

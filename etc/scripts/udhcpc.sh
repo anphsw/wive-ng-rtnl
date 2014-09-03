@@ -58,7 +58,7 @@ case "$1" in
 	fi
 	service vpnhelper stop_safe
 	# disable forward for paranoid users
-	sysctl -w net.ipv4.conf.all.forwarding=0
+	sysctl -wq net.ipv4.conf.all.forwarding=0
 	# generate random ip from zeroconfig range end set
 	# this is hack for some ISPs checked client alive by arping
 	# and prevent fake unset FULL_RENEW flag at next time bound
@@ -77,7 +77,7 @@ case "$1" in
 	fi
 	service vpnhelper stop_safe
 	# disable forward for paranoid users
-	sysctl -w net.ipv4.conf.all.forwarding=0
+	sysctl -wq net.ipv4.conf.all.forwarding=0
 	# Workaround for infinite OFFER wait
 	if [ "$OperationMode" != "2" ] && [ "$dhcpSwReset" = "1" ]; then
 	    if [ "$CONFIG_RT_3052_ESW" != "" ] && [ "$RALINK_MT7620" = "" ]; then
@@ -316,6 +316,6 @@ case "$1" in
 	    $LOG "End renew procedure..."
 	fi
 	# reenable forward for paranoid users
-	sysctl -w net.ipv4.conf.all.forwarding=1
+	sysctl -wq net.ipv4.conf.all.forwarding=1
     ;;
 esac

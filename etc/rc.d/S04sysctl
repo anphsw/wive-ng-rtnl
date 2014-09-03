@@ -7,7 +7,7 @@ LOG="logger -t sysctl"
 
 start() {
     $LOG "Tune kernel with sysctl."
-    sysctl -w -p -n -e /etc/sysctl.conf > /dev/null 2>&1
+    sysctl -wpneq /etc/sysctl.conf
 
     get_param
 

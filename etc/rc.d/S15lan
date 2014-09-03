@@ -54,7 +54,7 @@ start() {
     # enable forward for LAN interfaces
     # only not bridge mode enable forward
     if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-	sysctl -w net.ipv4.conf.$lan_if.forwarding=1
+	sysctl -wq net.ipv4.conf.$lan_if.forwarding=1
     fi
 
 }
