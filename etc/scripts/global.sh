@@ -230,7 +230,7 @@ flush_arp_cache() {
 }
 
 delif_from_br() {
-    ip addr flush dev $1 > /dev/null 2>&1
+    ip -4 addr flush dev $1 > /dev/null 2>&1
     ip link set $1 down > /dev/null 2>&1
     brctl delif br0 $1 > /dev/null 2>&1
 }

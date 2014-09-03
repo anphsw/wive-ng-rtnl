@@ -65,7 +65,7 @@ killall_vpn() {
  $LOG "Disconnect from vpn servers and kill daemons."
     # delete all routes to vpnnet
     # this prevent deadloop in kernel
-    ip route flush dev $vpn_if > /dev/null 2>&1
+    ip -4 route flush dev $vpn_if > /dev/null 2>&1
 
     # clear conntrack and routes tables/caches
     flush_net_caches

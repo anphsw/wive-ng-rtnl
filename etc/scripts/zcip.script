@@ -44,7 +44,7 @@ config)
 	# Add route to multicast subnet
 	if [ "$igmpEnabled" = "1" -o "$UDPXYMode" != "0" ]; then
 	    $LOG "Add route to multicast subnet."
-	    ip route replace "$mcast_net" dev "$interface"
+	    ip -4 route replace "$mcast_net" dev "$interface"
 	fi
 	if [ -f /bin/cdp-send ] && [ -f /etc/scripts/config-cdp.sh ]; then
 	    $LOG "Send Cisco Discovery request from $interface interface."

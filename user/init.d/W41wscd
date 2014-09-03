@@ -18,7 +18,7 @@ start() {
     get_param
     if [ "$WscModeOption" != "" ] || [ "$WscModeOption" != "0" ]; then
       $LOG "Starting WPS"
-	ip route replace 239.255.255.250 dev br0 > /dev/null 2>&1
+	ip -4 route replace 239.255.255.250 dev br0 > /dev/null 2>&1
 	if [ "$OperationMode" = "0" ] || [ "$ApCliBridgeOnly" = "1" ]; then
 	    wscd -m 1 -a $lan_ipaddr -i $first_wlan_root_if -D &
 	else

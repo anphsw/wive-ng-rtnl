@@ -64,7 +64,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
     $LOG "Restore default gateway"
     #clear all default route
     if [ -f /tmp/ip-down-route-reload ] || [ -f /tmp/default.gw ]; then
-	while ip route del default ; do
+	while ip -4 route del default ; do
     	    :
 	done
     fi
@@ -74,7 +74,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 	#resote old dgw
 	olddgw=`tail -qn1 /tmp/default.gw`
 	if [ "$olddgw" != "" ]; then
-	    ip route replace default via $olddgw
+	    ip -4 route replace default via $olddgw
 	fi
     else
 	if [ -f /tmp/ip-down-route-reload ]; then

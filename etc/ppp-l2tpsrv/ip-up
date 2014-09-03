@@ -43,7 +43,7 @@ if [ "$SmbEnabled" = "1" ]; then
 fi
 
 $LOG "Add low prio route to client $PPP_REMOTE network metric 100$PPP_NUM."
-ip route replace default dev $PPP_IFACE metric 100$PPP_NUM via $PPP_REMOTE > /dev/null 2>&1
+ip -4 route replace default dev $PPP_IFACE metric 100$PPP_NUM via $PPP_REMOTE > /dev/null 2>&1
 
 $LOG "Enable forwarding for $PPP_IFACE interface"
 sysctl -w net.ipv4.conf.$PPP_IFACE.forwarding=1

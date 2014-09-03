@@ -29,7 +29,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
     fi
 
     #Get current dgw
-    GWSTRING=`ip route | grep ^default`
+    GWSTRING=`ip -4 route | grep ^default`
     if [ "$GWSTRING" != "" ] && [ "$vpnDGW" = "1" ]; then
         RESTORESTRING="ip route replace $GWSTRING"
         $LOG "Store old default route to file. $GWSTRING "
@@ -42,7 +42,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 	chmod 755 /tmp/ip-down-route-reload
 	$LOG "Remove vpnDGW"
 	#clear all default route
-	while ip route del default ; do
+	while ip -4 route del default ; do
     	    :
 	done
     else
@@ -55,15 +55,15 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
     if [ "$vpnType" != "0" ]; then
 	$LOG "Modify route table need for buggy nas"
 	#Remove auto route in VPN
-	ip route del $PPP_REMOTE  > /dev/null 2>&1
-        ip route del dev $PPP_IFACE  > /dev/null 2>&1
+	ip -4 route del $PPP_REMOTE  > /dev/null 2>&1
+        ip -4 route del dev $PPP_IFACE  > /dev/null 2>&1
 	if [ -f /tmp/default.gw ] && [ -f /tmp/vpnip ]; then
 	    newdgw=`tail -qn1 /tmp/default.gw`
 	    vpnServerIP=`tail -qn1 /tmp/vpnip`
 	    if [ "$vpnServerIP" != "" ] && [ "$newdgw" != "" ] && [ "$vpnServerIP" = "$PPP_REMOTE" ]; then
 		$LOG "Replace route to $vpnServerIP via $newdgw for ppp remote $PPP_REMOTE Corbina ?...."
-		ip route del $vpnServerIP > /dev/null 2>&1
-		ip route replace $vpnServerIP via $newdgw
+		ip -4 route del $vpnServerIP > /dev/null 2>&1
+		ip -4 route replace $vpnServerIP via $newdgw
 		$LOG "Drop OUTPUT to $vpnServerIP over $PPP_IFACE"
                 iptables -I OUTPUT -o $PPP_IFACE -d $vpnServerIP -j DROP
 	    fi
@@ -73,7 +73,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
     #Replace default route to ppp tunnel
     if [ "$vpnDGW" = "1" ]; then
 	$LOG "Replace default route to $PPP_IFACE"
-	ip route replace default metric 10 dev $PPP_IFACE
+	ip -4 route replace default metric 10 dev $PPP_IFACE
     fi
 
     #user route add

@@ -61,9 +61,9 @@ start() {
 
 addr_flush() {
     # drop adresses
-    ip addr flush dev "$lan_if" > /dev/null 2>&1
-    ip addr flush dev "$lan2_if" > /dev/null 2>&1
-    ip addr flush dev "$phys_lan_if" > /dev/null 2>&1
+    ip -4 addr flush dev "$lan_if" > /dev/null 2>&1
+    ip -4 addr flush dev "$lan2_if" > /dev/null 2>&1
+    ip -4 addr flush dev "$phys_lan_if" > /dev/null 2>&1
 }
 
 get_param() {

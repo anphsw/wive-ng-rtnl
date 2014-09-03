@@ -63,8 +63,8 @@ case "$1" in
 	# this is hack for some ISPs checked client alive by arping
 	# and prevent fake unset FULL_RENEW flag at next time bound
 	rndip="169.254.$(($RANDOM%253+1)).$(($RANDOM%253+1))"
-	ip addr flush dev $interface
-	ip addr add $rndip/32 dev $interface
+	ip -4 addr flush dev $interface
+	ip -4 addr add $rndip/32 dev $interface
 	# never need down iface
 	ip link set $interface up
 	rm -f $WINS_CONF
@@ -118,7 +118,7 @@ case "$1" in
 	fi
 
 	# if dgw iface changed need fullrenew procedure
-	DGW_IF_CHANGED=`ip route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
+	DGW_IF_CHANGED=`ip -4 route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
 	if [ "$DGW_IF_CHANGED" =! "" ]; then
 	    FULL_RENEW=1
 	fi
@@ -153,7 +153,7 @@ case "$1" in
 		# this is workaroud for ppp used tunnels up over not default routes
 		if [ "$FULL_RENEW" = "1" ] && [ "$REPLACE_DGW" = "1" ]; then
 		    $LOG "Deleting default route dev $interface"
-		    while ip route del default dev $interface ; do
+		    while ip -4 route del default dev $interface ; do
 		        :
 		    done
 		fi
@@ -186,7 +186,7 @@ case "$1" in
 			while (a[i]%2==0) {w--; a[i]=a[i]/2}; break}\
 			}; print w }'`
 		    if [ "$GW" = "0.0.0.0" ] || [ -z "$GW" ]; then
-			ip route replace $NW/$MASK dev $interface
+			ip -4 route replace $NW/$MASK dev $interface
 		    else
 			ROUTELIST_CS="$ROUTELIST_CS $NW/$MASK:$GW:$interface:"
 		    fi
@@ -201,7 +201,7 @@ case "$1" in
 		    GW="$2"
 		    shift 2
 		    if [ "$GW" = "0.0.0.0" ] || [ -z "$GW" ]; then
-			ip route replace $NW dev $interface
+			ip -4 route replace $NW dev $interface
 		    else
 			ROUTELIST_ST="$ROUTELIST_ST $NW:$GW:$interface:"
 		    fi
@@ -222,18 +222,18 @@ case "$1" in
 		IPCMD=`echo $i|awk '{split($0,a,":"); \
 		    printf " %s via %s dev %s", a[1], a[2], a[3]; \
 		    if (a[4]!="") printf " metric %s", a[4]}'`
-		ip route replace $IPCMD
+		ip -4 route replace $IPCMD
 		$LOG "ip route replace $IPCMD"
 	    done
 	    # workaround for some buggy ISP
 	    if [ "$REPLACE_DGW" = "1" ] && [ "$FULL_RENEW" = "1" ] && [ "$first_dgw" != "" ]; then
 		$LOG "Set fist default gateway to $first_dgw dev $interface metric 0"
-		ip route replace default dev "$interface" via "$first_dgw" metric 0
+		ip -4 route replace default dev "$interface" via "$first_dgw" metric 0
 	    fi
 	    # add route to multicast subnet
 	    if [ "$igmpEnabled" = "1" -o "$UDPXYMode" != "0" ]; then
 		$LOG "Add route to multicast subnet."
-		ip route replace "$mcast_net" dev "$interface"
+		ip -4 route replace "$mcast_net" dev "$interface"
 	    fi
 	    # add routes configured in web
 	    if [ -f /etc/routes_replace ]; then
@@ -266,7 +266,7 @@ case "$1" in
 			# parce dnsservers
 			for i in $dns ; do
 	    		    echo nameserver $i >> $RESOLV_CONF
-			    ROUTE_NS=`ip route get "$i" | grep dev | cut -f -3 -d " "`
+			    ROUTE_NS=`ip -4 route get "$i" | grep dev | cut -f -3 -d " "`
 			    if [ "$ROUTE_NS" != "" ] && [ "$i" != "$first_dgw" ]; then
 				$LOG "Add static route to DNS $ROUTE_NS dev $interface"
 				REPLACE="ip route replace $ROUTE_NS dev $interface"
