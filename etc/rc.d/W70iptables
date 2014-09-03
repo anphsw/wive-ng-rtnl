@@ -393,39 +393,41 @@ start() {
 }
 
 startv6() {
-    get_param
+    if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
+	get_param
 
-    $LOG "Add netfiler rules for ipv6"
-    # default rules
-    ip6tables -A INPUT -i lo -j ACCEPT
-    ip6tables -A INPUT $STATE_EST -j ACCEPT
+        $LOG "Add netfiler rules for ipv6"
+        # default rules
+        ip6tables -A INPUT -i lo -j ACCEPT
+        ip6tables -A INPUT $STATE_EST -j ACCEPT
 
-    # wan accept and mss fix rules
-    ip6tables -A FORWARD -t mangle -p tcp ! -o $lan_if --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+        # wan accept and mss fix rules
+        ip6tables -A FORWARD -t mangle -p tcp ! -o $lan_if --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
-    # temp rules need enchange in future (need add service limit for ipv6 local services)
-    ip6tables -A INPUT -i $lan_if -j ACCEPT
-    ip6tables -A FORWARD -i $lan_if -j ACCEPT
+        # temp rules need enchange in future (need add service limit for ipv6 local services)
+        ip6tables -A INPUT -i $lan_if -j ACCEPT
+        ip6tables -A FORWARD -i $lan_if -j ACCEPT
 
-    if [ "$WANPingFilter" = "0" ] && [ "$ROUTE_MODE" = "on" ]; then
-	$LOG "Filter all ipv6 icmp echo requests for router and clients."
-        ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -j DROP
-        ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -j DROP
-    else
-	$LOG "Allow ratelimited icmp echo requests to router and clients."
-	ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -m limit --limit 10/s -j ACCEPT
-	ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -j DROP
-	ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -m limit --limit 10/s -j ACCEPT
-	ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -j DROP
-    fi
+        if [ "$WANPingFilter" = "0" ] && [ "$ROUTE_MODE" = "on" ]; then
+	    $LOG "Filter all ipv6 icmp echo requests for router and clients."
+    	    ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -j DROP
+    	    ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -j DROP
+	else
+	    $LOG "Allow ratelimited icmp echo requests to router and clients."
+	    ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -m limit --limit 10/s -j ACCEPT
+	    ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -j DROP
+	    ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -m limit --limit 10/s -j ACCEPT
+	    ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -j DROP
+	fi
 
-    # allow all others icmp messages (mtu probing and others) to router and clients
-    ip6tables -A INPUT -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
-    ip6tables -A FORWARD -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
+	# allow all others icmp messages (mtu probing and others) to router and clients
+	ip6tables -A INPUT -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
+	ip6tables -A FORWARD -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
 #########################################ACCEPT_ESTABLISHED################################
-    ip6tables -A FORWARD $STATE_EST -j ACCEPT
+	ip6tables -A FORWARD $STATE_EST -j ACCEPT
 ############################################ENDRULES#######################################
-    $LOG "Configure netfilter for ipv6 OK."
+	$LOG "Configure netfilter for ipv6 OK."
+    fi
 }
 
 get_param() {
@@ -543,44 +545,40 @@ stop() {
 }
 
 stopv6() {
-    $LOG "Clear iptables rules fo ipv6 and set default actions."
-    ip6tables -F > /dev/null 2>&1
-    ip6tables -t filter -F > /dev/null 2>&1
-    ip6tables -t mangle -F > /dev/null 2>&1
-    ip6tables -X > /dev/null 2>&1
-    ip6tables -t filter -X > /dev/null 2>&1
-    ip6tables -t mangle -X > /dev/null 2>&1
+    if [ -d /proc/sys/net/ipv6 ]; then
+	$LOG "Clear iptables rules fo ipv6 and set default actions."
+        ip6tables -F > /dev/null 2>&1
+        ip6tables -t filter -F > /dev/null 2>&1
+        ip6tables -t mangle -F > /dev/null 2>&1
+        ip6tables -X > /dev/null 2>&1
+        ip6tables -t filter -X > /dev/null 2>&1
+        ip6tables -t mangle -X > /dev/null 2>&1
 
-    ip6tables -t mangle -F PREROUTING > /dev/null 2>&1
-    ip6tables -t mangle -F FORWARD > /dev/null 2>&1
-    ip6tables -t mangle -F INPUT > /dev/null 2>&1
-    ip6tables -t mangle -F OUTPUT > /dev/null 2>&1
-    ip6tables -t mangle -F POSTROUTING > /dev/null 2>&1
+        ip6tables -t mangle -F PREROUTING > /dev/null 2>&1
+        ip6tables -t mangle -F FORWARD > /dev/null 2>&1
+        ip6tables -t mangle -F INPUT > /dev/null 2>&1
+        ip6tables -t mangle -F OUTPUT > /dev/null 2>&1
+        ip6tables -t mangle -F POSTROUTING > /dev/null 2>&1
 
-    ip6tables -t filter -Z > /dev/null 2>&1
-    ip6tables -t mangle -Z > /dev/null 2>&1
-    ip6tables -Z > /dev/null 2>&1
+        ip6tables -t filter -Z > /dev/null 2>&1
+        ip6tables -t mangle -Z > /dev/null 2>&1
+        ip6tables -Z > /dev/null 2>&1
 
-    # default actions
-    ip6tables -P FORWARD DROP > /dev/null 2>&1
-    ip6tables -P INPUT   DROP > /dev/null 2>&1
-    ip6tables -P OUTPUT ACCEPT > /dev/null 2>&1
+        # default actions
+        ip6tables -P FORWARD DROP > /dev/null 2>&1
+        ip6tables -P INPUT   DROP > /dev/null 2>&1
+        ip6tables -P OUTPUT ACCEPT > /dev/null 2>&1
+    fi
 }
 
 case "$1" in
         start)
             start
-            ;;
-
-        startv6)
             startv6
             ;;
 
         stop)
             stop
-            ;;
-
-        stopv6)
             stopv6
             ;;
 

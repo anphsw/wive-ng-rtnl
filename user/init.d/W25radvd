@@ -41,9 +41,6 @@ start() {
 	    exit 1
 	fi
 
-	# rebuild ipv6 rules
-        service iptables restartv6
-
         # calculate and set mtu
         calculate_and_set_mtu
 
@@ -154,9 +151,6 @@ stop() {
     	sysctl -wq net.ipv6.conf.sit0.forwarding=0		> /dev/null 2>&1
     	sysctl -wq net.ipv6.conf.$lan_if.forwarding=0		> /dev/null 2>&1
     	sysctl -wq net.ipv6.conf.$real_wan_if.forwarding=0	> /dev/null 2>&1
-
-	# rebuild ipv6 rules
-	service iptables stopv6
 
 	killall -q radvd
 	killall -q -SIGKILL radvd
