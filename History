@@ -300,7 +300,7 @@
 42) kernel: ipv6: don't accept multicast traffic with scope 0.<br>
 43) kernel: ipv6: udp: possible dst leak in udpv6_sendmsg.<br>
 44) kernel: ipv6: check the hop limit setting in ancillary data.<br>
-45) kernel: ipv6: remove optimistic DAD flag test in ipv6_add_addr().<br>
+45) kernel: ipv6: remove optimistic DAD flag test in ipv6_add_addr() and enable by default.<br>
 46) kernel: ipv6: update Destination Cache entries when gateway turn into host(RFC 4861).<br>
 47) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
 48) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>

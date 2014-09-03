@@ -179,6 +179,9 @@ struct ipv6_devconf ipv6_devconf __read_mostly = {
 #endif
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
+#ifdef CONFIG_IPV6_OPTIMISTIC_DAD
+	.optimistic_dad		= 1,
+#endif
 };
 
 static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
@@ -211,6 +214,9 @@ static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
 #endif
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
+#ifdef CONFIG_IPV6_OPTIMISTIC_DAD
+	.optimistic_dad		= 1,
+#endif
 };
 
 /* IPv6 Wildcard Address and Loopback Address defined by RFC2553 */
