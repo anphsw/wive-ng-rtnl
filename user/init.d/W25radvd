@@ -147,8 +147,6 @@ stop() {
 	ip -6 addr flush dev sit0		> /dev/null 2>&1
 	ip -6 route flush dev $real_wan_if	> /dev/null 2>&1
 	ip -6 addr flush dev $real_wan_if	> /dev/null 2>&1
-	#ip -6 route flush dev $lan_if		> /dev/null 2>&1
-	#ip -6 addr flush dev $lan_if		> /dev/null 2>&1
 	ip link set dev 6rd down		> /dev/null 2>&1
 	ip link set dev sit0 down		> /dev/null 2>&1
 	ip tunnel del 6rd			> /dev/null 2>&1

@@ -231,9 +231,6 @@ flush_arp_cache() {
 
 delif_from_br() {
     ip addr flush dev $1 > /dev/null 2>&1
-    if [ -d /proc/sys/net/ipv6 ]; then
-        ip -6 addr flush dev $1 > /dev/null 2>&1
-    fi
     ip link set $1 down > /dev/null 2>&1
     brctl delif br0 $1 > /dev/null 2>&1
 }
