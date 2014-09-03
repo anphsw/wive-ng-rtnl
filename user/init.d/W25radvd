@@ -48,6 +48,8 @@ start() {
         calculate_and_set_mtu
 
         $LOG "Tunel ipv6 in ipv4 configure and up"
+        # disable ra for all ifaces
+	sysctl -w net.ipv6.conf.all.accept_ra=0
         if [ "$ipv6_mode" = "6RD" ]; then
 	    # this section for 6RD tunnel mode
 	    relay6to4="192.88.99.127"	# The 6rd IPv4-gateway
@@ -83,16 +85,20 @@ start() {
 	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
         elif [ "$ipv6_mode" = "NATIVE" ]; then
 	    # this section for native/dualstack mode
-	    :
+	    $LOG "Accept router advertisements for autoconfigure from $real_wan_if interface."
+	    sysctl -w net.ipv6.conf.$real_wan_if.accept_ra=2
+	    sysctl -w net.ipv6.conf.all.accept_ra_pinfo=1
+	    sysctl -w net.ipv6.conf.all.autoconf=1
+	fi
+
+	if [ "$ipv6_mode" != "NATIVE" ]; then
+	    $LOG "Set ${ipv6prefix}:${ipv6subnet}::1/64 to $lan_if"
+	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if	> /dev/null 2>&1
+	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if
 	fi
 
 	$LOG "Enable ipv6 forward"
-        echo "1" > /proc/sys/net/ipv6/conf/all/forwarding
-
-	$LOG "Set ${ipv6prefix}:${ipv6subnet}::1/64 to $lan_if"
-	ip -6 addr del ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if		> /dev/null 2>&1
-	ip -6 addr add ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if
-
+        sysctl -w net.ipv6.conf.all.forwarding=1
 	$LOG "Configure radvd"
         printf "
         interface $lan_if
