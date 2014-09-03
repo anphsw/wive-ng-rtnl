@@ -84,7 +84,6 @@ bool 'inadyn (DDNS Client)'     		CONFIG_USER_INADYN
 bool 'iptables'					CONFIG_USER_IPTABLES_IPTABLES
 bool 'iptables-tools'				CONFIG_USER_IPTABLES_SAVE_RESTORE
 bool 'ip6tables'				CONFIG_USER_IPTABLES_IP6TABLES
-bool 'tc'                               	CONFIG_USER_TC
 bool 'dropbear (sshd daemon)'            	CONFIG_USER_DROPBEAR
 bool 'p910nd (small printer daemon)'            CONFIG_USER_P910ND
 bool 'pppd'                             	CONFIG_USER_PPPD
@@ -168,12 +167,17 @@ if [ "$CONFIG_RALINKAPP_HWNAT" = "y" ]; then
     bool 'HW NAT ACL'			CONFIG_RALINKAPP_HWNAT_ACL
     bool 'HW NAT Up/Download Metr'	CONFIG_RALINKAPP_HWNAT_MTR
 fi
-bool 'Software QOS support'		CONFIG_RALINKAPP_SWQOS
 bool 'iproute2 support'			CONFIG_USER_IPROUTE2
-bool 'iproute2 tc util support'		CONFIG_USER_IPROUTE2_TC
-
+if [ "$CONFIG_USER_IPROUTE2" = "y" ]; then
+    bool 'iproute2 ip util support'	CONFIG_USER_IPROUTE2_IP
+    bool 'iproute2 tc util support'	CONFIG_USER_IPROUTE2_TC
+fi
 bool 'RT3052 Switch Command'		CONFIG_RT3052_SWITCH
 bool 'RTL8567 Switch Command'		CONFIG_RTL8367M_SWITCH
+bool 'Software QOS support'		CONFIG_RALINKAPP_SWQOS
+if [ "$CONFIG_RALINKAPP_SWQOS" = "y" ]; then
+    define_bool CONFIG_USER_IPROUTE2_TC
+fi
 fi
 endmenu
 

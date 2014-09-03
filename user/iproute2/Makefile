@@ -9,8 +9,9 @@ DEFINES=
 SUBDIRS=lib tc ip
 
 HOSTCC = gcc
-CCOPTS = -D_GNU_SOURCE -Os -Wall -fno-aggressive-loop-optimizations -fno-caller-saves -ffunction-sections -fdata-sections
-CFLAGS =  $(DEFINES) $(CCOPTS) -I../include -I$(ROOTDIR)/lib/include 
+CCOPTS = -D_GNU_SOURCE -Os -Wall -fno-caller-saves -fno-unwind-tables -fno-asynchronous-unwind-tables -femit-struct-debug-baseonly -fno-var-tracking
+CCOPTS += -ffunction-sections -fdata-sections
+CFLAGS =  $(DEFINES) $(CCOPTS) -I../include -I$(ROOTDIR)/lib/include
 YACCFLAGS = -d -t -v
 
 LDLIBS += -L../lib -lnetlink -lutil
