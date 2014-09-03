@@ -80,21 +80,25 @@ start() {
 	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
         elif [ "$ipv6_mode" = "NATIVE" ]; then
 	    # this section for native/dualstack mode
-	    $LOG "Accept router advertisements for autoconfigure from wan $real_wan_if interface in route mode and for all in others."
-	    sysctl -w net.ipv6.conf.all.accept_ra=1
-	    sysctl -w net.ipv6.conf.$real_wan_if.accept_ra=2
-	    sysctl -w net.ipv6.conf.all.accept_ra_pinfo=1
-	    sysctl -w net.ipv6.conf.all.autoconf=1
+	    :
 	fi
 
-	if [ "$ipv6_mode" != "NATIVE" ]; then
+	# set defaults
+        sysctl -w net.ipv6.conf.all.forwarding=1
+	sysctl -w net.ipv6.conf.all.accept_ra=1
+	sysctl -w net.ipv6.conf.all.accept_ra_pinfo=1
+	sysctl -w net.ipv6.conf.all.autoconf=1
+
+	if [ "$ipv6_mode" = "NATIVE" ]; then
+	    $LOG "Always accept router advertisements for autoconfigure from wan $real_wan_if."
+	    sysctl -w net.ipv6.conf.$real_wan_if.accept_ra=2
+	else
 	    $LOG "Set ${ipv6prefix}:${ipv6subnet}::1/64 to $lan_if"
 	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if	> /dev/null 2>&1
 	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if
 	fi
 
 	$LOG "Enable ipv6 forward"
-        sysctl -w net.ipv6.conf.all.forwarding=1
 	$LOG "Configure radvd"
         printf "
         interface $lan_if
@@ -143,6 +147,8 @@ stop() {
 	ip -6 addr flush dev sit0		> /dev/null 2>&1
 	ip -6 route flush dev $real_wan_if	> /dev/null 2>&1
 	ip -6 addr flush dev $real_wan_if	> /dev/null 2>&1
+	ip -6 route flush dev $lan_if		> /dev/null 2>&1
+	ip -6 addr flush dev $lan_if		> /dev/null 2>&1
 	ip link set dev 6rd down		> /dev/null 2>&1
 	ip link set dev sit0 down		> /dev/null 2>&1
 	ip tunnel del 6rd			> /dev/null 2>&1
