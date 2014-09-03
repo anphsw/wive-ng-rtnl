@@ -455,7 +455,7 @@ int rtnl_from_file(FILE *rtnl, rtnl_filter_t handler,
 	nladdr.nl_groups = 0;
 
 	while (1) {
-		int err, len, type;
+		int err, len;
 		int l;
 
 		status = fread(&buf, 1, sizeof(*h), rtnl);
@@ -470,7 +470,6 @@ int rtnl_from_file(FILE *rtnl, rtnl_filter_t handler,
 			return 0;
 
 		len = h->nlmsg_len;
-		type= h->nlmsg_type;
 		l = len - sizeof(*h);
 
 		if (l<0 || len>sizeof(buf)) {

@@ -1,7 +1,6 @@
 IPOBJ=ip.o ipaddress.o iproute.o iprule.o \
     rtm_map.o iptunnel.o ip6tunnel.o tunnel.o ipneigh.o ipntable.o iplink.o \
     ipmaddr.o ipmonitor.o ipmroute.o ipprefix.o \
-    ipxfrm.o xfrm_state.o xfrm_policy.o xfrm_monitor.o \
     iplink_vlan.o link_veth.o
 
 RTMONOBJ=rtmon.o
@@ -15,11 +14,6 @@ all: $(TARGETS) $(SCRIPTS) $(LIBS)
 ip: $(IPOBJ) $(LIBNETLINK) $(LIBUTIL)
 
 rtmon: $(RTMONOBJ) $(LIBNETLINK) $(LIBUTIL)
-
-romfs: all
-	$(ROMFSINST) -S -e CONFIG_USER_IPROUTE2_IP /bin/ip
-	$(ROMFSINST) -S -e CONFIG_USER_IPROUTE2_IP /bin/routel
-	$(ROMFSINST) -S -e CONFIG_USER_IPROUTE2_RTMON /bin/rtmon
 
 clean:
 	rm -f $(ALLOBJ) $(TARGETS)

@@ -1,27 +1,20 @@
 LDLIBS=
 ADDLIB=
 
-#DEFINES= -DRESOLVE_HOSTNAMES
+DEFINES=
+#DEFINES+=-DRESOLVE_HOSTNAMES
 #LDLIBS+=-lresolv
-
 #NO_SHARED_LIBS = y
 
-#options for decnet
-#DEFINES+= -DDECNET
-#ADDLIB+=dnet_ntop.o dnet_pton.o
-
-#options for ipx
-#DEFINES+= -DIPX
-#ADDLIB+=ipx_ntop.o ipx_pton.o
+SUBDIRS=lib tc ip
 
 HOSTCC = gcc
-CCOPTS = -D_GNU_SOURCE -Os -Wall -fno-aggressive-loop-optimizations -fno-caller-saves
-CFLAGS = -I$(ROOTDIR)/lib/include -I../include $(DEFINES) $(CCOPTS)
+CCOPTS = -D_GNU_SOURCE -Os -Wall -fno-aggressive-loop-optimizations -fno-caller-saves -ffunction-sections -fdata-sections
+CFLAGS =  $(DEFINES) $(CCOPTS) -I../include -I$(ROOTDIR)/lib/include 
+YACCFLAGS = -d -t -v
 
 LDLIBS += -L../lib -lnetlink -lutil
-
-#SUBDIRS=lib ip tc misc netem genl
-SUBDIRS=lib tc
+LDFLAGS += -Wl,--gc-sections
 
 LIBNETLINK=../lib/libnetlink.a
 LIBUTIL=../lib/libutil.a
@@ -36,9 +29,12 @@ snapshot:
 		> include/SNAPSHOT.h
 
 romfs:
-	$(ROMFSINST) -S tc/tc /bin/tc
-#	@for i in $(SUBDIRS); \
-#	do $(MAKE) $(MFLAGS) -C $$i romfs; done
+ifdef ROMFS
+	rm -f $(ROMFS)/bin/ip
+	rm -f $(ROMFS)/bin/tc
+endif
+	$(ROMFSINST) -S -e CONFIG_USER_IPROUTE2_TC tc/tc /bin/tc
+	$(ROMFSINST) -S -e CONFIG_USER_IPROUTE2_IP ip/ip /bin/ip
 
 clean:
 	@for i in $(SUBDIRS) doc; \
