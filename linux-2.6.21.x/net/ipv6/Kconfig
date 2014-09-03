@@ -42,7 +42,7 @@ config IPV6_PRIVACY
 config IPV6_ROUTER_PREF
 	bool "IPv6: Router Preference (RFC 4191) support"
 	depends on IPV6
-	default y
+	default n
 	---help---
 	  Router Preference is an optional extension to the Router
 	  Advertisement message to improve the ability of hosts
@@ -54,7 +54,7 @@ config IPV6_ROUTER_PREF
 config IPV6_ROUTE_INFO
 	bool "IPv6: Route Information (RFC 4191) support"
 	depends on IPV6_ROUTER_PREF
-	default y
+	default n
 	---help---
 	  This is experimental support of Route Information.
 
