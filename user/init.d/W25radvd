@@ -155,6 +155,13 @@ stop() {
 	killall -q radvd
 	killall -q -SIGKILL radvd
 
+	# cleanup global adresses
+	echo "#!/bin/sh" > /tmp/ip6addrdel
+	ip -6 -o addr | grep "scope" | grep -vE "link|host" | awk {' print "ip -6 addr del " $4 " dev " $2 '} >> /tmp/ip6addrdel
+	chmod 777 /tmp/ip6addrdel
+	sh /tmp/ip6addrdel
+	rm -f /tmp/ip6addrdel
+
 	ip -6 route flush dev 6rd				> /dev/null 2>&1
 	ip -6 route flush dev sit0				> /dev/null 2>&1
 	ip -6 route flush dev $real_wan_if			> /dev/null 2>&1
