@@ -349,6 +349,7 @@ static struct inet6_dev * ipv6_add_dev(struct net_device *dev)
 	if ((dev->flags&IFF_LOOPBACK) ||
 	    dev->type == ARPHRD_TUNNEL ||
 #if defined(CONFIG_IPV6_SIT) || defined(CONFIG_IPV6_SIT_MODULE)
+	    dev->type == ARPHRD_TUNNEL6 ||
 	    dev->type == ARPHRD_SIT ||
 #endif
 	    dev->type == ARPHRD_NONE) {
@@ -396,8 +397,10 @@ static struct inet6_dev * ipv6_find_idev(struct net_device *dev)
 
 	ASSERT_RTNL();
 
-	if ((idev = __in6_dev_get(dev)) == NULL) {
-		if ((idev = ipv6_add_dev(dev)) == NULL)
+	idev = __in6_dev_get(dev);
+	if (!idev) {
+		idev = ipv6_add_dev(dev);
+		if (!idev)
 			return NULL;
 	}
 
@@ -1138,6 +1141,8 @@ int ipv6_get_lladdr(struct net_device *dev, struct in6_addr *addr,
 
 		read_lock_bh(&idev->lock);
 		for (ifp=idev->addr_list; ifp; ifp=ifp->if_next) {
+			if (ifp->scope > IFA_LINK)
+				break;
 			if (ifp->scope == IFA_LINK && !(ifp->flags & banned_flags)) {
 				ipv6_addr_copy(addr, &ifp->addr);
 				err = 0;
@@ -1452,6 +1457,8 @@ static int ipv6_inherit_eui64(u8 *eui, struct inet6_dev *idev)
 
 	read_lock_bh(&idev->lock);
 	for (ifp=idev->addr_list; ifp; ifp=ifp->if_next) {
+		if (ifp->scope > IFA_LINK)
+			break;
 		if (ifp->scope == IFA_LINK && !(ifp->flags&IFA_F_TENTATIVE)) {
 			memcpy(eui, ifp->addr.s6_addr+8, 8);
 			err = 0;
@@ -1636,14 +1643,6 @@ static void sit_route_add(struct net_device *dev)
 }
 #endif
 
-static void addrconf_add_lroute(struct net_device *dev)
-{
-	struct in6_addr addr;
-
-	ipv6_addr_set(&addr,  htonl(0xFE800000), 0, 0, 0);
-	addrconf_prefix_route(&addr, 64, dev, 0, 0);
-}
-
 static struct inet6_dev *addrconf_add_dev(struct net_device *dev)
 {
 	struct inet6_dev *idev;
@@ -1657,8 +1656,6 @@ static struct inet6_dev *addrconf_add_dev(struct net_device *dev)
 	if (!(dev->flags & IFF_LOOPBACK))
 		addrconf_add_mroute(dev);
 
-	/* Add link local route */
-	addrconf_add_lroute(dev);
 	return idev;
 }
 
@@ -2016,6 +2013,9 @@ static int inet6_addr_add(int ifindex, struct in6_addr *pfx, int plen,
 
 	ASSERT_RTNL();
 
+	if (plen > 128)
+		return -EINVAL;
+
 	/* check the lifetime */
 	if (!valid_lft || prefered_lft > valid_lft)
 		return -EINVAL;
@@ -2070,7 +2070,11 @@ static int inet6_addr_del(int ifindex, struct in6_addr *pfx, int plen)
 	struct inet6_dev *idev;
 	struct net_device *dev;
 
-	if ((dev = __dev_get_by_index(ifindex)) == NULL)
+	if (plen > 128)
+		return -EINVAL;
+
+	dev = __dev_get_by_index(ifindex);
+	if (!dev)
 		return -ENODEV;
 
 	if ((idev = __in6_dev_get(dev)) == NULL)
@@ -2135,6 +2139,7 @@ static void sit_add_v4_addrs(struct inet6_dev *idev)
 	struct in6_addr addr;
 	struct net_device *dev;
 	int scope;
+	int plen;
 
 	ASSERT_RTNL();
 
@@ -2144,8 +2149,10 @@ static void sit_add_v4_addrs(struct inet6_dev *idev)
 	if (idev->dev->flags&IFF_POINTOPOINT) {
 		addr.s6_addr32[0] = htonl(0xfe800000);
 		scope = IFA_LINK;
+		plen = 64;
 	} else {
 		scope = IPV6_ADDR_COMPATv4;
+		plen = 96;
 	}
 
 	if (addr.s6_addr32[3]) {
@@ -2168,7 +2175,6 @@ static void sit_add_v4_addrs(struct inet6_dev *idev)
 			int flag = scope;
 
 			for (ifa = in_dev->ifa_list; ifa; ifa = ifa->ifa_next) {
-				int plen;
 
 				addr.s6_addr32[3] = ifa->ifa_local;
 
@@ -2179,10 +2185,6 @@ static void sit_add_v4_addrs(struct inet6_dev *idev)
 						continue;
 					flag |= IFA_HOST;
 				}
-				if (idev->dev->flags&IFF_POINTOPOINT)
-					plen = 64;
-				else
-					plen = 96;
 
 				ifp = ipv6_add_addr(idev, &addr, plen, flag,
 						    IFA_F_PERMANENT, 0, 0);
@@ -2302,7 +2304,6 @@ static void addrconf_sit_config(struct net_device *dev)
 
 	if (dev->flags&IFF_POINTOPOINT) {
 		addrconf_add_mroute(dev);
-		addrconf_add_lroute(dev);
 	} else
 		sit_route_add(dev);
 }
@@ -3287,8 +3288,12 @@ static int inet6_fill_ifaddr(struct sk_buff *skb, struct inet6_ifaddr *ifa,
 				preferred -= tval;
 			else
 				preferred = 0;
-			if (valid != INFINITY_LIFE_TIME)
-				valid -= tval;
+			if (valid != INFINITY_LIFE_TIME) {
+				if (valid > tval)
+					valid -= tval;
+				else
+					valid = 0;
+			}
 		}
 	} else {
 		preferred = INFINITY_LIFE_TIME;

@@ -201,7 +201,7 @@ static void ip6_dst_destroy(struct dst_entry *dst)
 	struct rt6_info *rt = (struct rt6_info *)dst;
 	struct inet6_dev *idev = rt->rt6i_idev;
 
-	if (idev != NULL) {
+	if (!idev) {
 		rt->rt6i_idev = NULL;
 		in6_dev_put(idev);
 	}
@@ -256,7 +256,7 @@ static inline struct rt6_info *rt6_device_match(struct rt6_info *rt,
 			if (dev->ifindex == oif)
 				return sprt;
 			if (dev->flags & IFF_LOOPBACK) {
-				if (sprt->rt6i_idev == NULL ||
+				if (!sprt->rt6i_idev ||
 				    sprt->rt6i_idev->dev->ifindex != oif) {
 					if (strict && oif)
 						continue;
@@ -1256,7 +1256,7 @@ int ip6_route_add(struct fib6_config *cfg)
 			grt = rt6_lookup(gw_addr, NULL, cfg->fc_ifindex, 1);
 
 			err = -EHOSTUNREACH;
-			if (grt == NULL)
+			if (!grt)
 				goto out;
 			if (dev) {
 				if (dev != grt->rt6i_dev) {
@@ -1277,12 +1277,12 @@ int ip6_route_add(struct fib6_config *cfg)
 				goto out;
 		}
 		err = -EINVAL;
-		if (dev == NULL || (dev->flags&IFF_LOOPBACK))
+		if (!dev || (dev->flags&IFF_LOOPBACK))
 			goto out;
 	}
 
 	err = -ENODEV;
-	if (dev == NULL)
+	if (!dev)
 		goto out;
 
 	if (cfg->fc_flags & (RTF_GATEWAY | RTF_NONEXTHOP)) {

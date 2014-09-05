@@ -373,7 +373,7 @@ int inet6_dump_fib(struct sk_buff *skb, struct netlink_callback *cb)
 	s_e = cb->args[1];
 
 	w = (void *)cb->args[2];
-	if (w == NULL) {
+	if (!w) {
 		/* New dump:
 		 *
 		 * 1. hook callback destructor.
@@ -385,7 +385,7 @@ int inet6_dump_fib(struct sk_buff *skb, struct netlink_callback *cb)
 		 * 2. allocate and initialize walker.
 		 */
 		w = kzalloc(sizeof(*w), GFP_ATOMIC);
-		if (w == NULL)
+		if (!w)
 			return -ENOMEM;
 		w->func = fib6_dump_node;
 		cb->args[2] = (long)w;
@@ -486,7 +486,7 @@ static struct fib6_node * fib6_add_1(struct fib6_node *root, void *addr,
 
 	ln = node_alloc();
 
-	if (ln == NULL)
+	if (!ln)
 		return NULL;
 	ln->fn_bit = plen;
 
@@ -529,7 +529,7 @@ insert_above:
 		in = node_alloc();
 		ln = node_alloc();
 
-		if (in == NULL || ln == NULL) {
+		if (!in || !ln) {
 			if (in)
 				node_free(in);
 			if (ln)
@@ -583,7 +583,7 @@ insert_above:
 
 		ln = node_alloc();
 
-		if (ln == NULL)
+		if (!ln)
 			return NULL;
 
 		ln->fn_bit = plen;
@@ -709,7 +709,7 @@ int fib6_add(struct fib6_node *root, struct rt6_info *rt, struct nl_info *info)
 	if (rt->rt6i_src.plen) {
 		struct fib6_node *sn;
 
-		if (fn->subtree == NULL) {
+		if (!fn->subtree) {
 			struct fib6_node *sfn;
 
 			/*
@@ -724,7 +724,7 @@ int fib6_add(struct fib6_node *root, struct rt6_info *rt, struct nl_info *info)
 
 			/* Create subtree root node */
 			sfn = node_alloc();
-			if (sfn == NULL)
+			if (!sfn)
 				goto st_failure;
 
 			sfn->leaf = &ip6_null_entry;
@@ -738,7 +738,7 @@ int fib6_add(struct fib6_node *root, struct rt6_info *rt, struct nl_info *info)
 					sizeof(struct in6_addr), rt->rt6i_src.plen,
 					offsetof(struct rt6_info, rt6i_src));
 
-			if (sn == NULL) {
+			if (!sn) {
 				/* If it is failed, discard just allocated
 				   root, and then (in st_failure) stale node
 				   in main tree.
@@ -755,11 +755,11 @@ int fib6_add(struct fib6_node *root, struct rt6_info *rt, struct nl_info *info)
 					sizeof(struct in6_addr), rt->rt6i_src.plen,
 					offsetof(struct rt6_info, rt6i_src));
 
-			if (sn == NULL)
+			if (!sn)
 				goto st_failure;
 		}
 
-		if (fn->leaf == NULL) {
+		if (!fn->leaf) {
 			fn->leaf = rt;
 			atomic_inc(&rt->rt6i_ref);
 		}
@@ -865,7 +865,7 @@ static struct fib6_node * fib6_lookup_1(struct fib6_node *root,
 				if (fn->subtree)
 					fn = fib6_lookup_1(fn->subtree, args + 1);
 #endif
-				if (!fn || fn->fn_flags & RTN_RTINFO)
+				if (fn->fn_flags & RTN_RTINFO)
 					return fn;
 			}
 		}
@@ -901,7 +901,7 @@ struct fib6_node * fib6_lookup(struct fib6_node *root, struct in6_addr *daddr,
 
 	fn = fib6_lookup_1(root, daddr ? args : args + 1);
 
-	if (fn == NULL || fn->fn_flags & RTN_TL_ROOT)
+	if (!fn || fn->fn_flags & RTN_TL_ROOT)
 		fn = root;
 
 	return fn;
@@ -1168,7 +1168,7 @@ int fib6_del(struct rt6_info *rt, struct nl_info *info)
 		return -ENOENT;
 	}
 #endif
-	if (fn == NULL || rt == &ip6_null_entry)
+	if (!fn || rt == &ip6_null_entry)
 		return -ENOENT;
 
 	WARN_ON(!(fn->fn_flags & RTN_RTINFO));

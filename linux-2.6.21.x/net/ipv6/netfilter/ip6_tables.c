@@ -938,10 +938,11 @@ static inline struct xt_counters *alloc_counters(struct xt_table *table)
 	   (other than comefrom, which userspace doesn't care
 	   about). */
 	countersize = sizeof(struct xt_counters) * private->number;
-	counters = vmalloc(countersize);
 
+	counters = vmalloc(countersize);
 	if (counters == NULL)
 		return ERR_PTR(-ENOMEM);
+	memset(counters, 0, countersize);
 
 	get_counters(private, counters);
 
