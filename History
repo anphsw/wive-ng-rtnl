@@ -336,6 +336,7 @@
 77) kernel: spi_driver: add support MT762x support.<br>
 78) kernel: net_sched: avoid generating same handle for u32 filters.<br>
 79) kernel: inet: fix possible memory corruption with UDP_CORK and UFO.<br>
+80) kernel: ip: fix possible crashes in ip*_cork_release().<br>
 <br>
 <br>
 <br>

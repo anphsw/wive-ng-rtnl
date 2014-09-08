@@ -1054,7 +1054,7 @@ int ip6_append_data(struct sock *sk, int getfrag(void *from, char *to,
 		 */
 		if (opt) {
 			if (np->cork.opt == NULL) {
-				np->cork.opt = kmalloc(opt->tot_len,
+				np->cork.opt = kzalloc(opt->tot_len,
 						       sk->sk_allocation);
 				if (unlikely(np->cork.opt == NULL))
 					return -ENOBUFS;

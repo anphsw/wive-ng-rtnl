@@ -764,7 +764,7 @@ int ip_append_data(struct sock *sk,
 		opt = ipc->opt;
 		if (opt) {
 			if (inet->cork.opt == NULL) {
-				inet->cork.opt = kmalloc(sizeof(struct ip_options) + 40, sk->sk_allocation);
+				inet->cork.opt = kzalloc(sizeof(struct ip_options) + 40, sk->sk_allocation);
 				if (unlikely(inet->cork.opt == NULL))
 					return -ENOBUFS;
 			}
