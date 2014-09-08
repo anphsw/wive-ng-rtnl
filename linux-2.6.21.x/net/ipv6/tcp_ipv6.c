@@ -1150,11 +1150,12 @@ static void tcp_v6_send_ack(struct tcp_timewait_sock *tw,
 	}
 #endif
 
-	buff->csum = csum_partial((char *)t1, tot_len, 0);
-
 	memset(&fl, 0, sizeof(fl));
 	ipv6_addr_copy(&fl.fl6_dst, &skb->nh.ipv6h->saddr);
 	ipv6_addr_copy(&fl.fl6_src, &skb->nh.ipv6h->daddr);
+
+	buff->ip_summed = CHECKSUM_PARTIAL;
+	buff->csum = 0;
 
 	__tcp_v6_send_check(buff, &fl.fl6_src, &fl.fl6_dst);
 
