@@ -1075,9 +1075,9 @@ static inline int skb_gso_ok(struct sk_buff *skb, int features)
 
 static inline int netif_needs_gso(struct net_device *dev, struct sk_buff *skb)
 {
-	return skb_is_gso(skb) &&
-	       (!skb_gso_ok(skb, dev->features) ||
-		unlikely(skb->ip_summed != CHECKSUM_PARTIAL));
+	return skb_is_gso(skb) && (!skb_gso_ok(skb, dev->features) ||
+		unlikely((skb->ip_summed != CHECKSUM_PARTIAL) &&
+			 (skb->ip_summed != CHECKSUM_UNNECESSARY)));
 }
 
 /* On bonding slaves other than the currently active slave, suppress
