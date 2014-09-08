@@ -335,6 +335,7 @@
 76) kernel: fix check and set ignore dont fragment flag in some cases.<br>
 77) kernel: spi_driver: add support MT762x support.<br>
 78) kernel: net_sched: avoid generating same handle for u32 filters.<br>
+79) kernel: inet: fix possible memory corruption with UDP_CORK and UFO.<br>
 <br>
 <br>
 <br>
