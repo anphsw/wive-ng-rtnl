@@ -1,4 +1,4 @@
-/* $Id: pfpinhole.c,v 1.22 2014/05/15 21:23:43 nanard Exp $ */
+/* $Id: pfpinhole.c,v 1.23 2014/06/27 13:08:49 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2012 Thomas Bernard
@@ -15,7 +15,7 @@
 #ifdef __DragonFly__
 #include <net/pf/pfvar.h>
 #else
-#ifdef MACOSX
+#ifdef __APPLE__
 #define PRIVATE 1
 #endif
 #include <net/pfvar.h>
