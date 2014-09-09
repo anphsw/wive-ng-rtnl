@@ -13,7 +13,7 @@
 .S.o:
 	$(CC) $(CFLAGS) -c $< -o $*.o
 
-obj-y    			:= mipsIRQ.o reset.o init.o irq.o memory.o cmdline.o setup.o time.o printf.o
+obj-y    			:= mipsIRQ.o reset.o init.o irq.o memory.o cmdline.o setup.o time.o
 obj-$(CONFIG_PCI) 		+= pci.o
 obj-$(CONFIG_DWC_OTG) 		+= lm.o
 obj-$(CONFIG_RALINK_TIMER_WDG)	+= ralink_wdt.o

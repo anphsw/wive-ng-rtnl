@@ -46,8 +46,6 @@
 #include <asm/bootinfo.h>
 #include <asm/io.h>
 #include <asm/serial.h>
-#include "serial_rt2880.h"
-
 #include <asm/rt2880/prom.h>
 #include <asm/rt2880/generic.h>
 #include <asm/rt2880/surfboard.h>
@@ -452,14 +450,13 @@ __init void prom_init(void)
 	prom_init_serial_port();		/* Set rate. Needed for Serial Console */
 	prom_meminit();				/* Autodetect RAM size and set need variables */
 	prom_usbinit();				/* USB power saving*/
-	prom_setup_printf();			/* Set fake promprintf */
 
 #if defined(CONFIG_RT3352_FPGA)  ||  defined(CONFIG_RT3883_FPGA) || defined(CONFIG_RT5350_FPGA) || defined (CONFIG_MT7620_FPGA)
-	prom_printf("FPGA mode LINUX started...\n");
+	printk("FPGA mode LINUX started...\n");
 #elif defined(CONFIG_RT3352_ASIC) || defined (CONFIG_RT3883_ASIC) || defined (CONFIG_RT5350_ASIC) || defined (CONFIG_MT7620_ASIC)
-	prom_printf("ASIC mode LINUX started...\n");
+	printk("ASIC mode LINUX started...\n");
 #else
-	prom_printf("LINUX started...\n");
+	printk("LINUX started...\n");
 #endif
-	prom_printf("The CPU/SYS frequency set to %d/%lu MHz\n", mips_cpu_feq / 1000 / 1000, surfboard_sysclk / 1000 / 1000);
+	printk("The CPU/SYS frequency set to %d/%lu MHz\n", mips_cpu_feq / 1000 / 1000, surfboard_sysclk / 1000 / 1000);
 }

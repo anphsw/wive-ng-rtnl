@@ -40,11 +40,10 @@
 #include <linux/sched.h>
 #include <linux/mc146818rtc.h>
 #include <linux/ioport.h>
+
 #include <asm/cpu.h>
 #include <asm/bootinfo.h>
 #include <asm/irq.h>
-#include "serial_rt2880.h"
-
 #include <asm/rt2880/generic.h>
 #include <asm/rt2880/prom.h>
 #include <asm/rt2880/surfboardint.h>
@@ -123,7 +122,7 @@ void __init rt2880_setup(void)
 		strcpy(serial_console, "ttyS1,");
 #endif
 		strncpy(serial_console + 6, s, i);
-		prom_printf("Config serial console: %s\n", serial_console);
+		printk("Config serial console: %s\n", serial_console);
 		console_setup(serial_console, NULL);
 	}
 #endif
@@ -172,10 +171,10 @@ extern unsigned long detect_ram_sequence[3];
 void __init plat_mem_setup(void)
 {
 #ifdef CONFIG_RAM_SIZE_AUTO
-    prom_printf("DetectRAMsequence\nMAX memory:[%ld]\nRAM size detected:[%ld]\nFullviewRAM:[%ld]\n",
+    printk("DetectRAMsequence\nMAX memory:[%ld]\nRAM size detected:[%ld]\nFullviewRAM:[%ld]\n",
            detect_ram_sequence[0],detect_ram_sequence[1],detect_ram_sequence[2]);
 #else
-    prom_printf("Fixed Ramsize = %d MBytes\n", CONFIG_RALINK_RAM_SIZE );
+    printk("Fixed Ramsize = %d MBytes\n", CONFIG_RALINK_RAM_SIZE );
 #endif
     rt2880_setup();
 }

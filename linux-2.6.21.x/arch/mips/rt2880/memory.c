@@ -46,8 +46,6 @@
 #include <asm/system.h>
 #include <linux/irq.h>
 #include <asm/irq_cpu.h>
-#include "serial_rt2880.h"
-
 #include <asm/rt2880/prom.h>
 
 //#define DEBUG
@@ -88,24 +86,24 @@ static char *mtypes[3] = {
 struct prom_pmemblock mdesc[PROM_MAX_PMEMBLOCKS];
 struct prom_pmemblock * __init prom_getmdesc(void)
 {
-	char *env_str; 
+	char *env_str;
 	unsigned int ramsize, rambase;
 
 	env_str = prom_getenv("ramsize");
 	if (!env_str) {
 		ramsize = RAM_SIZE;
-		prom_printf("maximum ramsize = %d MBytes\n", CONFIG_RALINK_RAM_SIZE );
+		printk("maximum ramsize = %d MBytes\n", CONFIG_RALINK_RAM_SIZE );
 	} else {
-		prom_printf("maximum ramsize = %s\n", env_str);
+		printk("maximum ramsize = %s\n", env_str);
 		ramsize = simple_strtol(env_str, NULL, 0);
 	}
 
 	env_str = prom_getenv("rambase");
 	if (!env_str) {
-		prom_printf("rambase not set, set to default (0x00000000)\n");
+		printk("rambase not set, set to default (0x00000000)\n");
 		rambase = 0x00000000;
 	} else {
-		prom_printf("rambase = %s\n", env_str);
+		printk("rambase = %s\n", env_str);
 		rambase = simple_strtol(env_str, NULL, 0);
 	}
 
