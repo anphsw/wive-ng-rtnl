@@ -177,6 +177,8 @@ struct serial_icounter_struct {
 
 #ifdef __KERNEL__
 #include <linux/compiler.h>
-
+/* Allow architectures to override entries in serial8250_ports[] at run time: */
+struct uart_port;	/* forward declaration */
+extern int early_serial_setup(struct uart_port *port);
 #endif /* __KERNEL__ */
 #endif /* _LINUX_SERIAL_H */
