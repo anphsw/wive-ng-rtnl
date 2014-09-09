@@ -49,7 +49,12 @@
     defined (CONFIG_RALINK_RT5350) || \
     defined (CONFIG_RALINK_MT7620)
 
+/* if support others flash types try nor by default, else try spi by default */
+#if defined(CONFIG_MTD_NOR_RALINK) || defined(CONFIG_MTD_NAND_RALINK)
 int boot_from = BOOT_FROM_NOR;
+#else
+int boot_from = BOOT_FROM_SPI;
+#endif
 
 int ra_check_flash_type(void)
 {
@@ -63,7 +68,7 @@ int ra_check_flash_type(void)
     syscfg = (*((int *)(RALINK_SYSCTL_BASE + 0x10)));
 
     if((strcmp(Id,"RT3052")==0) || (strcmp(Id, "RT3350")==0)) {
-	boot_from = (syscfg >> 16) & 0x3; 
+	boot_from = (syscfg >> 16) & 0x3;
 	switch(boot_from)
 	{
 	case 0:
@@ -78,7 +83,7 @@ int ra_check_flash_type(void)
 	    break;
 	}
     }else if(strcmp(Id,"RT3883")==0) {
-	boot_from = (syscfg >> 4) & 0x3; 
+	boot_from = (syscfg >> 4) & 0x3;
 	switch(boot_from)
 	{
 	case 0:
@@ -105,7 +110,9 @@ int ra_check_flash_type(void)
 	boot_from = BOOT_FROM_NOR;
     }else if(strcmp(Id,"RT6855")==0) {
 	boot_from = BOOT_FROM_SPI;
-		}else if(strcmp(Id,"RT6352")==0) {
+    }else if(strcmp(Id,"RT6352")==0) {
+	chip_mode = syscfg & 0xF;
+    }else if(strcmp(Id,"MT7620")==0) {
 	chip_mode = syscfg & 0xF;
 	switch(chip_mode)
 	{

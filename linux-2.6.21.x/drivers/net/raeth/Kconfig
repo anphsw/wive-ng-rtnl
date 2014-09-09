@@ -88,7 +88,7 @@ config RAETH_RW_PDMAPTR_FROM_VAR
 
 #config RAETH_QOS
 #        bool "QoS Feature"
-#        depends on RAETH && !RALINK_RT2880 && !RALINK_RT6352 && !RALINK_RT71100 && !RAETH_TSO
+#        depends on RAETH && !RALINK_RT2880 && !RALINK_MT7620 && !RALINK_RT71100 && !RAETH_TSO
 
 choice
         prompt "QoS Type"
