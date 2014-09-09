@@ -10,10 +10,11 @@
  * register.  These assignments should hold for any serial port based on
  * a 8250, 16450, or 16550(A).
  */
-
+#if defined (CONFIG_RALINK_RT6855) ||  defined (CONFIG_RALINK_MT7620)
+#include <linux/serial_reg_mt762x.h>
+#else
 #ifndef _LINUX_SERIAL_REG_H
 #define _LINUX_SERIAL_REG_H
-
 /*
  * DLAB=0
  */
@@ -321,6 +322,6 @@
 #define UART_OMAP_MVER		0x14	/* Module version register */
 #define UART_OMAP_SYSC		0x15	/* System configuration register */
 #define UART_OMAP_SYSS		0x16	/* System status register */
-
 #endif /* _LINUX_SERIAL_REG_H */
+#endif /* MT7620 */
 
