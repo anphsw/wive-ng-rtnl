@@ -40,7 +40,7 @@ ifdef CONFIG_RALINK_MT7620
 CFLAGS    += -DMT7620_ASIC_BOARD
 endif
 
-all:	.depend $(BINS) 
+all:	.depend $(BINS)
 
 mkimage:mkimage.o crc32.o
 	$(CC) $(CFLAGS) $(HOST_LDFLAGS) -o $@ $^
