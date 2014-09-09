@@ -46,6 +46,8 @@
 #include <asm/bootinfo.h>
 #include <asm/io.h>
 #include <asm/serial.h>
+#include "serial_rt2880.h"
+
 #include <asm/rt2880/prom.h>
 #include <asm/rt2880/generic.h>
 #include <asm/rt2880/surfboard.h>
@@ -406,9 +408,6 @@ static int prom_init_serial_port(void)
 
 static void serial_setbrg(unsigned long wBaud)
 {
-#ifdef CONFIG_SERIAL_CONSOLE
-/////////////////////CLASSIC INIT////////////////////////////////////////////////////////////////////////////////////////////
-#include "serial_rt2880.h"
 	//fix at SURFBOARD_DEFAULT_BAUD 8 n 1 n
  	*(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC08)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC10)= 0;
@@ -427,38 +426,6 @@ static void serial_setbrg(unsigned long wBaud)
 #else
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x528)= (surfboard_sysclk / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
 #endif
-#else
-/////////////////////UBOOT INIT////////////////////////////////////////////////////////////////////////////////////////////
-#include "serial_uboot.h"
-        unsigned int clock_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV);
-	//reset uart lite and uart full
-#if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
-	*(unsigned long *)(RALINK_SYSCTL_BASE + 0x0034) = cpu_to_le32(1<<12);
-#elif defined(CONFIG_RT3052_ASIC) || defined(CONFIG_RT3052_FPGA) || \
-      defined(CONFIG_RT3352_ASIC) || defined(CONFIG_RT3352_FPGA) || \
-      defined(CONFIG_RT3883_ASIC) || defined(CONFIG_RT3883_FPGA)
-	*(unsigned long *)(RALINK_SYSCTL_BASE + 0x0034) = cpu_to_le32(1<<19|1<<12);
-#else
-#error "undefined Platform"
-#endif
-	/* RST Control change from W1C to W1W0 to reset, update 20080812 */
-	*(unsigned long *)(RALINK_SYSCTL_BASE + 0x0034) = 0;
-#if defined(CONFIG_RT3883_ASIC) || defined(CONFIG_RT3883_FPGA) || \
-    defined(CONFIG_RT3352_ASIC) || defined(CONFIG_RT3352_FPGA)
-	clock_divisor = (40*1000*1000/ SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
-#else
-	clock_divisor = (surfboard_sysclk/ SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
-#endif
-
-	IER(CFG_RT2880_CONSOLE) = 0;					/* Disable for now */
-	FCR(CFG_RT2880_CONSOLE) = 0;					/* No fifos enabled */
-
-	/* set baud rate */
-	LCR(CFG_RT2880_CONSOLE) = LCR_WLS0 | LCR_WLS1 | LCR_DLAB;
-	DLL(CFG_RT2880_CONSOLE) = clock_divisor & 0xffff;
-	LCR(CFG_RT2880_CONSOLE) = LCR_WLS0 | LCR_WLS1;
-#endif
-
 }
 
 int serial_init(unsigned long wBaud)
@@ -488,13 +455,14 @@ __init void prom_init(void)
 	prom_init_serial_port();		/* Set rate. Needed for Serial Console */
 	prom_meminit();				/* Autodetect RAM size and set need variables */
 	prom_usbinit();				/* USB power saving*/
+	prom_setup_printf();			/* Set fake promprintf */
 
 #if defined(CONFIG_RT3352_FPGA)  ||  defined(CONFIG_RT3883_FPGA) || defined(CONFIG_RT5350_FPGA) || defined (CONFIG_MT7620_FPGA)
-	printk("FPGA mode LINUX started...\n");
+	prom_printf("FPGA mode LINUX started...\n");
 #elif defined(CONFIG_RT3352_ASIC) || defined (CONFIG_RT3883_ASIC) || defined (CONFIG_RT5350_ASIC) || defined (CONFIG_MT7620_ASIC)
-	printk("ASIC mode LINUX started...\n");
+	prom_printf("ASIC mode LINUX started...\n");
 #else
-	printk("LINUX started...\n");
+	prom_printf("LINUX started...\n");
 #endif
-	printk("The CPU/SYS frequency set to %d/%lu MHz\n", mips_cpu_feq / 1000 / 1000, surfboard_sysclk / 1000 / 1000);
+	prom_printf("The CPU/SYS frequency set to %d/%lu MHz\n", mips_cpu_feq / 1000 / 1000, surfboard_sysclk / 1000 / 1000);
 }

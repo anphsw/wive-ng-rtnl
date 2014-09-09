@@ -33,10 +33,10 @@
 #define SURFBOARDINT_NAND	 8	/* NAND */
 #define SURFBOARDINT_PC	 	 9	/* Performance counter */
 #define SURFBOARDINT_I2S 	 10	/* I2S */
-#define SURFBOARDINT_SDXC        14     /* SDXC */
+//#define SURFBOARDINT_SDXC        14     /* SDXC */
 #define SURFBOARDINT_ESW	 17	/* ESW */
 #define SURFBOARDINT_UART1	 12 	/* UART Lite */
-#define SURFBOARDINT_CRYPTO      13     /* CryptoEngine */
+//#define SURFBOARDINT_CRYPTO      13     /* CryptoEngine */
 #define SURFBOARDINT_SYSCTL 	 32	/* SYSCTL */
 #define SURFBOARDINT_TIMER0	 33	/* timer0 */
 #define SURFBOARDINT_WDG	 34	/* watch dog */
