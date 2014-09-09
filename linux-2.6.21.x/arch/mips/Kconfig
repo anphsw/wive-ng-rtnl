@@ -112,11 +112,6 @@ config RALINK_MT7620
 
 endchoice
 
-config  RALINK_MT7620_PLL600
-	bool "Set MT7620 CPU clock to 600MHz (Override Uboot config)"
-	depends on RALINK_MT7620
-	default n
-
 config SERIAL_CONSOLE
         bool "Support for serial port console"
 	default y

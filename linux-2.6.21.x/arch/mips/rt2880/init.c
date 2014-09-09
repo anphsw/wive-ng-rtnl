@@ -39,7 +39,6 @@
 #include <linux/init.h>
 #include <linux/string.h>
 #include <linux/kernel.h>
-#include <linux/delay.h>
 #include <linux/serialP.h>
 #include <linux/serial.h>
 #include <linux/serial_core.h>
@@ -106,8 +105,9 @@ static void prom_usbinit(void)
 #endif
 #if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
 	reg = *(volatile u32 *)KSEG1ADDR((RALINK_SYSCTL_BASE + 0x34));
-	reg |= (RALINK_UDEV_RST | RALINK_UHST_RST);
+	reg = reg | RALINK_UDEV_RST | RALINK_UHST_RST;
 	*(volatile u32 *)KSEG1ADDR((RALINK_SYSCTL_BASE + 0x34))= reg;
+
 	reg = *(volatile u32 *)KSEG1ADDR((RALINK_SYSCTL_BASE + 0x30));
 #if defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
 	reg = reg & ~(RALINK_UPHY0_CLK_EN);
@@ -115,6 +115,7 @@ static void prom_usbinit(void)
 	reg = reg & ~(RALINK_UPHY0_CLK_EN | RALINK_UPHY1_CLK_EN);
 #endif
 	*(volatile u32 *)KSEG1ADDR((RALINK_SYSCTL_BASE + 0x30))= reg;
+
 #elif defined (CONFIG_RALINK_RT3052)
 	*(volatile u32 *)KSEG1ADDR((RALINK_USB_OTG_BASE + 0xE00)) = 0xF;	// power saving
 #endif
@@ -123,7 +124,7 @@ static void prom_usbinit(void)
 static void prom_init_sysclk(void)
 {
 	u32 	reg;
-#if defined(CONFIG_RT5350_ASIC) || defined (CONFIG_MT7620_ASIC)
+#ifdef CONFIG_RT5350_ASIC
 	u8      clk_sel, clk_sel2;
 #else
 	u8      clk_sel;
@@ -156,12 +157,7 @@ static void prom_init_sysclk(void)
 #elif defined (CONFIG_RT6855_ASIC)
 	clk_sel = 0;
 #elif defined (CONFIG_MT7620_ASIC)
-        clk_sel2 = (reg>>4) & 0x03;
-        reg = (*((volatile u32 *)(RALINK_SYSCTL_BASE + 0x58)));
-        if ( reg & ((0x1UL) << 24))
-                clk_sel = 1;    /* clock from BBP PLL (480MHz ) */
-        else
-                clk_sel = 0;    /* clock from CPU PLL (600MHz) */
+        clk_sel = 0;
 #else
 #error Please Choice System Type
 #endif
@@ -220,56 +216,7 @@ static void prom_init_sysclk(void)
 		break;
 #elif defined (CONFIG_RALINK_MT7620)
 	case 0:
-		/* set CPU ratio to 3/3 for normal mode (1/3 for sleep mode) */
-		reg = (*((volatile u32 *)(RALINK_SYSCTL_BASE + 0x3C)));
-		reg &= ~0x1F1F;
-		reg |=  0x0303;
-		(*((volatile u32 *)(RALINK_SYSCTL_BASE + 0x3C))) = reg;
-		udelay(10);
-		reg = (*((volatile u32 *)(RALINK_SYSCTL_BASE + 0x54)));
-		if (reg & CPLL_SW_CONFIG) {
-			int rewrite_reg = 0;
-			u32 pll_mult_ratio;
-			u32 pll_div_ratio;
-			/* disable bit SSC_EN (wrong CPU_PLL frequency, cause system clock drift) */
-			if (reg & 0x80) {
-				reg &= ~(0x80); 
-				rewrite_reg = 1;
-			}
-#if defined (CONFIG_RALINK_MT7620_PLL600)
-			pll_mult_ratio = (reg & CPLL_MULT_RATIO) >> CPLL_MULT_RATIO_SHIFT;
-			pll_div_ratio = (reg & CPLL_DIV_RATIO) >> CPLL_DIV_RATIO_SHIFT;
-			if (pll_mult_ratio != 6 || pll_div_ratio != 0) {
-				reg &= ~(CPLL_MULT_RATIO);
-				reg &= ~(CPLL_DIV_RATIO);
-				reg |=  (6 << CPLL_MULT_RATIO_SHIFT);
-				rewrite_reg = 1;
-			}
-#endif
-			if (rewrite_reg) {
-				(*((volatile u32 *)(RALINK_SYSCTL_BASE + 0x54))) = reg;
-				udelay(10);
-			}
-
-			/* read CPLL_CFG0 to determine real CPU clock */
-			pll_mult_ratio = (reg & CPLL_MULT_RATIO) >> CPLL_MULT_RATIO_SHIFT;
-			pll_div_ratio = (reg & CPLL_DIV_RATIO) >> CPLL_DIV_RATIO_SHIFT;
-			pll_mult_ratio += 24;	/* begin from 24 */
-			if(pll_div_ratio == 0)	/* define from datasheet */
-				pll_div_ratio = 2;
-			else if(pll_div_ratio == 1)
-				pll_div_ratio = 3;
-			else if(pll_div_ratio == 2)
-				pll_div_ratio = 4;
-			else if(pll_div_ratio == 3)
-				pll_div_ratio = 8;
-			mips_cpu_feq = ((BASE_CLOCK * pll_mult_ratio ) / pll_div_ratio) * 1000 * 1000;
-		} else {
-			mips_cpu_feq = (600*1000*1000);
-		}
-		break;
-	case 1:
-		mips_cpu_feq = (480*1000*1000);
+		mips_cpu_feq = (400*1000*100);
 		break;
 #else
 #error Please Choice Chip Type
@@ -325,21 +272,8 @@ static void prom_init_sysclk(void)
 		surfboard_sysclk = (100*1000*1000);
 		break;
 	}
-#elif defined (CONFIG_RALINK_RT6855)
+#elif defined (CONFIG_RALINK_RT6855) || defined (CONFIG_MT7620_ASIC)
 	surfboard_sysclk = mips_cpu_feq/4;
-#elif defined (CONFIG_MT7620_ASIC)
-	switch (clk_sel2) {
-	case 0:
-		surfboard_sysclk = mips_cpu_feq/4;	/* SDR (MT7620 E1) */
-		break;
-	case 1:
-	case 2:
-		surfboard_sysclk = mips_cpu_feq/3;	/* DDR1 & DDR2 */
-		break;
-	case 3:
-		surfboard_sysclk = mips_cpu_feq/5;	/* SDR (MT7620 E2) */
-		break;
-	}
 #else
 	surfboard_sysclk = mips_cpu_feq/3;
 #endif
