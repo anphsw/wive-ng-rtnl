@@ -22,22 +22,11 @@
 #ifndef _SURFBOARD_H
 #define _SURFBOARD_H
 
-#include <asm/addrspace.h>
-
-/*
- * Surfboard system clock.
- * This is the default value and maybe overidden by System Clock passed on the
- * command line (sysclk=).
- */
-#define SURFBOARD_SYSTEM_CLOCK		(125000000)
-
 /*
  * Surfboard UART base baud rate = System Clock / 16.
  * Ex. (14.7456 MHZ / 16) = 921600
  *     (32.0000 MHZ / 16) = 2000000
  */
 #define SURFBOARD_BAUD_DIV	(16)
-#define SURFBOARD_DEFAULT_BAUD	(57600)
-#define SURFBOARD_BASE_BAUD	(SURFBOARD_SYSTEM_CLOCK / SURFBOARD_BAUD_DIV)
 
 #endif /* !(_SURFBOARD_H) */

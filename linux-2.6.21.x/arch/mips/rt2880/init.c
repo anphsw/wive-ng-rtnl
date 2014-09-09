@@ -405,23 +405,23 @@ static int prom_init_serial_port(void)
 
 static void serial_setbrg(unsigned long wBaud)
 {
-	//fix at SURFBOARD_DEFAULT_BAUD 8 n 1 n
+	//fix at 57600 8 n 1 n
  	*(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC08)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC10)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC14)= 0x3;
 #if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) ||  defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
-        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC28)= (40000000 / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
+        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC28)= (40000000 / SURFBOARD_BAUD_DIV / 57600);
 #else
-        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC28)= (surfboard_sysclk / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
+        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC28)= (surfboard_sysclk / SURFBOARD_BAUD_DIV / 57600);
 #endif
-	//fix at SURFBOARD_DEFAULT_BAUD 8 n 1 n
+	//fix at 57600 8 n 1 n
  	*(volatile u32 *)(RALINK_SYSCTL_BASE + 0x508)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x510)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x514)= 0x3;
-#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) ||  defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
-        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x528)= (40000000 / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
+#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
+        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x528)= (40000000 / SURFBOARD_BAUD_DIV / 57600);
 #else
-        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x528)= (surfboard_sysclk / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
+        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x528)= (surfboard_sysclk / SURFBOARD_BAUD_DIV / 57600);
 #endif
 }
 
@@ -448,7 +448,7 @@ __init void prom_init(void)
 	set_io_port_base(KSEG1);
 	write_c0_wired(0);
 
-	serial_init(SURFBOARD_DEFAULT_BAUD);	/* Kernel driver serial init */
+	serial_init(57600);			/* Kernel driver serial init */
 	prom_init_serial_port();		/* Set rate. Needed for Serial Console */
 	prom_meminit();				/* Autodetect RAM size and set need variables */
 	prom_usbinit();				/* USB power saving*/
