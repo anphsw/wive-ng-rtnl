@@ -2110,7 +2110,7 @@ static int serial8250_request_std_resource(struct uart_8250_port *up)
 #if defined (CONFIG_SERIAL_8250_AU1X00)
 		size = 0x100000;
 #elif defined (CONFIG_SERIAL_8250_RALINK)
-		size = 256;
+		size = 0x0100;
 #endif
 		/* fall thru */
 	case UPIO_TSI:
