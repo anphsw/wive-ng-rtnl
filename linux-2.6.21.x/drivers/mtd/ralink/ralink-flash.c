@@ -110,9 +110,7 @@ int ra_check_flash_type(void)
 	boot_from = BOOT_FROM_NOR;
     }else if(strcmp(Id,"RT6855")==0) {
 	boot_from = BOOT_FROM_SPI;
-    }else if(strcmp(Id,"RT6352")==0) {
-	chip_mode = syscfg & 0xF;
-    }else if(strcmp(Id,"MT7620")==0) {
+    }else if((strcmp(Id,"RT6352")==0) || (strcmp(Id,"MT7620")==0)) {
 	chip_mode = syscfg & 0xF;
 	switch(chip_mode)
 	{
