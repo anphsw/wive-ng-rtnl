@@ -76,6 +76,7 @@ char getPromChar(void)
 	return serial_in(UART_RX);
 }
 
+extern char * prom_getcmdline(void);
 void __init prom_setup_printf(void)
 {
 	char *argptr;
