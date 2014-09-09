@@ -129,8 +129,8 @@ static void __inline__ enable_all(void)
 	write_32bit_cp0_register(CP0_STATUS, int_status);
 }
 
-#define	startup_rt2880_irq 	rt2880_irq_handler
-#define	shutdown_rt2880_irq	rt2880_irq_handler
+#define	startup_rt2880_irq	enable_rt2880_irq
+#define	shutdown_rt2880_irq	disable_rt2880_irq
 #define	enable_rt2880_irq	rt2880_irq_handler
 #define	disable_rt2880_irq	rt2880_irq_handler
 #define	mask_and_ack_rt2880_irq	rt2880_irq_handler
@@ -161,6 +161,7 @@ static inline int ls1bit32(unsigned int x)
 
 void surfboard_hw0_irqdispatch(void)
 {
+	struct irqaction *action;
 	unsigned long int_status;
 	int irq;
 
@@ -193,21 +194,22 @@ void surfboard_hw0_irqdispatch(void)
 	else if (irq == 2)
 		irq = SURFBOARDINT_WDG;
 #endif
-	/* ILL_ACC */ 
+	/* ILL_ACC */
 	if (irq == 3) {
 		irq = SURFBOARDINT_ILL_ACC;
 	}
 #if defined (CONFIG_RALINK_PCM) || defined (CONFIG_RALINK_PCM_MODULE)
-	/* PCM */ 
+	/* PCM */
 	if (irq == 4) {
 		irq = SURFBOARDINT_PCM;
 	}
 #endif
-	/* UARTF */ 
+	/* UARTF */
 	if (irq == 5) {
 		irq = SURFBOARDINT_UART;
 	}
 
+	action = irq_desc[irq].action;
 	do_IRQ(irq);
 	return;
 }
