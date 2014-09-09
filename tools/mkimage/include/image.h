@@ -234,7 +234,7 @@ typedef struct image_header {
 	defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
 	dram_header_t   ih_dram;
 #endif
-} image_header_t __attribute__((packed));
+} image_header_t;
 
 
 #endif	/* __IMAGE_H__ */
