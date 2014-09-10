@@ -1,5 +1,7 @@
 NVDIR	 = $(ROOTDIR)/lib/libnvram
-CFLAGS	+= -I$(NVDIR) -I$(ROOTDIR)/$(LINUXDIR)/include
+
+CFLAGS	+= -I$(NVDIR)
+CFLAGS	+= -I$(ROOTDIR)/$(LINUXDIR) -I$(ROOTDIR)/$(LINUXDIR)/include
 LDFLAGS	+= -lnvram
 
 all: ralink_init

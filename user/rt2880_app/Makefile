@@ -9,6 +9,7 @@ SUBDIRS_APP = mii_mgr nvram reg switch gpio mtd hw_nat switch_rtl eth_mac
 #allways agressive optimize for size
 CFLAGS	+= -Os -fno-caller-saves -fno-unwind-tables -fno-asynchronous-unwind-tables -femit-struct-debug-baseonly -fno-var-tracking
 CFLAGS	+= -ffunction-sections -fdata-sections
+CFLAGS	+= -I$(ROOTDIR)/$(LINUXDIR) -I$(ROOTDIR)/$(LINUXDIR)/include
 LDFLAGS	+= -Wl,--gc-sections
 
 #ralink specific applications

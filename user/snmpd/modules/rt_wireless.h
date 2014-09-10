@@ -1,4 +1,4 @@
-#include <linux/config.h>
+#include <linux/autoconf.h>
 
 #ifndef _WIRELESS_SNMP
 #define _WIRELESS_SNMP

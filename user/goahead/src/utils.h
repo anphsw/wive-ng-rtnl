@@ -7,7 +7,7 @@
  */
 
 #include        "config/autoconf.h"			//user config
-#include        "linux/config.h"			//kernel config
+#include	<linux/autoconf.h>			//kernel config
 #include        "user/busybox/include/autoconf.h"	//busybox config
 #include        "sdk_version.h"				//version config
 #include        "../options.h" 				//goahead options

@@ -6,8 +6,7 @@
  *
  * $Id: stapriv.h,v 1.18 2010-07-16 06:25:23 chhung Exp $
  */
-
-#include        "linux/config.h"
+#include <linux/autoconf.h>
 
 #define NDIS_802_11_LENGTH_SSID         32
 #define NDIS_802_11_LENGTH_RATES        8

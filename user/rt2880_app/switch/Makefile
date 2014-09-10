@@ -1,7 +1,8 @@
 EXEC = switch
-CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)
+
+CFLAGS += -I$(ROOTDIR)/$(LINUXDIR) -I$(ROOTDIR)/$(LINUXDIR)/include
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth
-CONF_H  = $(ROOTDIR)/$(LINUXDIR)/include/linux/config.h
+CONF_H  = $(ROOTDIR)/$(LINUXDIR)/include/linux/autoconf.h
 
 ifeq ($(CONFIG_RALINK_RT6855),y)
 SRC=switch_gsw.c

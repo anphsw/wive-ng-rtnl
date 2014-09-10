@@ -21,7 +21,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <linux/if.h>
-#include <linux/config.h>
+#include <linux/autoconf.h>
 
 #include "ra_ioctl.h"
 

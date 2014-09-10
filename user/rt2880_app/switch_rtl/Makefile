@@ -1,6 +1,7 @@
 EXEC = rtl8367m
-CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)
-CONF_H  = $(ROOTDIR)/$(LINUXDIR)/include/linux/config.h
+
+CFLAGS += -I$(ROOTDIR)/$(LINUXDIR) -I$(ROOTDIR)/$(LINUXDIR)/include
+CONF_H  = $(ROOTDIR)/$(LINUXDIR)/include/linux/autoconf.h
 
 SRC=rtl8367m.c
 

@@ -12,7 +12,7 @@
 #include "webs.h"
 #include "internet.h"
 #include "wireless.h"
-#include "linux/config.h"									/* for CONFIG_RT2860V2_STA_WSC */
+#include <linux/autoconf.h>						/* for CONFIG_RT2860V2_STA_WSC */
 
 #include "oid.h"
 

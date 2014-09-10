@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
-#include <linux/config.h>
+#include <linux/autoconf.h>
 
 #include "nvram.h"
 

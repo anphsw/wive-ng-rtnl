@@ -21,7 +21,7 @@
 
 #ifdef __KERNEL__
 
-#include <linux/config.h>
+#include <linux/autoconf.h>
 #include <linux/version.h>
 #include <linux/types.h>
 #include <linux/mtd/compatmac.h>

@@ -4,7 +4,8 @@ IGMP_PROXY_OBJ= igmpproxy.o config.o confread.o request.o mcgroup.o rttable.o \
 
 -include $(LINUX_CONFIG)
 
-CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/include
+CFLAGS += -I$(ROOTDIR)/$(LINUXDIR) -I$(ROOTDIR)/$(LINUXDIR)/include
+CONF_H = $(ROOTDIR)/$(LINUXDIR)/include/linux/autoconf
 
 #CFLAGS+= -DWIFI_IGMPSNOOP_SUPPORT
 #CFLAGS+= -DSEARCH_CLIENT_IN_WIFI_MACTABLE

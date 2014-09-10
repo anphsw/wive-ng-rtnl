@@ -30,7 +30,7 @@
 #include <sys/types.h>  /* for size_t */
 #include <arpa/inet.h>  /* for in6addr, htons(), and friends */
 
-#include "linux/config.h" /* kernel config */
+#include <linux/autoconf.h>
 
 #if defined(CONFIG_RALINK_RT3050_1T1R) || defined(CONFIG_RALINK_RT3051_1T2R) || defined(CONFIG_RALINK_RT5350)
 #define WIFISPEED 1500000	// 150Mbit wireless...

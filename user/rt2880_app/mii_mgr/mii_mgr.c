@@ -25,7 +25,7 @@
 #include <linux/mii.h>
 #include <linux/types.h>
 
-#include <linux/config.h>
+#include <linux/autoconf.h>
 #include "ra_ioctl.h"
 
 void show_usage(void)

@@ -1,7 +1,7 @@
 EXEC += eth_mac
 OBJS += eth_mac.o
 
-CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)
+CFLAGS += -I$(ROOTDIR)/$(LINUXDIR) -I$(ROOTDIR)/$(LINUXDIR)/include
 
 all: $(EXEC)
 

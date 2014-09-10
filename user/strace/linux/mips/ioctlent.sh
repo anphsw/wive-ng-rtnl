@@ -33,7 +33,7 @@
 file_find='asm/*.h linux/*.h scsi/*.h'
 
 # Files to stop.
-file_stop='asm/byteorder.h linux/config.h linux/pci.h linux/xd.h'
+file_stop='asm/byteorder.h linux/autoconf.h linux/pci.h linux/xd.h'
 
 # Defs to find.
 # Work on the kernel source to convert all to df_iowr.

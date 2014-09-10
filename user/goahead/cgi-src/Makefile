@@ -8,7 +8,7 @@
 #
 
 CONF	= $(ROOTDIR)/$(LINUXDIR)
-CONF_H  = $(CONF)/include/linux/config.h
+CONF_H  = $(CONF)/include/linux/autoconf.h
 
 # system cgi scripts must be static
 LDFLAGS += -static

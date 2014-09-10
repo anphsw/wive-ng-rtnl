@@ -1,6 +1,7 @@
 EXEC = mii_mgr
 OBJS = mii_mgr.o
-CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)
+
+CFLAGS += -I$(ROOTDIR)/$(LINUXDIR) -I$(ROOTDIR)/$(LINUXDIR)/include
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth
 
 all: $(EXEC)

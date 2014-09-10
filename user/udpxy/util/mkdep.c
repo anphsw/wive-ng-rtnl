@@ -191,7 +191,7 @@ void handle_include(int start, const char * name, int len)
 	struct path_struct *path;
 	int i;
 
-	if (len == 14 && !memcmp(name, "linux/config.h", len))
+	if (len == 16 && !memcmp(name, "linux/autoconf.c", len))
 		return;
 
 	if (len >= 7 && !memcmp(name, "config/", 7))

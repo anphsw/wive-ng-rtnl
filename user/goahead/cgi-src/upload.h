@@ -28,7 +28,7 @@
 #include <sys/reboot.h>
 
 /* for CONFIG_MTD_KERNEL_PART_SIZ  */
-#include "linux/config.h"  				/* kernel config		*/
+#include <linux/autoconf.h>  				/* kernel config		*/
 #include "config/autoconf.h"				/* user config			*/
 #include "../../../tools/mkimage/include/image.h"	/* For Uboot image header format */
 

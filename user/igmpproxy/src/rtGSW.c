@@ -8,7 +8,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 
-#include "linux/autoconf.h"
+#include <linux/autoconf.h>
 #include "defs.h"
 #include "ralink.h"
 #include "ra_ioctl.h"			/*new switch address define*/

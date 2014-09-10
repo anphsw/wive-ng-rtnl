@@ -4,7 +4,7 @@
  *
  */
 
-#include <linux/config.h>
+#include <linux/autoconf.h>
 
 #ifndef	RALINK_ESW_MIB
 #define	RALINK_ESW_MIB

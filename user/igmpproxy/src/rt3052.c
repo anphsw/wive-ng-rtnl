@@ -42,7 +42,7 @@
 
 //#define DEBUG_RT
 
-#include "linux/config.h"
+#include <linux/autoconf.h>
 
 #include "defs.h"
 

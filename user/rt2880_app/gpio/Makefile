@@ -1,5 +1,6 @@
 EXEC = gpio
-CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/include
+
+CFLAGS += -I$(ROOTDIR)/$(LINUXDIR) -I$(ROOTDIR)/$(LINUXDIR)/include
 
 all: $(EXEC)
 
