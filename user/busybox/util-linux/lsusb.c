@@ -28,8 +28,9 @@ static int FAST_FUNC fileAction(
 	free(uevent_filename);
 
 	while (config_read(parser, tokens, 6, 1, "\\/=", PARSE_NORMAL)) {
-		if ((parser->lineno == 1) && strcmp(tokens[0], "DEVTYPE") == 0) {
-			break;
+		if (strcmp(tokens[0], "DRIVER") == 0) {
+			if (strcmp(tokens[1], "usb") != 0)
+				break;
 		}
 
 		if (strcmp(tokens[0], "DEVICE") == 0) {
