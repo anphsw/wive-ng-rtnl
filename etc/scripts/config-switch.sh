@@ -307,7 +307,7 @@ if [ "$CONFIG_RT_3052_ESW" != "" ] && [ "$SWITCH_MODE" != "" ]; then
 	switch reg w e4 $DOUBLE_TAG
     fi
 ##############################################################################
-# VTSS OR RTL8367M external switch dual phy mode
+# RTL8367M external switch dual phy mode
 ##############################################################################
 elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" != "" ]; then
     SWITCH_MODE=1
@@ -315,12 +315,9 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" != "" ]; the
     if [ "$CONFIG_RTL8367M" != "" ]; then
 	$LOG '##### config switch partition (RTL DUAL PHY) #####'
 	esw_rtl8367_config
-    else
-	$LOG '######## clear switch partition (VTTS DUAL_PHY) ########'
-	/etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
     fi
 ##############################################################################
-# VTSS OR RTL8367M external switch one phy mode
+# RTL8367M external switch one phy mode
 ##############################################################################
 elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" = "" ]; then
     SWITCH_MODE=1
@@ -329,32 +326,6 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" = "" ]; then
     if [ "$CONFIG_RTL8367M" != "" ]; then
 	$LOG '##### config vlan partition (RTL ONE PHY) #####'
 	esw_rtl8367_config
-    else
-	$LOG '##### clear switch partition (VTTS ONE_PHY) ########'
-	/etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
-	$LOG '##### config vlan partition (VTTS ONE_PHY)  ########'
-	/etc/scripts/config-vlan.sh $SWITCH_MODE 1 > /dev/null 2>&1
-    fi
-##############################################################################
-# IC+ external switch
-##############################################################################
-elif [ "$CONFIG_RAETH_ROUTER" != "" ]; then
-    SWITCH_MODE=0
-    configs_system_vlans
-    ##########################################################################
-    $LOG '######## clear switch partition  ########'
-    /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
-    ##########################################################################
-    # In gate mode and hotspot mode configure vlans
-    ##########################################################################
-    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
-	if [ "$wan_port" = "0" ]; then
-	    $LOG '##### IC+ config vlan partition (WLLLL) #####'
-	    /etc/scripts/config-vlan.sh $SWITCH_MODE WLLLL > /dev/null 2>&1
-	else
-	    $LOG '##### IC+ config vlan partition (LLLLW) #####'
-	    /etc/scripts/config-vlan.sh $SWITCH_MODE LLLLW > /dev/null 2>&1
-	fi
     fi
 fi
 
