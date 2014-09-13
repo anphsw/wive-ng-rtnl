@@ -10,11 +10,6 @@
 
 usage() {
 	echo "Usage:"
-	echo "  $0 0 0 - restore IC+ to no VLAN partition"
-	echo "  $0 0 LLLLW - config IC+ with VLAN and WAN at port 4"
-	echo "  $0 0 WLLLL - config IC+ with VLAN and WAN at port 0"
-	echo "  $0 1 0 - restore Vtss to no VLAN partition"
-	echo "  $0 1 1 - config Vtss with VLAN partition"
 	echo "  $0 2 0 - restore RT3052 to no VLAN partition"
 	echo "  $0 2 EEEEE - config RT3052 Enable all ports 100FD"
 	echo "  $0 2 DDDDD - config RT3052 Disable all ports"
@@ -233,105 +228,6 @@ reinit_all_phys() {
 	reset_all_phys
 }
 
-config175C() {
-	mii_mgr -s -p 29 -r 23 -v 0x07c2
-	mii_mgr -s -p 29 -r 22 -v 0x8420
-
-	if [ "$1" = "LLLLW" ]; then
-		mii_mgr -s -p 29 -r 24 -v 0x1
-		mii_mgr -s -p 29 -r 25 -v 0x1
-		mii_mgr -s -p 29 -r 26 -v 0x1
-		mii_mgr -s -p 29 -r 27 -v 0x1
-		mii_mgr -s -p 29 -r 28 -v 0x2
-		mii_mgr -s -p 30 -r 9 -v 0x1089
-		mii_mgr -s -p 30 -r 1 -v 0x2f00
-		mii_mgr -s -p 30 -r 2 -v 0x0030
-	elif [ "$1" = "WLLLL" ]; then
-		mii_mgr -s -p 29 -r 24 -v 0x2
-		mii_mgr -s -p 29 -r 25 -v 0x1
-		mii_mgr -s -p 29 -r 26 -v 0x1
-		mii_mgr -s -p 29 -r 27 -v 0x1
-		mii_mgr -s -p 29 -r 28 -v 0x1
-		mii_mgr -s -p 30 -r 9 -v 0x0189
-		mii_mgr -s -p 30 -r 1 -v 0x3e00
-		mii_mgr -s -p 30 -r 2 -v 0x0021
-	else
-		echo "LAN WAN layout $0 is not suported"
-	fi
-}
-
-restore175C() {
-	mii_mgr -s -p 29 -r 23 -v 0x0
-	mii_mgr -s -p 29 -r 22 -v 0x420
-	mii_mgr -s -p 29 -r 24 -v 0x1
-	mii_mgr -s -p 29 -r 25 -v 0x1
-	mii_mgr -s -p 29 -r 26 -v 0x1
-	mii_mgr -s -p 29 -r 27 -v 0x1
-	mii_mgr -s -p 29 -r 27 -v 0x2
-	mii_mgr -s -p 30 -r 9 -v 0x1001
-	mii_mgr -s -p 30 -r 1 -v 0x2f3f
-	mii_mgr -s -p 30 -r 2 -v 0x3f30
-}
-
-restore175D() {
-	mii_mgr -s -p 20 -r  4 -v 0xa000
-	mii_mgr -s -p 20 -r 13 -v 0x20
-	mii_mgr -s -p 21 -r  1 -v 0x1800
-	mii_mgr -s -p 22 -r  0 -v 0x0
-	mii_mgr -s -p 22 -r  2 -v 0x0
-	mii_mgr -s -p 22 -r 10 -v 0x0
-	mii_mgr -s -p 22 -r 14 -v 0x1
-	mii_mgr -s -p 22 -r 15 -v 0x2
-	mii_mgr -s -p 23 -r  8 -v 0x0
-	mii_mgr -s -p 23 -r 16 -v 0x0
-
-	mii_mgr -s -p 22 -r 4 -v 0x1
-	mii_mgr -s -p 22 -r 5 -v 0x1
-	mii_mgr -s -p 22 -r 6 -v 0x1
-	mii_mgr -s -p 22 -r 7 -v 0x1
-	mii_mgr -s -p 22 -r 8 -v 0x1
-	mii_mgr -s -p 23 -r 0 -v 0x3f3f
-}
-
-config175D() {
-	mii_mgr -s -p 20 -r  4 -v 0xa000
-	mii_mgr -s -p 20 -r 13 -v 0x21
-	mii_mgr -s -p 21 -r  1 -v 0x1800
-	mii_mgr -s -p 22 -r  0 -v 0x27ff
-	mii_mgr -s -p 22 -r  2 -v 0x20
-	mii_mgr -s -p 22 -r  3 -v 0x8100
-	mii_mgr -s -p 22 -r 10 -v 0x3
-	mii_mgr -s -p 22 -r 14 -v 0x1001
-	mii_mgr -s -p 22 -r 15 -v 0x2002
-	mii_mgr -s -p 23 -r  8 -v 0x2020
-	mii_mgr -s -p 23 -r 16 -v 0x1f1f
-	if [ "$1" = "LLLLW" ]; then
-		mii_mgr -s -p 22 -r 4 -v 0x1
-		mii_mgr -s -p 22 -r 5 -v 0x1
-		mii_mgr -s -p 22 -r 6 -v 0x1
-		mii_mgr -s -p 22 -r 7 -v 0x1
-		mii_mgr -s -p 22 -r 8 -v 0x2
-		mii_mgr -s -p 23 -r 0 -v 0x302f
-	elif [ "$1" = "WLLLL" ]; then
-		mii_mgr -s -p 22 -r 4 -v 0x2
-		mii_mgr -s -p 22 -r 5 -v 0x1
-		mii_mgr -s -p 22 -r 6 -v 0x1
-		mii_mgr -s -p 22 -r 7 -v 0x1
-		mii_mgr -s -p 22 -r 8 -v 0x1
-		mii_mgr -s -p 23 -r 0 -v 0x213e
-	else
-		echo "LAN WAN layout $0 is not suported"
-	fi
-}
-
-configVtss() {
-	spicmd vtss vlan
-}
-
-restoreVtss() {
-	spicmd vtss novlan
-}
-
 config6855Esw()
 {
 	#LAN/WAN ports as security mode
@@ -477,43 +373,7 @@ restore6855Esw()
 	switch clear
 }
 
-if [ "$1" = "0" ]; then
-	SWITCH_MODE=0
-	# isc is used to distinguish between 175C and 175D
-	isc=`mii_mgr -g -p 29 -r 31`
-	if [ "$2" = "0" ]; then
-		if [ "$isc" = "Get: phy[29].reg[31] = 175c" ]; then
-			restore175C
-		else
-			restore175D
-		fi
-	elif [ "$2" = "LLLLW" ]; then
-		if [ "$isc" = "Get: phy[29].reg[31] = 175c" ]; then
-			config175C "LLLLW"
-		else
-			config175D "LLLLW"
-		fi
-	elif [ "$2" = "WLLLL" ]; then
-		if [ "$isc" = "Get: phy[29].reg[31] = 175c" ]; then
-			config175C "WLLLL"
-		else
-			config175D "WLLLL"
-		fi
-	else
-		echo ">>> unknown vlan type $2 <<<"
-		usage "$0"
-	fi
-elif [ "$1" = "1" ]; then
-	SWITCH_MODE=1
-	if [ "$2" = "0" ]; then
-		restoreVtss
-	elif [ "$2" = "1" ]; then
-		configVtss
-	else
-		echo ">>> unknown vlan type $2 <<<"
-		usage "$0"
-	fi
-elif [ "$1" = "2" ]; then
+if [ "$1" = "2" ]; then
 	SWITCH_MODE=2
 	if [ "$2" = "0" ]; then
 		restoreEsw
