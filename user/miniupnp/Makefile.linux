@@ -50,7 +50,7 @@ BASEOBJS = miniupnpd.o upnphttp.o upnpdescgen.o upnpsoap.o \
            upnpevents.o upnputils.o getconnstatus.o \
            upnppinhole.o pcplearndscp.o asyncsendto.o
 
-LNXOBJS = linux/getifstats.o linux/ifacewatcher.o linux/getroute.o
+LNXOBJS = linux/getifstats.o linux/ifacewatcher.o
 NETFILTEROBJS = netfilter/iptcrdr.o netfilter/iptpinhole.o netfilter/nfct_get.o
 
 ALLOBJS = $(BASEOBJS) $(LNXOBJS) $(NETFILTEROBJS)
@@ -98,7 +98,7 @@ TEST := $(shell [ \( \( $(IPTABLESVERSION1) -ge 1 \) -a \( $(IPTABLESVERSION2) -
 ifeq ($(TEST), 1)
 CFLAGS := $(CFLAGS) -DIPTABLES_143
 # the following sucks, but works
-LIBS = $(IPTABLESPATH)/libiptc/.libs/libip4tc.o
+LIBS = $(IPTABLESPATH)/libiptc/libip4tc.o
 #LIBS = $(IPTABLESPATH)/libiptc/.libs/libiptc.a
 else # ifeq ($(TEST), 1)
 LIBS = $(IPTABLESPATH)/libiptc/libiptc.a
@@ -151,7 +151,7 @@ TESTUPNPDESCGENOBJS = testupnpdescgen.o upnpdescgen.o
 
 EXECUTABLES = miniupnpd testupnpdescgen testgetifstats \
               testupnppermissions miniupnpdctl testgetifaddr \
-              testgetroute testasyncsendto testportinuse
+              testasyncsendto testportinuse
 
 .PHONY:	all clean install depend genuuid
 
@@ -162,7 +162,7 @@ clean:
 	$(RM) $(EXECUTABLES)
 	$(RM) testupnpdescgen.o testgetifstats.o
 	$(RM) testupnppermissions.o testgetifaddr.o
-	$(RM) testgetroute.o testasyncsendto.o
+	$(RM) testasyncsendto.o
 	$(RM) miniupnpdctl.o
 	$(RM) -r filesystem
 
@@ -209,10 +209,7 @@ testupnppermissions:	testupnppermissions.o upnppermissions.o
 
 testgetifaddr:	testgetifaddr.o getifaddr.o
 
-testgetroute:	testgetroute.o linux/getroute.o upnputils.o $(LIBS)
-
-testasyncsendto:	testasyncsendto.o asyncsendto.o upnputils.o \
-	linux/getroute.o $(LIBS)
+testasyncsendto:	testasyncsendto.o asyncsendto.o upnputils.o $(LIBS)
 
 testportinuse:	testportinuse.o portinuse.o getifaddr.o \
 	netfilter/iptcrdr.o $(LIBS)
@@ -226,7 +223,7 @@ depend:	config.h
 	makedepend -f$(MAKEFILE_LIST) -Y \
 	$(ALLOBJS:.o=.c) $(TESTUPNPDESCGENOBJS:.o=.c) \
 	testgetifstats.c testupnppermissions.c testgetifaddr.c \
-	testgetroute.c testasyncsendto.c testportinuse.c \
+	testasyncsendto.c testportinuse.c \
 	miniupnpdctl.c 2>/dev/null
 
 # DO NOT DELETE
@@ -285,7 +282,6 @@ linux/getifstats.o: config.h getifstats.h
 linux/ifacewatcher.o: config.h ifacewatcher.h config.h minissdp.h
 linux/ifacewatcher.o: miniupnpdtypes.h getifaddr.h upnpglobalvars.h
 linux/ifacewatcher.o: upnppermissions.h natpmp.h
-linux/getroute.o: getroute.h upnputils.h
 netfilter/iptcrdr.o: macros.h config.h netfilter/iptcrdr.h commonrdr.h
 netfilter/iptcrdr.o: config.h upnpglobalvars.h upnppermissions.h
 netfilter/iptcrdr.o: miniupnpdtypes.h
@@ -299,8 +295,6 @@ upnpdescgen.o: miniupnpdtypes.h upnpdescstrings.h upnpurns.h getconnstatus.h
 testgetifstats.o: getifstats.h
 testupnppermissions.o: upnppermissions.h config.h
 testgetifaddr.o: config.h getifaddr.h
-testgetroute.o: getroute.h upnputils.h upnpglobalvars.h upnppermissions.h
-testgetroute.o: config.h miniupnpdtypes.h
 testasyncsendto.o: miniupnpdtypes.h config.h upnputils.h asyncsendto.h
 testportinuse.o: macros.h config.h portinuse.h
 miniupnpdctl.o: macros.h

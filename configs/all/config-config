@@ -26,7 +26,7 @@ CONFIG_LIB_FLEX=y
 # CONFIG_LIB_ICONV is not set
 # CONFIG_LIB_NET is not set
 # CONFIG_LIB_NL is not set
-CONFIG_LIB_NFNETLINK=y
+# CONFIG_LIB_NFNETLINK is not set
 # CONFIG_LIB_UPNP is not set
 
 #

@@ -101,9 +101,6 @@ bool 'Cisco Discovery Protocol'			CONFIG_USER_CDP
 bool 'Link Layer Topology Discovery Protocol'	CONFIG_USER_LLTD
 bool 'rt2860apd (802.1x Authenticator)'		CONFIG_USER_802_1X
 bool 'wscd (WSC/WPS)'				CONFIG_USER_WSC
-if [ "$CONFIG_USER_MINIUPNPD" = "y" ]; then
-	define_bool CONFIG_LIB_NFNETLINK y
-fi
 if [ "$CONFIG_USER_WSC" = "y" ]; then
 	define_bool CONFIG_LIB_LIBPTHREAD_FORCE y
 	define_bool CONFIG_LIB_UPNP y
