@@ -76,7 +76,7 @@ function setLanguage()
               <!-- added by initValue -->
             </select>
             &nbsp;&nbsp;
-	    <input type="hidden" name="submit-url" value="/home.asp" >
+	    <input type="hidden" name="submit-url" value="/overview.asp" >
             <input type="submit" style="{width:50px;}" value="Apply" id="ovLangApply" onClick="return setLanguage()">
           </fieldset>
         </blockquote>
