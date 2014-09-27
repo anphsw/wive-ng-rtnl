@@ -52,18 +52,23 @@
 #define LOG_MAX 5 /* log-queue length */
 #define RANDFILE "/dev/urandom"
 
-/* DBUS interface specifics */
 #define DNSMASQ_SERVICE "uk.org.thekelleys.dnsmasq" /* Default - may be overridden by config */
 #define DNSMASQ_PATH "/uk/org/thekelleys/dnsmasq"
 #define AUTH_TTL 600 /* default TTL for auth DNS */
 #define SOA_REFRESH 1200 /* SOA refresh default */
 #define SOA_RETRY 180 /* SOA retry default */
 #define SOA_EXPIRY 1209600 /* SOA expiry default */
-#define RA_INTERVAL 600 /* Send unsolicited RA's this often when not provoked. */
+#define LOOP_TEST_DOMAIN "test" /* domain for loop testing, "test" is reserved by RFC 2606 and won't therefore clash */
+#define LOOP_TEST_TYPE T_TXT
 
 /* Follows system specific switches. If you run on a
    new system, you may want to edit these.
    May replace this with Autoconf one day.
+
+NO_NETTLE_ECC
+   Don't include the ECDSA cypher in DNSSEC validation. Needed for older Nettle versions.
+NO_GMP
+   Don't use and link against libgmp, Useful if nettle is built with --enable-mini-gmp.
 
 HAVE_LINUX_NETWORK
 HAVE_BSD_NETWORK
@@ -109,6 +114,12 @@ HAVE_IPSET
 HAVE_AUTH
    define this to include the facility to act as an authoritative DNS
    server for one or more zones.
+
+HAVE_DNSSEC
+   include DNSSEC validator.
+
+HAVE_LOOP
+   include functionality to probe for and remove DNS forwarding loops.
 
 NOTES:
    For Linux you should define
@@ -304,8 +315,12 @@ NOTES:
 #undef HAVE_AUTH
 #endif
 
-#if defined(NO_IPSET) || !defined(HAVE_LINUX_NETWORK)
+#if defined(NO_IPSET)
 #undef HAVE_IPSET
+#endif
+
+#ifdef NO_LOOP
+#undef HAVE_LOOP
 #endif
 
 /* Define a string indicating which options are in use.
@@ -377,7 +392,10 @@ static char *compile_opts =
 #ifndef HAVE_DNSSEC
 "no-"
 #endif
-"DNSSEC";
-
+"DNSSEC "
+#ifndef HAVE_LOOP
+"no-"
+#endif
+"loop-detect";
 
 #endif

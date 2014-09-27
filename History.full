@@ -1986,7 +1986,7 @@
 23) dropbear: update to 2014.65.<br>
 24) dropbear: fix keepalive.<br>
 25) base_system: backports from new sdk for support MT7620 (process non end now).<br>
-26) dnsmasq: fix a race condition possibly leading to lockup.<br>
+26) dnsmasq: update to 2.72 version.<br>
 27) goahead: fix handle reset/wps buttons.<br>
 28) miniupnpd: up to 1.8.20140906 version.<br>
 29) system: replace ip tool from busybox to iproute2 version (need for 6rd tunnels based acess ipv6 support).<br>

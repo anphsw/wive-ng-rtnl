@@ -674,6 +674,7 @@ int enumerate_interfaces(int reset)
     }
   
   errno = errsave;
+
   spare = param.spare;
 
   return ret;
@@ -1297,8 +1298,14 @@ void mark_servers(int flag)
 
   /* mark everything with argument flag */
   for (serv = daemon->servers; serv; serv = serv->next)
+    {
     if (serv->flags & flag)
       serv->flags |= SERV_MARK;
+#ifdef HAVE_LOOP
+      /* Give looped servers another chance */
+      serv->flags &= ~SERV_LOOP;
+#endif
+    }
 }
 
 void cleanup_servers(void)
@@ -1320,6 +1327,11 @@ void cleanup_servers(void)
       else 
        up = &serv->next;
     }
+
+#ifdef HAVE_LOOP
+  /* Now we have a new set of servers, test for loops. */
+  loop_send_probes();
+#endif
 }
 
 void add_update_server(int flags,
@@ -1385,6 +1397,9 @@ void add_update_server(int flags,
       serv->domain = domain_str;
       serv->next = next;
       serv->queries = serv->failed_queries = 0;
+#ifdef HAVE_LOOP
+      serv->uid = rand32();
+#endif      
       
       if (domain)
 	serv->flags |= SERV_HAS_DOMAIN;
@@ -1464,6 +1479,10 @@ void check_servers(void)
 	      else if (!(serv->flags & SERV_LITERAL_ADDRESS))
 		my_syslog(LOG_INFO, _("using nameserver %s#%d for %s %s"), daemon->namebuff, port, s1, s2);
 	    }
+#ifdef HAVE_LOOP
+	  else if (serv->flags & SERV_LOOP)
+	    my_syslog(LOG_INFO, _("NOT using nameserver %s#%d - query loop detected"), daemon->namebuff, port); 
+#endif
 	  else if (serv->interface[0] != 0)
 	    my_syslog(LOG_INFO, _("using nameserver %s#%d(via %s)"), daemon->namebuff, port, serv->interface); 
 	  else
@@ -1559,7 +1578,6 @@ int reload_servers(char *fname)
   return gotone;
 }
 
-#if defined(HAVE_LINUX_NETWORK) || defined(HAVE_BSD_NETWORK)
 /* Called when addresses are added or deleted from an interface */
 void newaddress(time_t now)
 {
@@ -1584,7 +1602,6 @@ void newaddress(time_t now)
 #endif
 }
 
-#endif
 
 
 
