@@ -25,7 +25,7 @@ HTARGET=mipsel-linux
 CONFOPTS="--host=$HTARGET --target=$HTARGET --build=$HBUILD"
 
 CONFOPTS="$CONFOPTS --without-ssl --disable-debug --disable-curldebug --disable-manual --without-random"
-CONFOPTS="$CONFOPTS --disable-dependency-tracking --disable-verbose --disable-rtsp --disable-ipv6"
+CONFOPTS="$CONFOPTS --disable-dependency-tracking --disable-verbose --disable-rtsp"
 CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem"
 CFLAGS="-Os"
 CPPFLAGS="$BACKUPCFLAGS -I$ZLIB -I$LIBSSL"
