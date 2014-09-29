@@ -23,22 +23,13 @@ if [ "$1" = "" ]; then
     #MODE=RT5350-1T1R
     #MODE=RT3350-1T1R
     #MODE=RT3050-1T1R
-    #MODE=MT7620-2T2R
-    #MODE=MT7620-2T2R-8M
-    #MODE=MT7620-2T2R-USB-8M
 else
     MODE=$1
 fi
 
 #------------------------------------#
 #WR-N for full and WR-NL for ligth HW
-if [ "$MODE" = "MT7620-2T2R-USB-8M" ]; then
-    DEVNAME="Wive_WR-300NM8U"
-elif [ "$MODE" = "MT7620-2T2R-8M" ]; then
-    DEVNAME="Wive_WR-300NM8"
-elif [ "$MODE" = "MT7620-2T2R" ]; then
-    DEVNAME="Wive_WR-300NM"
-elif [ "$MODE" = "RT3662-2T2R-5G-USB" ]; then
+if [ "$MODE" = "RT3662-2T2R-5G-USB" ]; then
     DEVNAME="Wive_WR-300NU"
 elif [ "$MODE" = "RT3052-2T2R-USB" ]; then
     DEVNAME="Wive_WR-300NU"
@@ -133,21 +124,6 @@ elif [ "$MODE" = "RT3662-2T2R-5G-USB" ] ; then
     cp -fv $ROOTDIR/configs/kernel/config-kernel-RT3662-2T2R-5G-USB-8M	$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-busybox-USB-8M			$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-config-5G-USB-8M			$ROOTDIR/config/.config
-    cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
-elif [ "$MODE" = "MT7620-2T2R" ] ; then
-    cp -fv $ROOTDIR/configs/kernel/config-kernel-MT7620-2T2R		$ROOTDIR/linux/.config
-    cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
-    cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/config/.config
-    cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
-elif [ "$MODE" = "MT7620-2T2R-8M" ] ; then
-    cp -fv $ROOTDIR/configs/kernel/config-kernel-MT7620-2T2R-8M		$ROOTDIR/linux/.config
-    cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
-    cp -fv $ROOTDIR/configs/all/config-config-8M			$ROOTDIR/config/.config
-    cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
-elif [ "$MODE" = "MT7620-2T2R-USB-8M" ] ; then
-    cp -fv $ROOTDIR/configs/kernel/config-kernel-MT7620-2T2R-USB-8M	$ROOTDIR/linux/.config
-    cp -fv $ROOTDIR/configs/all/config-busybox-USB-8M			$ROOTDIR/user/busybox/.config
-    cp -fv $ROOTDIR/configs/all/config-config-USB-8M			$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
 else
     echo "Config files not found."
