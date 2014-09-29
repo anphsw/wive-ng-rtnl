@@ -2041,6 +2041,11 @@
 78) kernel: net_sched: avoid generating same handle for u32 filters.<br>
 79) kernel: inet: fix possible memory corruption with UDP_CORK and UFO.<br>
 80) kernel: ip: fix possible crashes in ip*_cork_release().<br>
+
+<br>
+<b>4.11.x</b><br>
+1) curl: transmission: disable ipv6 by default (avoid kernel panic on some installations).<br>
+
 <br>
 <br>
 <br>
