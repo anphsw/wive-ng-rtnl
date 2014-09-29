@@ -343,6 +343,7 @@
 1) curl: transmission: disable ipv6 by default (avoid kernel panic on some installations).<br>
 2) usb: fix double modem init.<br>
 3) hw_nat: update to 2.51 version.<br>
+4) kernel: spi: add more flash support.<br>
 <br>
 <br>
 <br>
