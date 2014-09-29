@@ -161,9 +161,16 @@ ioctl_err:
 	return;
 }
 
-static void fs_nvram_reset_handler (int signum)
+#ifndef CONFIG_USER_WSC
+static void short_reset_handler (int signum)
 {
-	printf("fs_nvram_reset_handler: load nvram default and restore original rwfs...");
+	printf("short_reset_handler: nothing...");
+}
+#endif
+
+static void long_reset_handler (int signum)
+{
+	printf("long_reset_handler: load nvram default and restore original rwfs...");
 
         system("fs nvramreset");
         system("fs restore");
@@ -177,9 +184,12 @@ static void InitSignals(int helper)
 #ifdef CONFIG_USER_WSC
 	    /* call helper to switch to listen wsc mode */
 	    signal(SIGUSR1, goaSigHandler);
+#else
+	    /* stub */
+	    signal(SIGUSR1, short_reset_handler);
 #endif
 	    /* write defaults to flash and reboot */
-	    signal(SIGUSR2, fs_nvram_reset_handler);
+	    signal(SIGUSR2, long_reset_handler);
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	} else {
 	    signal(SIGUSR1, goaSigWPSHlpr);

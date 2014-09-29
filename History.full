@@ -2048,6 +2048,7 @@
 2) usb: fix double modem init.<br>
 3) hw_nat: update to 2.51 version.<br>
 4) kernel: spi: add more flash support.<br>
+5) goahead: fix regression crash at short reset press.<br>
 <br>
 <br>
 <br>
