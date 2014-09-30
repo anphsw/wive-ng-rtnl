@@ -369,7 +369,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 				len -= rc;
 			}
 		}
-		rc = snprintf(pos, len, "-j MASQUERADE > /dev/null 2>&1\n");
+		rc = snprintf(pos, len, "-j MASQUERADE\n");
 		pos += rc;
 		len -= rc;
 	}
@@ -504,7 +504,7 @@ static void makePortForwardRuleVPN(char *buf, int len, char *wan_name, char *ip_
 				len -= rc;
 			}
 		}
-		rc = snprintf(pos, len, "-j MASQUERADE > /dev/null 2>&1\n");
+		rc = snprintf(pos, len, "-j MASQUERADE\n");
 		pos += rc;
 		len -= rc;
 	}
