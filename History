@@ -345,6 +345,7 @@
 3) hw_nat: update to 2.51 version.<br>
 4) kernel: spi: add more flash support.<br>
 5) goahead: fix regression crash at short reset press.<br>
+6) kenrel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
 <br>
 <br>
 <br>
