@@ -187,6 +187,10 @@ ifeq ($(RALINK_DUAL_CORE_FUN),y)
 CPPFLAGS += -DRALINK_DUAL_CORE_FUN
 endif
 
+ifeq ($(RALINK_DUAL_VPE_FUN),y)
+CPPFLAGS += -DRALINK_DUAL_VPE_FUN
+endif
+
 ifeq ($(RALINK_DDR_CONTROLLER_OPTIMIZATION),ON)
 CPPFLAGS += -DRALINK_DDR_OPTIMIZATION
 endif
@@ -226,7 +230,7 @@ endif
 endif
 
 ifeq ($(MT7621_MP),y)
-CPPFLAGS += -EL -mmt
+CPPFLAGS += -EL -mmt -mips32r2
 else
 CPPFLAGS += -march=4kc -mtune=4kc
 endif
@@ -237,6 +241,10 @@ endif
 
 ifeq ($(RALINK_NAND_UPGRADE_CHECK),ON)
 CPPFLAGS += -DRALINK_NAND_UPGRADE_CHECK
+endif
+
+ifeq ($(RALINK_HTTP_UPGRADE_FUN),ON)
+CPPFLAGS += -DRALINK_HTTP_UPGRADE_FUN
 endif
 
 ifeq ($(RALINK_RW_RF_REG_FUN),ON)
@@ -748,6 +756,11 @@ endif
 
 AFLAGS_DEBUG := -Wa,-gstabs
 AFLAGS := $(AFLAGS_DEBUG) -D__ASSEMBLY__ $(CPPFLAGS)
+
+ifeq ($(MT7621_MP), y)
+CFLAGS += -fpic
+AFLAGS += -fno-pic
+endif
 
 LDFLAGS += -Bstatic -T $(LDSCRIPT) -Ttext $(TEXT_BASE) $(PLATFORM_LDFLAGS)
 

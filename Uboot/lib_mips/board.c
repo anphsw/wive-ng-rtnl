@@ -610,7 +610,7 @@ void board_init_f(ulong bootflag)
 #elif defined MT7621_ASIC_BOARD
 	value = le32_to_cpu(*(volatile u_long *)(RALINK_SPI_BASE + 0x3c));
 	value &= ~(0xFFF);
-	value |= 5; //work-around 3-wire SPI issue (3 for RFB, 5 for EVB)
+	value |= 7; //work-around 3-wire SPI issue (3 for RFB, 5 for EVB)
 	*(volatile u_long *)(RALINK_SPI_BASE + 0x3c) = cpu_to_le32(value);	
 #elif  defined MT7628_ASIC_BOARD
 	value = le32_to_cpu(*(volatile u_long *)(RALINK_SPI_BASE + 0x3c));

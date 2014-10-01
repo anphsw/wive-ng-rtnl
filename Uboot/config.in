@@ -1291,6 +1291,7 @@ choice 'DDR Component' "512Mb  ON_BOARD_512M_DRAM_COMPONENT  \
 			" 1024Mb
 
 choice 'DRAM Speed'    "1200Mhz MT7621_DDR_1200MHZ \
+			1066Mhz MT7621_DDR_1066MHZ \
 			800Mhz MT7621_DDR_800MHZ \
 			400Mhz MT7621_DDR_400MHZ
 			"800Mhz
@@ -1303,11 +1304,14 @@ choice 'DRAM Speed'    "1200Mhz MT7621_DDR_1200MHZ \
 if [ "$MT7621_DDR_1200MHZ" = "y" ]; then
     define_hex  MT7621_DDR_SPEED    11
 fi
-if [ "$MT7621_DDR_800MHZ" = "y" ]; then
+if [ "$MT7621_DDR_1066MHZ" = "y" ]; then
     define_hex  MT7621_DDR_SPEED    21
 fi
-if [ "$MT7621_DDR_400MHZ" = "y" ]; then
+if [ "$MT7621_DDR_800MHZ" = "y" ]; then
     define_hex  MT7621_DDR_SPEED    31
+fi
+if [ "$MT7621_DDR_400MHZ" = "y" ]; then
+    define_hex  MT7621_DDR_SPEED    41
 fi
 
 choice 'CPU Frequency' " 880Mhz MT7621_CPU_880MHZ \
@@ -1350,6 +1354,7 @@ fi
 
 bool "Dual Image" DUAL_IMAGE_SUPPORT
 bool "Dual Core Support" RALINK_DUAL_CORE_FUN
+define_bool RALINK_DUAL_VPE_FUN	y
 
 bool "Partition LAN/WAN" LAN_WAN_PARTITION
 if [ "$LAN_WAN_PARTITION" = "y" ]; then
@@ -1365,8 +1370,10 @@ choice 'DDR Chip' "\
 	DDR3_Default(2Gb) DEFAULT_DDR3_2048M \
 	DDR3_Default(4Gb) DEFAULT_DDR3_4096M \
 	DDR2_Default(512Mb) DEFAULT_DDR2_512M \
+	DDR2_W9751G6KB(512Mb) W9751G6KB_A02_DDR2_512M \
 	DDR2_Default(1Gb) DEFAULT_DDR2_1024M \
-	DDR2_W971GG6KB(1Gb) W971GG6KB_DDR2_1024M"
+	DDR2_W971GG6KB25(1Gb) W971GG6KB25_DDR2_800_1024M \
+	DDR2_1066_W971GG6KB18(1Gb) W971GG6KB18_DDR2_1066_1024M"
 
 if [ "$DEFAULT_DDR3_1024M" = "y" ]; then
 define_string DDR_CHIP DEFAULT_DDR3_1024M
@@ -1380,8 +1387,14 @@ fi
 if [ "$DEFAULT_DDR2_512M" = "y" ]; then
 define_string DDR_CHIP DEFAULT_DDR2_512M
 fi
-if [ "$W971GG6KB_DDR2_1024M" = "y" ]; then
-define_string DDR_CHIP W971GG6KB_DDR2_1024M
+if [ "$W9751G6KB_A02_DDR2_512M" = "y" ]; then
+define_string DDR_CHIP W9751G6KB_A02_DDR2_512M
+fi
+if [ "$W971GG6KB25_DDR2_800_1024M" = "y" ]; then
+define_string DDR_CHIP W971GG6KB25_DDR2_800_1024M
+fi
+if [ "$W971GG6KB18_DDR2_1066_1024M" = "y" ]; then
+define_string DDR_CHIP W971GG6KB18_DDR2_1066_1024M
 fi
 if [ "$DEFAULT_DDR2_1024M" = "y" ]; then
 define_string DDR_CHIP DEFAULT_DDR2_1024M

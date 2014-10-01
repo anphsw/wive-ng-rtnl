@@ -341,20 +341,20 @@ endif
 		@echo "===============<<IMPORTANT>>=================="
 ifeq ($(ON_BOARD_NAND_FLASH_COMPONENT),y)
 		@echo "Notes:Uboot firmware is uboot.img NOT uboot.bin"
-		rm uboot.bin
+		@rm -f uboot.bin
 endif
 ifeq ($(ON_BOARD_NOR_FLASH_COMPONENT),y)
 		@echo "Notes:Uboot firmware is uboot.bin NOT uboot.img"
-		rm uboot.img
+		@rm -f uboot.img
 endif
 ifeq ($(ON_BOARD_SPI_FLASH_COMPONENT),y)
 ifeq ($(UBOOT_ROM),y)
 		@echo "Notes:Uboot firmware is uboot.bin NOT uboot.img"
-		rm uboot.img
+		@rm -f uboot.img
 else
 ifeq ($(UBOOT_RAM),y)
 		@echo "Notes:Uboot firmware in flash is uboot.img NOT uboot.bin"
-		rm uboot.bin
+		@rm -f uboot.bin
 endif
 endif
 endif
