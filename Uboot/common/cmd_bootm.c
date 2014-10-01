@@ -46,6 +46,10 @@
 #include <LzmaDecode.h>
 #endif /* CONFIG_LZMA */
 
+#ifdef CONFIG_XZ
+#include <unxz.h>
+#endif /* CONFIG_XZ */
+
  /*cmd_boot.c*/
 extern int do_reset (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
 
@@ -466,6 +470,21 @@ int do_bootm (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 #endif
                 break;
 #endif /* CONFIG_LZMA */
+#ifdef CONFIG_XZ
+	case IH_COMP_XZ:
+		printf ("   Uncompressing %s ... ", name);
+		i = unxz((unsigned char *)data, len,
+			(unsigned char *)ntohl(hdr->ih_load), &unc_len);
+
+		if (i != 0) {
+			printf ("XZ: uncompress or overwrite error %d "
+				"- must RESET board to recover\n", i);
+			SHOW_BOOT_PROGRESS (-6);
+                        udelay(100000);
+                        do_reset (cmdtp, flag, argc, argv);
+		}
+		break;
+#endif /* CONFIG_XZ */
 	default:
 		/*
 		if (iflag)
@@ -1371,6 +1390,7 @@ print_type (image_header_t *hdr)
 	case IH_COMP_GZIP:	comp = "gzip compressed";	break;
 	case IH_COMP_BZIP2:	comp = "bzip2 compressed";	break;
 	case IH_COMP_LZMA:      comp = "lzma compressed";       break;
+	case IH_COMP_XZ:        comp = "xz compressed";         break;
 	default:		comp = "unknown compression";	break;
 	}
 

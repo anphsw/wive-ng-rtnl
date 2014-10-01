@@ -39,6 +39,10 @@ ifeq ($(CONFIG_LZMA),ON)
 OBJS   += LzmaDecode.o
 endif
 
+ifeq ($(CONFIG_XZ),ON)
+OBJS   += decompress_unxz.o xz_dec_bcj.o xz_dec_lzma2.o xz_dec_stream.o
+endif
+
 $(LIB):	.depend $(OBJS)
 	$(AR) crv $@ $(OBJS)
 

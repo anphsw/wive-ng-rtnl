@@ -70,6 +70,7 @@ RALINK_EPHY_INIT = ON
 CONFIG_GZIP = OFF
 CONFIG_BZIP2 = OFF
 CONFIG_LZMA = ON
+CONFIG_XZ = OFF
 
 ##########################################################################
 
