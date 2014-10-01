@@ -346,6 +346,7 @@
 4) kernel: spi: add more flash support.<br>
 5) goahead: fix regression crash at short reset press.<br>
 6) kenrel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
+7) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
 <br>
 <br>
 <br>

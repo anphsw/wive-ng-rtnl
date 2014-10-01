@@ -435,9 +435,10 @@ static int raspi_cmd(const u8 cmd, const u32 addr, const u8 mode, u8 *buf, const
 	}
 
 	if (spic_busy_wait())
-	{
 		retval = -1;
-	}
+
+	// de-assert CS before change SPIENMODE to HW control
+	ra_or (RT2880_SPICTL_REG, (SPICTL_SPIENA_HIGH));
 	ra_and(RT2880_SPICFG_REG, ~(SPICFG_SPIENMODE | SPICFG_RXENVDIS));
 
 	return retval;
