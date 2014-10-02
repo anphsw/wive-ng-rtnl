@@ -91,14 +91,11 @@
 #define RT_OID_802_11_TX_POWER_LEVEL_1              0x0614
 #define RT_OID_802_11_QUERY_PIDVID                  0x0615
 
-//#if WPA_SUPPLICANT_SUPPORT
 #define OID_SET_COUNTERMEASURES                     0x0616
 #define OID_802_11_SET_IEEE8021X                    0x0617
 #define OID_802_11_SET_IEEE8021X_REQUIRE_KEY        0x0618
 #define OID_802_11_PMKID                            0x0620
-#define RT_OID_WPA_SUPPLICANT_SUPPORT					0x0621
 #define RT_OID_WE_VERSION_COMPILED                  0x0622
-//#endif
 
 //rt2860 , kathy
 #define	RT_OID_802_11_SNR_0							0x0630

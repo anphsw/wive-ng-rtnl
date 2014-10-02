@@ -652,7 +652,7 @@ function displayServiceStatus()
             <td class="title" colspan="5">Others</td>
           </tr>
           <tr>
-            <td class="head">Switch reinit on DHCP lease fail</td>
+            <td class="head">WAN reinit on DHCP lease fail</td>
             <td colspan="4"><select name="dhcpSwReset" class="half">
                 <option value="0">Disable</option>
                 <option value="1">Enable</option>

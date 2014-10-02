@@ -17,8 +17,8 @@
 #include	"oid.h"
 #include	"internet.h"
 #include	"helpers.h"
+#include	"station.h"
 
-static int	getWPASupplicantBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int	getCACLCertList(int eid, webs_t wp, int argc, char_t **argv);
 static int	getKeyCertList(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaAdhocChannel(int eid, webs_t wp, int argc, char_t **argv);
@@ -65,7 +65,6 @@ static int getActiveProfileStatus(int eid, webs_t wp, int argc, char_t **argv);
 
 void formDefineStation(void)
 {
-	websAspDefine(T("getWPASupplicantBuilt"), getWPASupplicantBuilt);
 	websAspDefine(T("getCACLCertList"), getCACLCertList);
 	websAspDefine(T("getKeyCertList"), getKeyCertList);
 	websAspDefine(T("getStaAdhocChannel"), getStaAdhocChannel);
@@ -123,7 +122,6 @@ char    G_staProfileNum = 0;
 NDIS_802_11_SSID        G_SSID;
 unsigned char			G_Bssid[6];
 int        G_ConnectStatus = NdisMediaStateDisconnected;
-unsigned char WpaSupplicant_flag = FALSE;
 
 PAIR_CHANNEL_FREQ_ENTRY ChannelFreqTable[] = {
 	//channel Frequency
@@ -1352,17 +1350,6 @@ void initStaProfile(void)
 	// WPA config
 	PARSE_STR("staWpaPsk", p->WpaPsk); // WpaPsk
 	
-#ifdef WPA_SUPPLICANT_SUPPORT
-	PARSE_INT("sta8021xKeyMgmt", p->KeyMgmt); // 8021xKeyMgmt
-	PARSE_INT("sta8021xEAP", p->EAP); // 8021xEAP
-	PARSE_INT("sta8021xIdentity", p->Identity); // 8021xIdentity
-	PARSE_STR("sta8021xPassword", p->Password); // 8021xPassword
-	PARSE_STR("sta8021xClientCert", p->ClientCert); // 8021xClientCert
-	PARSE_STR("sta8021xPrivateKey", p->PrivateKey); // 8021xPrivateKey
-	PARSE_STR("sta8021xPrivateKeyPassword", p->PrivateKeyPassword); // 8021xPrivateKeyPassword
-	PARSE_STR("sta8021xCACert", p->CACert); // 8021xCACert
-	PARSE_INT("sta8021xTunnel", p->Tunnel); // 8021xTunnel
-#endif
 	// Make some magix
 	for (i=0, p=headerProfileSetting; p != NULL; i++, p=p->Next)
 	{
@@ -1637,13 +1624,6 @@ int PasswordHash(char *password, unsigned char *ssid, int ssidlength, unsigned c
 
 static int getCACLCertList(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef WPA_SUPPLICANT_SUPPORT
-	char *caclcert_file = (char *) nvram_get(CERT_NVRAM, "CACLCertFile");
-
-	if (strlen(caclcert_file) > 0)
-		websWrite(wp, T("<option value=\"%s\">%s</option>"), caclcert_file, caclcert_file);
-	else
-#endif
 		websWrite(wp, T("<option value=\"\"></option>"));
 
 	return 0;
@@ -1651,291 +1631,18 @@ static int getCACLCertList(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getKeyCertList(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef WPA_SUPPLICANT_SUPPORT
-	char *keycert_file = (char *)  nvram_get(CERT_NVRAM, "KeyCertFile");
-
-	if (strlen(keycert_file) > 0)
-		websWrite(wp, T("<option value=\"%s\">%s</option>"), keycert_file, keycert_file);
-	else
-#endif
 		websWrite(wp, T("<option value=\"\"></option>"));
 
 	return 0;
 }
-
-static int getWPASupplicantBuilt(int eid, webs_t wp, int argc, char_t **argv)
-{
-#ifdef WPA_SUPPLICANT_SUPPORT
-	return websWrite(wp, T("1"));
-#else
-	return websWrite(wp, T("0"));
-#endif
-}
-
-#ifdef WPA_SUPPLICANT_SUPPORT
-static void exec_WPASupplicant(char* ssid, NDIS_802_11_WEP_STATUS encryp, NDIS_802_11_AUTHENTICATION_MODE auth, RT_WPA_SUPPLICANT_KEY_MGMT keymgmt, int keyidx, char* wepkey)
-{
-	// auth mode
-	int s, ret;
-	unsigned char wpa_supplicant_support = 2, ieee8021x_support = 1;
-	NDIS_802_11_SSID Ssid;
-
-	system("killall -q wpa_supplicant");
-	sleep(1);
-	system("killall -q -SIGKILL wpa_supplicant");
-	sleep(1);
-
-	//fprintf(stderr, "exec_WPASupplicant()\n");
-	memset(&Ssid, 0x00, sizeof(NDIS_802_11_SSID));
-	strcpy((char *)Ssid.Ssid ,ssid);
-	Ssid.SsidLength = strlen(ssid);
-
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-	if (auth == Ndis802_11AuthMode8021x)
-		auth = Ndis802_11AuthModeOpen;
-
-	if (keymgmt == Rtwpa_supplicantKeyMgmtNONE)
-	{
-		wpa_supplicant_support = 0;
-		ieee8021x_support = 0;
-
-		ret = OidSetInformation(OID_802_11_SET_IEEE8021X, s, "ra0", &ieee8021x_support, sizeof(ieee8021x_support));
-		if (ret < 0) {
-			fprintf(stderr, "Set OID_802_11_SET_IEEE8021X has error =%d, ieee8021x_support=%d\n", ret, ieee8021x_support);
-			close(s);
-			return;
-		}
-
-		ret = OidSetInformation(RT_OID_WPA_SUPPLICANT_SUPPORT, s, "ra0", &wpa_supplicant_support, sizeof(wpa_supplicant_support));
-		if (ret < 0) {
-			fprintf(stderr, "Set RT_OID_WPA_SUPPLICANT_SUPPORT has error =%d, wpa_supplicant_support=%d\n", ret, wpa_supplicant_support);
-			fprintf(stderr, "Please check the driver configuration whether support WAP_SUPPORT!!");
-			close(s);
-			return;
-		}
-	}
-	else
-	{
-		ret = OidSetInformation(OID_802_11_SET_IEEE8021X, s, "ra0", &ieee8021x_support, sizeof(ieee8021x_support));
-		if (ret < 0) {
-			fprintf(stderr, "Set OID_802_11_SET_IEEE8021X has error =%d, ieee8021x_support=%d\n", ret, ieee8021x_support);
-			close(s);
-			return;
-		}
-
-		ret = OidSetInformation(RT_OID_WPA_SUPPLICANT_SUPPORT, s, "ra0", &wpa_supplicant_support, sizeof(wpa_supplicant_support));
-		if (ret < 0) {
-			fprintf(stderr, "Set RT_OID_WPA_SUPPLICANT_SUPPORT has error =%d, wpa_supplicant_support=%d\n", ret, wpa_supplicant_support);
-			fprintf(stderr, "Please check the driver configuration whether support WAP_SUPPORT!!");
-			close(s);
-			return;
-		}
-	}
-
-	ret = OidSetInformation(OID_802_11_AUTHENTICATION_MODE, s, "ra0", &auth, sizeof(auth));
-	if (ret < 0) {
-		fprintf(stderr, "Set OID_802_11_AUTHENTICATION_MODE has error =%d, auth=%d\n", ret, auth);
-		close(s);
-		return;
-	}
-
-	// encryp mode
-	ret = OidSetInformation(OID_802_11_ENCRYPTION_STATUS, s, "ra0", &encryp, sizeof(encryp));
-	if (ret < 0) {
-		fprintf(stderr, "Set OID_802_11_ENCRYPTION_STATUS has error =%d, encry=%d\n", ret, encryp);
-		close(s);
-		return;
-	}
-
-	if (encryp == Ndis802_11WEPEnabled)
-	{
-		PNDIS_802_11_WEP	pWepKey = NULL;
-		unsigned long		lBufLen;
-		int 				nKeyLen;
-
-		nKeyLen = strlen(wepkey);
-		if (nKeyLen == 0)
-		{
-			NDIS_802_11_REMOVE_KEY	removeKey;
-			int j=0;
-			removeKey.Length = sizeof(NDIS_802_11_REMOVE_KEY);
-			removeKey.KeyIndex = keyidx;
-			for (j = 0; j < 6; j++)
-				removeKey.BSSID[j] = 0xff;
-
-			ret = OidSetInformation(OID_802_11_REMOVE_KEY, s, "ra0", &removeKey, removeKey.Length);
-			if (ret < 0)
-				fprintf(stderr, "Set OID_802_11_REMOVE_KEY has error =%d, \n", ret);
-		}
-		else
-		{
-			if (nKeyLen == 10)
-				nKeyLen = 5;
-			else if (nKeyLen == 26)
-				nKeyLen = 13;
-
-			lBufLen = sizeof(NDIS_802_11_WEP) + nKeyLen - 1;
-			// Allocate Resource
-			pWepKey = (PNDIS_802_11_WEP)malloc(lBufLen);
-			pWepKey->Length = lBufLen;
-			pWepKey->KeyLength = nKeyLen;
-			pWepKey->KeyIndex = keyidx;
-
-			if (keyidx == 1)
-				pWepKey->KeyIndex |= 0x80000000;
-
-			if (strlen(wepkey) == 5)
-				memcpy(pWepKey->KeyMaterial, wepkey, 5);
-			else if (strlen(wepkey) == 10)
-				AtoH(wepkey, pWepKey->KeyMaterial, 5);
-			else if (strlen(wepkey) == 13)
-				memcpy(pWepKey->KeyMaterial, wepkey, 13);
-			else if (strlen(wepkey) == 26)
-				AtoH(wepkey, pWepKey->KeyMaterial, 13);
-
-			OidSetInformation(OID_802_11_ADD_WEP, s, "ra0", pWepKey, pWepKey->Length);
-			free(pWepKey);
-		}
-	}
-
-	// set ssid for associate
-	if (OidSetInformation(OID_802_11_SSID, s, "ra0", &Ssid, sizeof(NDIS_802_11_SSID)) < 0) {
-		fprintf(stderr, "Set OID_802_11_SSID has error =%d, pSsid->Ssid=%s\n", ret, Ssid.Ssid);
-		close(s);
-		return;
-	}
-
-	close(s);
-
-	doSystem("wpa_supplicant -B -ira0 -bbr0 -c/etc/wpa_supplicant.conf -Dralink -d");
-	WpaSupplicant_flag = TRUE;
-}
-
-static void conf_WPASupplicant(char* ssid, RT_WPA_SUPPLICANT_KEY_MGMT keymgmt, RT_WPA_SUPPLICANT_EAP eap, char* identity, char* password, char* cacert, char* clientcert, char* privatekey, char* privatekeypassword, char* wepkey, int keyidx, NDIS_802_11_WEP_STATUS encryp, RT_WPA_SUPPLICANT_TUNNEL tunnel, NDIS_802_11_AUTHENTICATION_MODE auth)
-{
-	FILE *wsconf;
-	char wpaconf[] = "/etc/wpa_supplicant.conf";
-
-	//fprintf(stderr, "conf_WPASupplicant()\n");
-
-	fprintf(stderr, "wpaconf=%s\n", wpaconf);
-	fprintf(stderr, "conf_WPASupplicant(), keymgmt=%d, Rtwpa_supplicantKeyMgmtNONE=%d\n", keymgmt, Rtwpa_supplicantKeyMgmtNONE);
-
-	wsconf = fopen(wpaconf, "w+");
-
-	fprintf(wsconf, "ctrl_interface=/var/run/wpa_supplicant\n");
-	fprintf(wsconf, "eapol_version=1\n");
-	fprintf(wsconf, "ap_scan=0\n");
-	fprintf(wsconf, "network={\n");
-	fprintf(wsconf, "ssid=\"%s\"\n", ssid);
-
-	if (keymgmt == Rtwpa_supplicantKeyMgmtWPAEAP)
-	{
-		fprintf(wsconf, "key_mgmt=%s\n", "WPA-EAP");
-
-		if (auth == Ndis802_11AuthModeWPA)
-			fprintf(wsconf, "proto=WPA\n");
-		else if (auth == Ndis802_11AuthModeWPA2)
-			fprintf(wsconf, "proto=RSN\n");
-
-		if (encryp == Ndis802_11Encryption2Enabled) //tkip
-		{
-			fprintf(wsconf, "pairwise=TKIP\n");
-			fprintf(wsconf, "group=TKIP\n");
-		}
-		else if (encryp == Ndis802_11Encryption3Enabled) //aes
-		{
-			fprintf(wsconf, "pairwise=CCMP TKIP\n");
-			fprintf(wsconf, "group=CCMP TKIP\n");
-		}
-
-	}
-	else if (keymgmt == Rtwpa_supplicantKeyMgmtIEEE8021X)
-	{
-		fprintf(wsconf, "key_mgmt=%s\n", "IEEE8021X");
-		if (eap == Rtwpa_supplicantEAPTLS || eap == Rtwpa_supplicantEAPTTLS)
-			fprintf(wsconf, "eapol_flags=3\n");
-		else if (eap == Rtwpa_supplicantEAPMD5)
-			fprintf(wsconf, "eapol_flags=0\n");
-	}
-	else if (keymgmt == Rtwpa_supplicantKeyMgmtNONE)
-	{
-		fprintf(wsconf, "key_mgmt=%s\n", "NONE");
-		fprintf(wsconf, "}\n");
-		fclose(wsconf);
-		exec_WPASupplicant(ssid, encryp, auth, keymgmt, keyidx, wepkey);
-		return;
-	}
-
-	//id
-	fprintf(wsconf, "identity=\"%s\"\n",identity);
-
-	//CA cert
-	if (strcmp(cacert, "0" ) != 0 && strcmp(cacert, "") !=0) //option
-		fprintf(wsconf, "ca_cert=\"%s\"\n", cacert);
-
-	//eap
-	switch(eap)
-	{
-		case Rtwpa_supplicantEAPTLS:
-			fprintf(wsconf, "eap=TLS\n");
-			fprintf(wsconf, "client_cert=\"%s\"\n", clientcert);
-			fprintf(wsconf, "private_key=\"%s\"\n", privatekey);
-			fprintf(wsconf, "private_key_passwd=\"%s\"\n", privatekeypassword);
-			break;
-		case Rtwpa_supplicantEAPTTLS:
-			fprintf(wsconf, "eap=TTLS\n");
-			if( strcmp(clientcert, "0" ) != 0 && strcmp(clientcert, "") !=0 ) //option
-			{
-				fprintf(wsconf, "client_cert=\"%s\"\n", clientcert);
-				fprintf(wsconf, "private_key=\"%s\"\n", privatekey);
-				fprintf(wsconf, "private_key_passwd=\"%s\"\n", privatekeypassword);
-			}
-			if (tunnel == Rtwpa_supplicantTUNNELMSCHAPV2)
-				fprintf(wsconf, "phase2=\"auth=MSCHAPV2\"\n");
-			else if (tunnel == Rtwpa_supplicantTUNNELMSCHAP)
-				fprintf(wsconf, "phase2=\"auth=MSCHAP\"\n");
-			else if (tunnel == Rtwpa_supplicantTUNNELPAP)
-				fprintf(wsconf, "phase2=\"auth=PAP\"\n");
-			break;
-
-		case Rtwpa_supplicantEAPPEAP:
-			fprintf(wsconf, "eap=PEAP\n");
-			//fprintf(stderr, "clientcert=%s, strlen=%d\n", clientcert, strlen((char *)clientcert));
-			if( strcmp(clientcert, "0" ) != 0 && strcmp(clientcert, "") !=0) //option
-			{
-				fprintf(wsconf, "client_cert=\"%s\"\n", clientcert);
-				fprintf(wsconf, "private_key=\"%s\"\n", privatekey);
-				fprintf(wsconf, "private_key_passwd=\"%s\"\n", privatekeypassword);
-			}
-			fprintf(wsconf, "password=\"%s\"\n", password);
-			fprintf(wsconf, "phase1=\"peaplable=0\"\n");
-
-			if (tunnel == Rtwpa_supplicantTUNNELMSCHAPV2)
-				fprintf(wsconf, "phase2=\"auth=MSCHAPV2\"\n");
-
-			break;
-		case Rtwpa_supplicantEAPMD5:
-			fprintf(wsconf, "eap=MD5\n");
-			fprintf(wsconf, "password=\"%s\"\n", password);
-			fprintf(wsconf, "wep_tx_keyidx=%d\n", keyidx);
-			fprintf(wsconf, "wep_key%d=%s\n", keyidx, wepkey);
-			break;
-		default:
-			break;
-	}
-
-	fprintf(wsconf, "}\n");
-	fclose(wsconf);
-	exec_WPASupplicant(ssid, encryp, auth, keymgmt, keyidx, wepkey);
-}
-#endif
 
 /*
  * description: connect to AP according to the active profile
  */
 void initStaConnection(void)
 {
+	int i, j, s, ret;
+
 	// Clear current SSID
 	nvram_set(RT2860_NVRAM, "staCur_SSID", "");
 
@@ -1954,31 +1661,7 @@ void initStaConnection(void)
 	// Set-up current SSID
 	nvram_set(RT2860_NVRAM, "staCur_SSID", p->SSID);
 
-#ifdef WPA_SUPPLICANT_SUPPORT
-	if (p->Authentication == Ndis802_11AuthModeWPA ||
-		p->Authentication == Ndis802_11AuthModeWPA2 ||
-		p->Authentication == Ndis802_11AuthMode8021x )//802.1x
-	{
-		char tmp_key[27];
-		if (p->DefaultKeyId == 2)
-			strcpy(tmp_key, (char *)p->Key2);
-		else if (p->DefaultKeyId == 3)
-			strcpy(tmp_key, (char *)p->Key3);
-		else if (p->DefaultKeyId == 4)
-			strcpy(tmp_key, (char *)p->Key4);
-		else
-			strcpy(tmp_key, (char *)p->Key1);
-
-		// Configure WPA supplicant & return
-		conf_WPASupplicant((char*)p->SSID, p->KeyMgmt, p->EAP, (char*)p->Identity, (char*)p->Password,
-			(char*)p->CACert, (char*)p->ClientCert, (char*)p->PrivateKey, (char*)p->PrivateKeyPassword,
-			tmp_key, p->KeyDefaultId-1, p->Encryption, p->Tunnel, p->Authentication);
-		return;
-	}
-#endif
-
-	int i, j;
-	int s = socket(AF_INET, SOCK_DGRAM, 0);
+	s = socket(AF_INET, SOCK_DGRAM, 0);
 
 	// Fetch current wireless mode
 	unsigned long CurrentWirelessMode;
@@ -1989,25 +1672,7 @@ void initStaConnection(void)
 		return;
 	}
 
-	// Check WPA Supplicant
-	int ret = 0;
-	if (WpaSupplicant_flag == TRUE)
-	{
-		int wpa_supplicant_support = 0, ieee8021x_support = 0;
-
-		doSystem("killall -q wpa_supplicant");
-		sleep(1);
-		doSystem("killall -q -SIGKILL wpa_supplicant");
-		sleep(1);
-
-		ret = OidSetInformation(OID_802_11_SET_IEEE8021X, s, "ra0", &ieee8021x_support, sizeof(ieee8021x_support));
-		if (ret < 0)
-			fprintf(stderr, "Set OID_802_11_SET_IEEE8021X has error =%d, ieee8021x_support=%d\n", ret, ieee8021x_support);
-		ret = OidSetInformation(RT_OID_WPA_SUPPLICANT_SUPPORT, s, "ra0", &wpa_supplicant_support, sizeof(wpa_supplicant_support));                                           if (ret < 0)
-			fprintf(stderr, "Set RT_OID_WPA_SUPPLICANT_SUPPORT has error =%d, wpa_supplicant_support=%d\n", ret, wpa_supplicant_support);
-		WpaSupplicant_flag = FALSE;
-	}
-
+	ret = 0;
 	// step 0: OID_802_11_INFRASTRUCTURE_MODE
 	ret = OidSetInformation(OID_802_11_INFRASTRUCTURE_MODE, s, "ra0", &p->NetworkType, sizeof(int));
 	if (ret < 0)
@@ -2797,7 +2462,7 @@ static void setSta11nCfg(webs_t wp, char_t *path, char_t *query)
 static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *w_mode, *cr_bg, *cr_a, *bg_prot, *rate, *burst;
-	char_t *ht, *bw, *gi, *mcs, *tx_power, *sta_ar, *sta_ac, *sta_fc, *lna_gain;
+	char_t *ht, *bw, *gi, *mcs, *tx_power, *sta_ar, *sta_ac, *sta_fc;
 	int s, ret, wireless_mode=0, tx_rate=0;
 
 	unsigned char radio_status=0;
@@ -2818,7 +2483,6 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	sta_ar = websGetVar(wp, T("staAutoRoaming"), T("off"));
 	sta_ac = websGetVar(wp, T("staAutoConnect"), T("off"));
 	sta_fc = websGetVar(wp, T("staFastConnect"), T("off"));
-	lna_gain = websGetVar(wp, T("lnaGainEnable"), T("off"));
 	char_t *tx_stream = websGetVar(wp, T("tx_stream"), T("1"));
 	char_t *rx_stream = websGetVar(wp, T("rx_stream"), T("1"));
 
@@ -2845,7 +2509,6 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "AutoRoaming", (strcmp(sta_ar, "on")==0) ? "1" : "0");
 	nvram_bufset(RT2860_NVRAM, "AutoConnect", (strcmp(sta_ac, "on")==0) ? "1" : "0");
 	nvram_bufset(RT2860_NVRAM, "FastConnect", (strcmp(sta_fc, "on")==0) ? "1" : "0");
-	nvram_bufset(RT2860_NVRAM, "HiPower", (strcmp(lna_gain, "on")==0) ? "1" : "0");
 
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);

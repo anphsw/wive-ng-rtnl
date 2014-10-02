@@ -1175,7 +1175,8 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	}
 	else if (!strncmp(countrycode, "HK", 3)) {
 		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "0");
-	}
+	} else  /* default RU */
+		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "0");
 
 	// Set-up country region
 	nvram_bufset(RT2860_NVRAM, "CountryRegion", country_region);
@@ -1184,8 +1185,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	nvram_close(RT2860_NVRAM);
 
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	if (! submitUrl[0])
-	{
+	if (! submitUrl[0]) {
 #ifdef PRINT_DEBUG
 		//debug print
 		websHeader(wp);
@@ -1209,8 +1209,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 		websFooter(wp);
 #endif
 		websDone(wp, 200);
-	}
-	else
+	} else
 		websRedirect(wp, submitUrl);
 
     // restart wireless network

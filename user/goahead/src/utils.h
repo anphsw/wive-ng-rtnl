@@ -75,3 +75,7 @@ void websLongWrite(webs_t wp, char *longstr);
 char *strip_space(char *str);
 int netmask_aton(const char *ip);
 void STFs(int nvram, int index, char *flash_key, char *value);
+#ifdef CONFIG_USER_802_1X
+void restart8021XDaemon(int nvram);
+void updateFlash8021x(int nvram);
+#endif

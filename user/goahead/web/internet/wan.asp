@@ -119,7 +119,6 @@ function initTranslation()
 function initValue()
 {
 	var mode = "<% getCfgGeneral(1, "wanConnectionMode"); %>";
-	var pptpMode = <% getCfgZero(1, "wan_pptp_mode"); %>;
 	var nat = "<% getCfgZero(1, "natEnabled"); %>";
 	var opmode = "<% getCfgZero(1, "OperationMode"); %>";
 	var static_dns = "<% getCfgZero(1, "wan_static_dns"); %>";

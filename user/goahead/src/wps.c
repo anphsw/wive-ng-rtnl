@@ -2220,17 +2220,6 @@ static char_t *addWPSSTAProfile2(WSC_CREDENTIAL *wsc_cre)
 	tmpProfileSetting.KeyDefaultId = KeyIndex;
 	SaveToFlashInt("staKeyDefaultId", tmpProfileSetting.KeyDefaultId);
 
-#ifdef WPA_SUPPLICANT_SUPPORT
-	if(tmpProfileSetting.Authentication  == Ndis802_11AuthModeWPA ||
-		tmpProfileSetting.Authentication == Ndis802_11AuthModeWPA2){
-		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtWPAEAP;
-	}else if(tmpProfileSetting.Authentication == Ndis802_11AuthModeMax){
-		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtIEEE8021X;
-	}else
-		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtNONE;
-	SaveToFlashInt("sta8021xKeyMgmt", tmpProfileSetting.KeyMgmt);
-#endif
-
 	/*
 	 *	Deal with Key
 	 */
@@ -2309,31 +2298,6 @@ static char_t *addWPSSTAProfile2(WSC_CREDENTIAL *wsc_cre)
 	SaveToFlashInt("staKey3Length", 0);
 	SaveToFlashInt("staKey4Length", 0);
 
-#ifdef WPA_SUPPLICANT_SUPPORT
-	tmpProfileSetting.EAP = Rtwpa_supplicantEAPNONE;
-	SaveToFlashInt("sta8021xEAP", tmpProfileSetting.EAP);
-
-	tmpProfileSetting.Tunnel = Rtwpa_supplicantTUNNENONE;
-	SaveToFlashInt("sta8021xTunnel", tmpProfileSetting.Tunnel);
-
-	strncpy(tmpProfileSetting.Identity, "", IDENTITY_LENGTH);
-	SaveToFlashStr("sta8021xIdentity", "");
-
-	strncpy(tmpProfileSetting.Password, "", 32);
-	SaveToFlashStr("sta8021xPassword", "");
-
-	strncpy(tmpProfileSetting.ClientCert, "", CERT_PATH_LENGTH);
-	SaveToFlashStr("sta8021xClientCert", "");
-
-	strncpy(tmpProfileSetting.PrivateKey, "", PRIVATE_KEY_PATH_LENGTH);
-	SaveToFlashStr("sta8021xPrivateKey", "");
-
-	strncpy(tmpProfileSetting.PrivateKeyPassword, "", 32);
-	SaveToFlashStr("sta8021xPrivateKeyPassword", "");
-
-	strncpy(tmpProfileSetting.CACert, "", CERT_PATH_LENGTH);
-	SaveToFlashStr("sta8021xCACert", "");
-#else /* WPA_SUPPLICANT_SUPPORT */
 	SaveToFlashStr("sta8021xEAP", "7");
 	SaveToFlashStr("sta8021xTunnel", "3");
 	SaveToFlashStr("sta8021xKeyMgmt", "3");
@@ -2343,10 +2307,6 @@ static char_t *addWPSSTAProfile2(WSC_CREDENTIAL *wsc_cre)
 	SaveToFlashStr("sta8021xPrivateKey", "0");
 	SaveToFlashStr("sta8021xPrivateKeyPassword", "0");
 	SaveToFlashStr("sta8021xCACert", "0");
-#endif /* WPA_SUPPLICANT_SUPPORT */
-
-	//write into /etc/rt61sta.ui
-	//writeProfileToFile(&tmpProfileSetting);
 
 	tmpProfileSetting.Active = 0;
 	SaveToFlashInt("staActive", tmpProfileSetting.Active);
@@ -2444,17 +2404,6 @@ static char_t *addWPSSTAProfile(char_t *result)
 	}
 	SaveToFlashInt("staAuth", tmpProfileSetting.Authentication);
 
-#ifdef WPA_SUPPLICANT_SUPPORT
-	if(tmpProfileSetting.Authentication  == Ndis802_11AuthModeWPA ||
-		tmpProfileSetting.Authentication == Ndis802_11AuthModeWPA2){
-		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtWPAEAP;
-	}else if(tmpProfileSetting.Authentication == Ndis802_11AuthModeMax){
-		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtIEEE8021X;
-	}else
-		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtNONE;
-	SaveToFlashInt("sta8021xKeyMgmt", tmpProfileSetting.KeyMgmt);
-#endif
-
 	if(!getValueFromDat("Key1Str", value, 512))			
 		return NULL;
 	if(!strlen(value))
@@ -2551,31 +2500,6 @@ static char_t *addWPSSTAProfile(char_t *result)
 	strncpy(tmpProfileSetting.WpaPsk, value, 64);
 	SaveToFlashStr("staWpaPsk", tmpProfileSetting.WpaPsk);
 
-#ifdef WPA_SUPPLICANT_SUPPORT
-	tmpProfileSetting.EAP = Rtwpa_supplicantEAPNONE;
-	SaveToFlashInt("sta8021xEAP", tmpProfileSetting.EAP);
-
-	tmpProfileSetting.Tunnel = Rtwpa_supplicantTUNNENONE;
-	SaveToFlashInt("sta8021xTunnel", tmpProfileSetting.Tunnel);
-
-	strncpy(tmpProfileSetting.Identity, "", IDENTITY_LENGTH);
-	SaveToFlashStr("sta8021xIdentity", "");
-
-	strncpy(tmpProfileSetting.Password, "", 32);
-	SaveToFlashStr("sta8021xPassword", "");
-
-	strncpy(tmpProfileSetting.ClientCert, "", CERT_PATH_LENGTH);
-	SaveToFlashStr("sta8021xClientCert", "");
-
-	strncpy(tmpProfileSetting.PrivateKey, "", PRIVATE_KEY_PATH_LENGTH);
-	SaveToFlashStr("sta8021xPrivateKey", "");
-
-	strncpy(tmpProfileSetting.PrivateKeyPassword, "", 32);
-	SaveToFlashStr("sta8021xPrivateKeyPassword", "");
-
-	strncpy(tmpProfileSetting.CACert, "", CERT_PATH_LENGTH);
-	SaveToFlashStr("sta8021xCACert", "");
-#else /* WPA_SUPPLICANT_SUPPORT */
 	SaveToFlashStr("sta8021xEAP", "7");
 	SaveToFlashStr("sta8021xTunnel", "3");
 	SaveToFlashStr("sta8021xKeyMgmt", "3");
@@ -2585,10 +2509,6 @@ static char_t *addWPSSTAProfile(char_t *result)
 	SaveToFlashStr("sta8021xPrivateKey", "0");
 	SaveToFlashStr("sta8021xPrivateKeyPassword", "0");
 	SaveToFlashStr("sta8021xCACert", "0");
-#endif /* WPA_SUPPLICANT_SUPPORT */
-
-	//write into /etc/rt61sta.ui
-	//writeProfileToFile(&tmpProfileSetting);
 
 	tmpProfileSetting.Active = 0;
 	SaveToFlashInt("staActive", tmpProfileSetting.Active);

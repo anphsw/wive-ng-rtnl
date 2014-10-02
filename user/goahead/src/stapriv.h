@@ -416,37 +416,6 @@ typedef enum _RT_802_11_PREAMBLE {
 	Rt802_11PreambleAuto
 } RT_802_11_PREAMBLE, *PRT_802_11_PREAMBLE;
 
-#ifdef WPA_SUPPLICANT_SUPPORT
-#define IDENTITY_LENGTH 32
-#define CERT_PATH_LENGTH    64
-#define PRIVATE_KEY_PATH_LENGTH 64
-
-typedef enum _RT_WPA_SUPPLICANT_KEY_MGMT {
-	Rtwpa_supplicantKeyMgmtWPAPSK,
-	Rtwpa_supplicantKeyMgmtWPAEAP,
-	Rtwpa_supplicantKeyMgmtIEEE8021X,
-	Rtwpa_supplicantKeyMgmtNONE
-} RT_WPA_SUPPLICANT_KEY_MGMT, *PRT_WPA_SUPPLICANT_KEY_MGMT;
-
-typedef enum _RT_WPA_SUPPLICANT_EAP {
-	Rtwpa_supplicantEAPMD5,
-	Rtwpa_supplicantEAPMSCHAPV2,
-	Rtwpa_supplicantEAPOTP,
-	Rtwpa_supplicantEAPGTC,
-	Rtwpa_supplicantEAPTLS,
-	Rtwpa_supplicantEAPPEAP,
-	Rtwpa_supplicantEAPTTLS,
-	Rtwpa_supplicantEAPNONE
-} RT_WPA_SUPPLICANT_EAP, *PRT_WPA_SUPPLICANT_EAP;
-
-typedef enum _RT_WPA_SUPPLICANT_TUNNEL {
-	Rtwpa_supplicantTUNNELMSCHAP,
-	Rtwpa_supplicantTUNNELMSCHAPV2,
-	Rtwpa_supplicantTUNNELPAP,
-	Rtwpa_supplicantTUNNENONE
-} RT_WPA_SUPPLICANT_TUNNEL, *PRT_WPA_SUPPLICANT_TUNNEL;
-#endif
-
 typedef struct _RT_PROFILE_SETTING {
 	unsigned int                        ProfileDataType; //0x18140201
 	unsigned char                       Profile[32+1];
@@ -486,22 +455,6 @@ typedef struct _RT_PROFILE_SETTING {
 	unsigned int                        AdhocMode;
 	//unsigned char                       reserved[64];
 	unsigned int                        Active; // 0 is the profile is set as connection profile, 1 is not.
-#ifdef WPA_SUPPLICANT_SUPPORT
-	RT_WPA_SUPPLICANT_KEY_MGMT          KeyMgmt;
-	RT_WPA_SUPPLICANT_EAP               EAP;
-	unsigned char                       Identity[IDENTITY_LENGTH];
-	unsigned char                       Password[32];
-	unsigned char                       CACert[CERT_PATH_LENGTH];
-	unsigned char                       ClientCert[CERT_PATH_LENGTH];
-	unsigned char                       PrivateKey[PRIVATE_KEY_PATH_LENGTH];
-	unsigned char                       PrivateKeyPassword[32];
-	//unsigned int                        EapolFlag;
-	//RT_WPA_SUPPLICANT_PROTO             Proto;
-	//RT_WPA_SUPPLICANT_PAIRWISE          Pairwise;
-	//RT_WPA_SUPPLICANT_GROUP             group;
-	//unsigned char                       Phase1[32];
-	RT_WPA_SUPPLICANT_TUNNEL            Tunnel;
-#endif
 	struct  _RT_PROFILE_SETTING         *Next;
 } RT_PROFILE_SETTING, *PRT_PROFILE_SETTING;
 

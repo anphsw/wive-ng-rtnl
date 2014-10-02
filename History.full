@@ -2046,11 +2046,12 @@
 <b>4.11.x</b><br>
 1) transmission: disable ipv6 by default (avoid kernel panic on some installations).<br>
 2) usb: fix double modem init.<br>
-3) hw_nat: update to 2.51 version.<br>
-4) kernel: spi: add more flash support.<br>
-5) goahead: fix regression crash at short reset press.<br>
-6) kenrel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
-7) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
+3) goahead: cleanup and small fixes.<br>
+4) hw_nat: update to 2.51 version.<br>
+5) kernel: spi: add more flash support.<br>
+6) goahead: fix regression crash at short reset press.<br>
+7) kenrel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
+8) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
 <br>
 <br>
 <br>
