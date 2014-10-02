@@ -26,7 +26,7 @@ fi
 ########################################STAMODE param########################################
 if [ "$OperationMode" = "2" ]; then
     if [ "$AutoConnect" != "" ]; then
-	iwpriv "$1" set AutoReconnect="$AutoReconnect"
+	iwpriv "$1" set AutoReconnect="$AutoConnect"
     fi
   # in sta mode exit
   exit 0
