@@ -5,8 +5,6 @@
 #define PROC_MEM_STATISTIC	"/proc/meminfo"
 #define PROC_CPU_STATISTIC	"/proc/stat"
 
-#define SYSTEM_COMMAND_LOG	"/var/log/system_command.log"
-
 #define TXBYTE		0
 #define TXPACKET	1
 #define RXBYTE		2

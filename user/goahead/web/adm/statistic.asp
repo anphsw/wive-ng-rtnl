@@ -40,7 +40,7 @@ function PageInit()
 {
 	initTranslation();
 	showLoadedElements();
-	
+
 	loadStatistics();
 }
 
@@ -56,17 +56,6 @@ function showLoadedElements()
 
 	var nat_fp = defaultNumber("<% getCfgGeneral(1, "offloadMode"); %>", "1");
 	displayElement('fastpath_warning', (nat_fp == '2') || (nat_fp == '3'));
-}
-
-function formCheck()
-{
-	if( document.SystemCommand.command.value == "")
-	{
-		alert("Please specify a command.");
-		return false;
-	}
-
-	return true;
 }
 
 function loadStatistics()

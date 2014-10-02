@@ -134,11 +134,6 @@
   <message msgid="statistic lan tx bytes" msgstr="LAN Tx bytes: " />
   <message msgid="statistic all interface" msgstr="All interfaces" />
 
-  <message msgid="syscommand title" msgstr="System Command" />
-  <message msgid="syscommand introduction" msgstr=" Run system command as root: " />
-  <message msgid="syscommand system command" msgstr="System command " />
-  <message msgid="syscommand command" msgstr="Command:" />
-
   <message msgid="syslog title" msgstr="System Log" />
   <message msgid="syslog introduction" msgstr=" Syslog: " />
   <message msgid="syslog system log" msgstr="System Log" />

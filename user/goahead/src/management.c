@@ -17,9 +17,6 @@
 #include "wireless.h"
 #include "management.h"
 
-#define COMMAND_MAX	1024
-static char system_command[COMMAND_MAX];
-
 static unsigned long int prevTotal = 0, prevBusy = 0;
 
 void scale(char_t * strBuf, long long data)
@@ -278,58 +275,6 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 		websRedirect(wp, submitUrl);
 }
 #endif
-
-static void SystemCommand(webs_t wp, char_t *path, char_t *query)
-{
-	char *command;
-
-	command = websGetVar(wp, T("command"), T(""));
-
-	if(!command)
-		return;
-
-	if(!strlen(command))
-		snprintf(system_command, COMMAND_MAX, "cat /dev/null > %s", SYSTEM_COMMAND_LOG);
-	else
-		snprintf(system_command, COMMAND_MAX, "%s 1>%s 2>&1", command, SYSTEM_COMMAND_LOG);
-
-	if(strlen(system_command))
-		doSystem(system_command);
-
-	websRedirect(wp, "adm/system_command.asp");
-
-	return;
-}
-
-static void repeatLastSystemCommand(webs_t wp, char_t *path, char_t *query)
-{
-	if(strlen(system_command))
-		doSystem(system_command);
-
-	websRedirect(wp, "adm/system_command.asp");
-
-	return;
-}
-
-
-int showSystemCommandASP(int eid, webs_t wp, int argc, char_t **argv)
-{
-	FILE *fp;
-	char buf[1024];
-
-	fp = fopen(SYSTEM_COMMAND_LOG, "r");
-	if(!fp){
-		websWrite(wp, T(""));
-		return 0;
-	}
-
-	while(fgets(buf, 1024, fp)){
-		websWrite(wp, T("%s"), buf);
-	}
-	fclose(fp);
-
-	return 0;
-}
 
 char* getField(char *a_line, char *delim, int count)
 {
@@ -897,10 +842,6 @@ void formDefineManagement(void)
 	websAspDefine(T("getLANTxPacketASP"), getLANTxPacketASP);
 
 	websAspDefine(T("getAllNICStatisticASP"), getAllNICStatisticASP);
-
-	websAspDefine(T("showSystemCommandASP"), showSystemCommandASP);
-	websFormDefine(T("SystemCommand"), SystemCommand);
-	websFormDefine(T("repeatLastSystemCommand"), repeatLastSystemCommand);
 
 	websFormDefine(T("LoadDefaultSettings"), LoadDefaultSettings);
 
