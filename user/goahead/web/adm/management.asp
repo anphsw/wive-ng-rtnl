@@ -185,9 +185,7 @@ function onImportSettings(form)
               </form></td>
           </tr>
         </table>
-        
         <!-- ================= Settings management ================= -->
-        
         <table class="form">
           <tr>
             <td class="title" colspan="2">Router Settings Management</td>

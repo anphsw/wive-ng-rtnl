@@ -208,14 +208,14 @@ function initValue()
 	sshRmtSelect(form);
 	pingerSelect(form);
 	udpxySelect(form);
-	
+
 	displayServiceStatus();
 }
 
 function CheckValue(form)
 {
 	var thresh = form.offloadMode.value;
-	
+
 	if ((thresh == '2') || (thresh == '3'))
 	{
 		// Check threshold
@@ -233,7 +233,7 @@ function CheckValue(form)
 			return false;
 		}
 	}
-	
+
 	var udpxy_port = form.udpxyPort.value * 1;
 	if (!((udpxy_port == 81) || ((udpxy_port >= 1024) && (udpxy_port <= 65535))))
 	{
@@ -241,20 +241,20 @@ function CheckValue(form)
 		form.udpxyPort.focus();
 		return false;
 	}
-	
+
 	if (form.RemoteManagementPort.value != rmtManagementPort)
 	{
 		if (!confirm("You have changed remote management port number. This change needs to reboot your router. Do you want to proceed?"))
 			return false;
-		
+
 		form.rmt_http_port_changed.value = '1';
 		ajaxPostForm(null, form, 'setMiscReloader', '/messages/rebooting.asp', ajaxShowProgress);
 		return false;
 	}
-	
+
 	// Timeout reload
 	TimeoutReload(20);
-	
+
 	return true;
 }
 
@@ -319,7 +319,7 @@ function displayServiceHandler(response)
 	var daemons = [];
 	for (var i=0; i<tmp.length; i++)
 		daemons[tmp[i]] = 1;
-	
+
 	// Now display all services
 	for (var i=0; i<services.length; i++)
 	{
@@ -329,7 +329,7 @@ function displayServiceHandler(response)
 		for (var j=0; j<row.childNodes.length; j++)
 			if (row.childNodes[j].nodeName == 'TD')
 				tds.push(row.childNodes[j]);
-		
+
 		if (row != null)
 		{
 			// Fill-up about
@@ -488,7 +488,6 @@ function displayServiceStatus()
                 <option value="1">Enable</option>
               </select></td>
           </tr>
-          
           <!-- Services -->
           <tr>
             <td class="title">Services</td>
@@ -619,7 +618,6 @@ function displayServiceStatus()
             <td>&nbsp;</td>
             <td>&nbsp;</td>
           </tr>
-          
           <!-- Watchers -->
           <tr>
             <td class="title" colspan="5">Watchers</td>

@@ -64,7 +64,6 @@
       <td class="head" id="statisticLANTxBytes" colspan="3">LAN Tx bytes: </td>
       <td colspan="3"><% getLANTxByteASP(); %></td>
     </tr>
-    
     <!-- =================  ALL  ================= -->
     <tr>
       <td class="title" colspan="6" id="statisticAllIF">All interfaces</td>
@@ -78,6 +77,5 @@
     </tr>
     <% getAllNICStatisticASP(); %>
     </script>
-    
   </tbody>
 </table>

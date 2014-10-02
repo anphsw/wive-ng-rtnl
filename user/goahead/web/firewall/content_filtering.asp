@@ -25,12 +25,12 @@ function genFilteringTable()
 	{
 		var row = filteringRules[i];
 		var type = 'Unknown';
-		
+
 		if (row[0] == 'url')
 			type = 'Block URL';
 		else if (row[0] == 'host')
 			type = 'Block Host';
-		
+
 		table +=
 			'<tr>' +
 			'<td style="text-align: left;">' + type + '</td>' + // Type
@@ -38,10 +38,10 @@ function genFilteringTable()
 			'<td style="text-align: center;"><a style="color: #ff0000;" title="Delete record" onclick="deleteRule(' + i + ');"><b>[x]</b></a></td>' +
 			'</tr>';
 	}
-	
+
 	if (filteringRules.length <= 0)
 		table += '<tr><td colspan="3" style="text-align: left;">No content filtering rules yet</td></tr>';
-	
+
 	// Controls
 	table +=
 		'<tr>'+
@@ -49,10 +49,10 @@ function genFilteringTable()
 		'<td style="text-align: left;"><input type="text" class="normal" name="filterValue" tabindex="2"></td>' +
 		'<td style="text-align: center;"><input type="button" class="short" title="Add record" value="Add" tabindex="3" onclick="addRule(this.form);"></td>' +
 		'</tr>';
-	
+
 	// Close manager
 	table += '</table>';
-	
+
 	var elem = document.getElementById("filteringRules");
 	if (elem!=null)
 		elem.innerHTML = table;

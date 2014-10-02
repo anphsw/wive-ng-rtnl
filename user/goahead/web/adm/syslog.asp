@@ -128,9 +128,7 @@ function syslogdSelect(form)
           </tr>
         </table>
       </form>
-      
       <!-- ================= System log ================= -->
-      
       <table class="form" id="syslog_view" style="display: none;">
         <tr>
           <td class="title" colspan="2" id="syslogSysLog">System Log: </td>

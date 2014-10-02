@@ -19,13 +19,12 @@ function resetClick(form)
 function initValue()
 {
 	var form = document.formIptAccounting;
-	
+
 	form.iptEnable.value = defaultNumber("<% getCfgZero(1, "ipt_account"); %>", '0');
-	var nat_fp = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
-	var fp_on = nat_fp != '0';
-	
-	displayElement('fastpath_warning', fp_on);
-	displayElement('fastpath_form', !fp_on);
+
+	var nat_fp = defaultNumber("<% getCfgGeneral(1, "offloadMode"); %>", "1");
+	displayElement('fastpath_warning', (nat_fp == '1') || (nat_fp == '2') || (nat_fp == '3'));
+	displayElement('fastpath_form', (nat_fp == '0'));
 }
 </script>
 </head>
@@ -36,9 +35,7 @@ function initValue()
     <td><h1>Accounting</h1>
       <p>Here you can configure Accounting Control.</p>
       <hr>
-      
       <!-- IP Accounting -->
-      
       <h2>IP Accounting</h2>
       <div style="display:none;" id="fastpath_warning">
         <p><span style="color: #ff0000;"><b>CAUTION!&nbsp;</b></span> <b>NAT offload mode</b> option is turned on.</p>

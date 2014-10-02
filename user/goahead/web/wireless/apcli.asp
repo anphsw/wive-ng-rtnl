@@ -20,14 +20,14 @@ function SecurityModeSwitch(form)
 function initValue()
 {
 	var form = document.wireless_apcli;
-	
+
 	form.apcli_ssid.value   = '<% getCfgGeneral(1, "ApCliSsid"); %>';
 	form.apcli_bssid.value  = '<% getCfgGeneral(1, "ApCliBssid"); %>';
 	form.apcli_mode.value   = '<% getCfgGeneral(1, "ApCliAuthMode"); %>';
 	form.apcli_enc.value    = '<% getCfgGeneral(1, "ApCliEncrypType"); %>';
 	form.apcli_apiface.checked = '<% getCfgGeneral(1, "ApCliClientOnly"); %>' == '1';
 	form.apcli_bridge.checked = '<% getCfgGeneral(1, "ApCliBridgeOnly"); %>' == '1';
-	
+
 	SecurityModeSwitch(form);
 }
 
