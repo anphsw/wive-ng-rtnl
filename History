@@ -348,6 +348,7 @@
 6) goahead: fix regression crash at short reset press.<br>
 7) kenrel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
 8) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
+9) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
 <br>
 <br>
 <br>

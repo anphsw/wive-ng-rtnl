@@ -499,6 +499,9 @@ int rt28xx_init(
 		MATEngineInit(pAd);
 #endif // MAT_SUPPORT //
 
+	/* auto-fall back settings */
+	RTMP_IO_WRITE32(pAd, HT_FBK_CFG1, 0xedcba980);
+
 #ifdef CLIENT_WDS
 	CliWds_ProxyTabInit(pAd);
 #endif // CLIENT_WDS //
