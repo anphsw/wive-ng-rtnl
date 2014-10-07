@@ -302,11 +302,6 @@ static void kfree_skbmem(struct sk_buff *skb)
 		if (atomic_dec_and_test(fclone_ref))
 			kmem_cache_free(skbuff_fclone_cache, other);
 		break;
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	default:
-		if(IS_MAGIC_TAG_VALID(skb) || FOE_MAGIC_TAG(skb) == FOE_MAGIC_PPE)
-		    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
-#endif
 	};
 }
 
@@ -349,6 +344,10 @@ static void skb_release_all(struct sk_buff *skb)
 
 void FASTPATHNET __kfree_skb(struct sk_buff *skb)
 {
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	if(IS_MAGIC_TAG_VALID(skb) || FOE_MAGIC_TAG(skb) == FOE_MAGIC_PPE)
+	    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
+#endif
 	skb_release_all(skb);
 	kfree_skbmem(skb);
 }
