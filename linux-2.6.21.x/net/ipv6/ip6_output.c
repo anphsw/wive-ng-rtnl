@@ -56,9 +56,11 @@
 #include <net/xfrm.h>
 #include <net/checksum.h>
 
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#if defined (CONFIG_RA_HW_NAT_IPV6)
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 #include "../../net/nat/hw_nat/ra_nat.h"
 #include "../../net/nat/hw_nat/frame_engine.h"
+#endif
 #endif
 
 static int ip6_fragment(struct sk_buff *skb, int (*output)(struct sk_buff *));
@@ -237,9 +239,11 @@ int ip6_xmit(struct sock *sk, struct sk_buff *skb, struct flowi *fl,
 	if ((skb->len <= mtu) || skb->ignore_df || skb_is_gso(skb)) {
 		IP6_INC_STATS(ip6_dst_idev(skb->dst),
 			      IPSTATS_MIB_OUTREQUESTS);
+#if defined (CONFIG_RA_HW_NAT_IPV6)
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 		FOE_MAGIC_TAG(skb) = 0;
 		FOE_AI_UNHIT(skb);
+#endif
 #endif
 		return NF_HOOK(PF_INET6, NF_IP6_LOCAL_OUT, skb, NULL, dst->dev,
 				dst_output);
@@ -1384,9 +1388,11 @@ int ip6_push_pending_frames(struct sock *sk)
 
 	skb->dst = dst_clone(&rt->u.dst);
 
+#if defined (CONFIG_RA_HW_NAT_IPV6)
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	FOE_MAGIC_TAG(skb) = 0;
 	FOE_AI_UNHIT(skb);
+#endif
 #endif
 
 	IP6_INC_STATS(rt->rt6i_idev, IPSTATS_MIB_OUTREQUESTS);

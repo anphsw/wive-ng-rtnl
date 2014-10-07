@@ -45,6 +45,13 @@
 #include <net/addrconf.h>
 #include <net/xfrm.h>
 
+#if defined (CONFIG_RA_HW_NAT_IPV6)
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include "../../net/nat/hw_nat/ra_nat.h"
+#include "../../net/nat/hw_nat/frame_engine.h"
+#endif
+#endif
+
 inline int ip6_rcv_finish( struct sk_buff *skb)
 {
 	if (skb->dst == NULL)
@@ -263,6 +270,11 @@ discard:
 
 int ip6_input(struct sk_buff *skb)
 {
+#if defined (CONFIG_RA_HW_NAT_IPV6)
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	FOE_ALG_MARK(skb);
+#endif
+#endif
 	return NF_HOOK(PF_INET6,NF_IP6_LOCAL_IN, skb, skb->dev, NULL, ip6_input_finish);
 }
 
