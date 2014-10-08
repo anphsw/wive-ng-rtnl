@@ -641,8 +641,9 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 	TXD_STRUC	TxD, *pOriTxD;
 	/*ULONG		IrqFlags;*/
 	BOOLEAN			bReschedule = FALSE;
+#ifdef UAPSD_SUPPORT
 	UINT8 TXWISize = pAd->chipCap.TXWISize;
-
+#endif
 	ASSERT(QueIdx < NUM_OF_TX_RING);
 	if (QueIdx >= NUM_OF_TX_RING)
 		return FALSE;
@@ -659,6 +660,9 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 
 		if ((ATE_ON(pAd)) && (pAd->ate.bQATxStart == TRUE))
 		{
+#ifndef UAPSD_SUPPORT
+			UINT8 TXWISize = pAd->chipCap.TXWISize;
+#endif
 			if (pAd->ate.QID == QueIdx)
 			{
 				pAd->ate.TxDoneCount++;

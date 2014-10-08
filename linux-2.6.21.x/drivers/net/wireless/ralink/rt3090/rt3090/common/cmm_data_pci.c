@@ -406,7 +406,7 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 	PRTMP_TX_RING pTxRing;
 	PTXD_STRUC	  pTxD;
 #ifdef RT_BIG_ENDIAN
-    PTXD_STRUC      pDestTxD;
+	PTXD_STRUC      pDestTxD;
 #endif
 	PNDIS_PACKET  pPacket;
 	UCHAR	FREE = 0;
@@ -432,6 +432,9 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 
 		if ((ATE_ON(pAd)) && (pAd->ate.bQATxStart == TRUE))
 		{
+#ifndef UAPSD_SUPPORT
+			UINT8 TXWISize = pAd->chipCap.TXWISize;
+#endif
 			if (pAd->ate.QID == QueIdx)
 			{
 				pAd->ate.TxDoneCount++;
