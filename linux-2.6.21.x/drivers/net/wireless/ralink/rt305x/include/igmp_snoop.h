@@ -102,9 +102,6 @@ BOOLEAN isMldPkt(
 	OUT UINT8 *pProtoType,
 	OUT PUCHAR *pMldHeader);
 
-BOOLEAN IPv6MulticastFilterExcluded(
-	IN PUCHAR pDstMacAddr);
-
 VOID MLDSnooping(
 	IN PRTMP_ADAPTER pAd,
 	IN PUCHAR pDstMacAddr,

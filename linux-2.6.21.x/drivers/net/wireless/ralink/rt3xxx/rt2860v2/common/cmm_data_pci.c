@@ -621,7 +621,7 @@ NDIS_STATUS RTMPCheckRxError(
 			return(NDIS_STATUS_SUCCESS);
 		return(NDIS_STATUS_FAILURE);
 	}
-	
+
 	return(NDIS_STATUS_SUCCESS);
 }
 #endif /* CONFIG_STA_SUPPORT */
@@ -634,16 +634,14 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 	PRTMP_TX_RING pTxRing;
 	PTXD_STRUC	  pTxD;
 #ifdef RT_BIG_ENDIAN
-    PTXD_STRUC      pDestTxD;
+	PTXD_STRUC      pDestTxD;
 #endif
 	PNDIS_PACKET  pPacket;
 	UCHAR	FREE = 0;
 	TXD_STRUC	TxD, *pOriTxD;
 	/*ULONG		IrqFlags;*/
 	BOOLEAN			bReschedule = FALSE;
-#ifdef UAPSD_SUPPORT
 	UINT8 TXWISize = pAd->chipCap.TXWISize;
-#endif
 
 	ASSERT(QueIdx < NUM_OF_TX_RING);
 	if (QueIdx >= NUM_OF_TX_RING)

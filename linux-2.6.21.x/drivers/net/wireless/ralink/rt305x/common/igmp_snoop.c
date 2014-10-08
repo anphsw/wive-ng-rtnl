@@ -987,7 +987,7 @@ static rsv_table_t ip_addr_rsvd[] =
 	{ 0xeffffffa, 0xffffffff }, /* UPnP */
 };
 
-inline BOOLEAN IPv4MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
+static inline BOOLEAN IPv4MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
 {
 	UINT32 DstIpAddr;
 	UINT32 Count;
@@ -1006,6 +1006,49 @@ inline BOOLEAN IPv4MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
 	for (Count = 0; Count < sizeof(ip_addr_rsvd)/sizeof(rsv_table_t); Count++)
 		if ((DstIpAddr & ip_addr_rsvd[Count].mask) == (ip_addr_rsvd[Count].addr & ip_addr_rsvd[Count].mask))
 			return TRUE;
+
+	return FALSE;
+}
+
+static inline int IPv6_Transient_Multicast(
+	IN PRT_IPV6_ADDR pIpv6Addr)
+{
+	if ((pIpv6Addr->ipv6_addr32[0] & htonl(0xFF100000)) == htonl(0xFF100000))
+		return 1;
+
+	return 0;
+}
+
+static inline BOOLEAN IPv6MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
+{
+	PUCHAR pIpHeader;
+	PRT_IPV6_HDR pIpv6Hdr;
+	UINT32 offset;
+	INT idx;
+	UINT8 nextProtocol;
+
+	if(!IS_IPV6_MULTICAST_MAC_ADDR(pDstMacAddr))
+		return FALSE;
+
+	pIpHeader = pDstMacAddr + 14;
+	pIpv6Hdr = (PRT_IPV6_HDR)(pIpHeader);
+	offset = IPV6_HDR_LEN;
+		nextProtocol = pIpv6Hdr->nextHdr;
+		while(nextProtocol == IPV6_NEXT_HEADER_HOP_BY_HOP)
+		{
+			if(IPv6ExtHdrHandle((RT_IPV6_EXT_HDR *)(pIpHeader + offset), &nextProtocol, &offset) == FALSE)
+				break;
+		}
+
+	for (idx = 0; idx < IPV6_MULTICAST_FILTER_EXCLUED_SIZE; idx++)
+	{
+		if (nextProtocol == IPv6MulticastFilterExclued[idx])
+			return TRUE;
+	}
+
+	/* Check non-transient multicast */
+	if (!IPv6_Transient_Multicast(&pIpv6Hdr->dstAddr))
+		return TRUE;
 
 	return FALSE;
 }
@@ -1097,6 +1140,7 @@ NDIS_STATUS IgmpPktClone(
 		if (pMemberEntry)
 		{
 			pMemberAddr = pMemberEntry->Addr;
+			pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 			bContinue = TRUE;
 		}
 	}
@@ -1107,7 +1151,8 @@ NDIS_STATUS IgmpPktClone(
 		
 		for(MacEntryIdx=1; MacEntryIdx<MAX_NUMBER_OF_MAC; MacEntryIdx++)
 		{
-			pMacEntry = &pAd->MacTab.Content[MacEntryIdx];
+			pMemberAddr = pAd->MacTab.Content[MacEntryIdx].Addr;
+			pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 			if ((pMacEntry && IS_ENTRY_CLIENT(pMacEntry)) &&
 				(get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev) &&
 				(!MAC_ADDR_EQUAL(pMacEntry->Addr, pSrcMAC))) /* DAD IPv6 issue */
@@ -1173,6 +1218,7 @@ NDIS_STATUS IgmpPktClone(
 			if (pMemberEntry)
 			{
 				pMemberAddr = pMemberEntry->Addr;
+				pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 				bContinue = TRUE;
 			}
 			else
@@ -1182,7 +1228,8 @@ NDIS_STATUS IgmpPktClone(
 		{
 			for(MacEntryIdx=pMacEntry->Aid + 1; MacEntryIdx<MAX_NUMBER_OF_MAC; MacEntryIdx++)
 			{
-				pMacEntry = &pAd->MacTab.Content[MacEntryIdx];
+				pMemberAddr = pAd->MacTab.Content[MacEntryIdx].Addr;
+				pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 				if ((pMacEntry && IS_ENTRY_CLIENT(pMacEntry)) &&
 					(get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev) &&
 					(!MAC_ADDR_EQUAL(pMacEntry->Addr, pSrcMAC)))
@@ -1269,49 +1316,6 @@ BOOLEAN isMldPkt(
 	}while(FALSE);
 
 	return result;
-}
-
-static inline int IPv6_Transient_Multicast(
-	IN PRT_IPV6_ADDR pIpv6Addr)
-{
-	if ((pIpv6Addr->ipv6_addr32[0] & htonl(0xFF100000)) == htonl(0xFF100000))
-		return 1;
-
-	return 0;
-}
-
-BOOLEAN IPv6MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
-{
-	PUCHAR pIpHeader;
-	PRT_IPV6_HDR pIpv6Hdr;
-	UINT32 offset;
-	INT idx;
-	UINT8 nextProtocol;
-
-	if(!IS_IPV6_MULTICAST_MAC_ADDR(pDstMacAddr))
-		return FALSE;
-
-	pIpHeader = pDstMacAddr + 14;
-	pIpv6Hdr = (PRT_IPV6_HDR)(pIpHeader);
-	offset = IPV6_HDR_LEN;
-		nextProtocol = pIpv6Hdr->nextHdr;
-		while(nextProtocol == IPV6_NEXT_HEADER_HOP_BY_HOP)
-		{
-			if(IPv6ExtHdrHandle((RT_IPV6_EXT_HDR *)(pIpHeader + offset), &nextProtocol, &offset) == FALSE)
-				break;
-		}
-
-	for (idx = 0; idx < IPV6_MULTICAST_FILTER_EXCLUED_SIZE; idx++)
-	{
-		if (nextProtocol == IPv6MulticastFilterExclued[idx])
-			return TRUE;
-	}
-
-	/* Check non-transient multicast */
-	if (!IPv6_Transient_Multicast(&pIpv6Hdr->dstAddr))
-		return TRUE;
-
-	return FALSE;
 }
 
 /*  MLD v1 messages have the following format:

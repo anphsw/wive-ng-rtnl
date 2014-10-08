@@ -94,9 +94,6 @@ BOOLEAN isMldPkt(
 	OUT UINT8 *pProtoType,
 	OUT PUCHAR *pMldHeader);
 
-BOOLEAN IPv6MulticastFilterExcluded(
-	IN PUCHAR pDstMacAddr);
-
 VOID MLDSnooping(
 	IN PRTMP_ADAPTER pAd,
 	IN PUCHAR pDstMacAddr,
@@ -149,6 +146,12 @@ NDIS_STATUS IgmpPktClone(
 	IN PMULTICAST_FILTER_TABLE_ENTRY pGroupEntry,
 	IN UCHAR QueIdx,
 	IN UINT8 UserPriority);
+
+
+typedef struct rsv_table {
+	UINT32 addr;
+	UINT32 mask;
+} rsv_table_t;
 
 #endif /* __RTMP_IGMP_SNOOP_H__ */
 

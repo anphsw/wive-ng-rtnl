@@ -400,7 +400,7 @@ BOOLEAN MulticastFilterTableDeleteEntry(
 		}
 		else
 		{
-			DBGPRINT(RT_DEBUG_TRACE, ("%s: the Group doesn't exist.\n", __FUNCTION__));
+			DBGPRINT(RT_DEBUG_ERROR, ("%s: the Group doesn't exist.\n", __FUNCTION__));
 		}
 	} while(FALSE);
 
@@ -608,31 +608,6 @@ BOOLEAN isIgmpPkt(
 		if(IgmpProtocol == IGMP_PROTOCOL_DESCRIPTOR)
 				return TRUE;
 	}
-
-	return FALSE;
-}
-
-BOOLEAN IPv4MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
-{
-	UINT32 DstIpAddr;
-
-	if(!isIgmpMacAddr(pDstMacAddr))
-		return FALSE;
-
-	/* Check IGMP packet */
-	if(*(pDstMacAddr + 23) == IGMP_PROTOCOL_DESCRIPTOR)
-		return TRUE;
-
-	/* Get destination Ip address of IP header */
-	DstIpAddr = ntohl(*((UINT32*)(pDstMacAddr + 30)));
-
-	/* Check address is local multicast */
-	if ((DstIpAddr & 0xffffff00) == 0xe0000000)
-		return TRUE;
-
-	/* Check address is SSDP */
-	if (DstIpAddr == 0xeffffffa)
-		return TRUE;
 
 	return FALSE;
 }
@@ -995,6 +970,88 @@ void rtmp_read_igmp_snoop_from_file(
 	}
 }
 
+static rsv_table_t ip_addr_rsvd[] =
+{
+	{ 0xe0000001, 0xffffffff }, /* All hosts */
+	{ 0xe0000002, 0xffffffff }, /* All routers */
+	{ 0xe0000004, 0xffffffff }, /* DVMRP routers */
+	{ 0xe0000005, 0xffffffff }, /* OSPF1 routers */
+	{ 0xe0000006, 0xffffffff }, /* OSPF2 routers */
+	{ 0xe0000009, 0xffffffff }, /* RIP v2 routers */
+	{ 0xe000000d, 0xffffffff }, /* PIMd routers */
+	{ 0xe0000010, 0xffffffff }, /* IGMP v3 routers */
+	{ 0xe00000fb, 0xffffffff }, /* Reserved */
+	{ 0xe000ff87, 0xffffffff }, /* Reserved */
+	{ 0xeffffffa, 0xffffffff }, /* UPnP */
+};
+
+static inline int IPv6_Transient_Multicast(
+	IN PRT_IPV6_ADDR pIpv6Addr)
+{
+	if ((pIpv6Addr->ipv6_addr32[0] & htonl(0xFF100000)) == htonl(0xFF100000))
+		return 1;
+
+	return 0;
+}
+
+static inline BOOLEAN IPv4MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
+{
+	UINT32 DstIpAddr;
+	UINT32 Count;
+
+	if(!isIgmpMacAddr(pDstMacAddr))
+		return FALSE;
+
+	/* Check IGMP packet */
+	if(*(pDstMacAddr + 23) == IGMP_PROTOCOL_DESCRIPTOR)
+		return TRUE;
+
+	/* Get destination Ip address of IP header */
+	DstIpAddr = ntohl(*((UINT32*)(pDstMacAddr + 30)));
+
+	/* Check adress exist in reserved ranges by ip_addr_rsvd table */
+	for (Count = 0; Count < sizeof(ip_addr_rsvd)/sizeof(rsv_table_t); Count++)
+		if ((DstIpAddr & ip_addr_rsvd[Count].mask) == (ip_addr_rsvd[Count].addr & ip_addr_rsvd[Count].mask))
+			return TRUE;
+
+	return FALSE;
+}
+
+static inline BOOLEAN IPv6MulticastFilterExcluded(
+	IN PUCHAR pDstMacAddr)
+{
+	PUCHAR pIpHeader;
+	PRT_IPV6_HDR pIpv6Hdr;
+	UINT32 offset;
+	INT idx;
+	UINT8 nextProtocol;
+
+	if(!IS_IPV6_MULTICAST_MAC_ADDR(pDstMacAddr))
+		return FALSE;
+
+	pIpHeader = pDstMacAddr + 14;
+	pIpv6Hdr = (PRT_IPV6_HDR)(pIpHeader);
+	offset = IPV6_HDR_LEN;
+	nextProtocol = pIpv6Hdr->nextHdr;
+	while(nextProtocol == IPV6_NEXT_HEADER_HOP_BY_HOP)
+	{
+		if(IPv6ExtHdrHandle((RT_IPV6_EXT_HDR *)(pIpHeader + offset), &nextProtocol, &offset) == FALSE)
+			break;
+	}
+
+	for (idx = 0; idx < IPV6_MULTICAST_FILTER_EXCLUED_SIZE; idx++)
+	{
+		if (nextProtocol == IPv6MulticastFilterExclued[idx])
+			return TRUE;
+	}
+
+	/* Check non-transient multicast */
+	if (!IPv6_Transient_Multicast(&pIpv6Hdr->dstAddr))
+		return TRUE;
+
+	return FALSE;
+}
+
 NDIS_STATUS IgmpPktInfoQuery(
 	IN PRTMP_ADAPTER pAd,
 	IN PUCHAR pSrcBufVA,
@@ -1082,6 +1139,7 @@ NDIS_STATUS IgmpPktClone(
 		if (pMemberEntry)
 		{
 			pMemberAddr = pMemberEntry->Addr;
+			pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 			bContinue = TRUE;
 		}
 	}
@@ -1092,7 +1150,8 @@ NDIS_STATUS IgmpPktClone(
 		
 		for(MacEntryIdx=1; MacEntryIdx<MAX_NUMBER_OF_MAC; MacEntryIdx++)
 		{
-			pMacEntry = &pAd->MacTab.Content[MacEntryIdx];
+			pMemberAddr = pAd->MacTab.Content[MacEntryIdx].Addr;
+			pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 			if ((pMacEntry && IS_ENTRY_CLIENT(pMacEntry)) &&
 			    (get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev) &&
 			    (!MAC_ADDR_EQUAL(pMacEntry->Addr, pSrcMAC))) /* DAD IPv6 issue */
@@ -1157,6 +1216,7 @@ NDIS_STATUS IgmpPktClone(
 			if (pMemberEntry)
 			{
 				pMemberAddr = pMemberEntry->Addr;
+				pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 				bContinue = TRUE;
 			}
 			else
@@ -1166,7 +1226,8 @@ NDIS_STATUS IgmpPktClone(
 		{
 			for(MacEntryIdx=pMacEntry->Aid + 1; MacEntryIdx<MAX_NUMBER_OF_MAC; MacEntryIdx++)
 			{
-				pMacEntry = &pAd->MacTab.Content[MacEntryIdx];
+				pMemberAddr = pAd->MacTab.Content[MacEntryIdx].Addr;
+				pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 				if ((pMacEntry && IS_ENTRY_CLIENT(pMacEntry)) && 
 				    (get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev) &&
 				    (!MAC_ADDR_EQUAL(pMacEntry->Addr, pSrcMAC)))
@@ -1251,49 +1312,6 @@ BOOLEAN isMldPkt(
 	}while(FALSE);
 
 	return result;
-}
-
-static inline int IPv6_Transient_Multicast(
-	IN PRT_IPV6_ADDR pIpv6Addr)
-{
-	if ((pIpv6Addr->ipv6_addr32[0] & htonl(0xFF100000)) == htonl(0xFF100000))
-		return 1;
-
-	return 0;
-}
-
-BOOLEAN IPv6MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
-{
-	PUCHAR pIpHeader;
-	PRT_IPV6_HDR pIpv6Hdr;
-	UINT32 offset;
-	INT idx;
-	UINT8 nextProtocol;
-
-	if(!IS_IPV6_MULTICAST_MAC_ADDR(pDstMacAddr))
-		return FALSE;
-
-	pIpHeader = pDstMacAddr + 14;
-	pIpv6Hdr = (PRT_IPV6_HDR)(pIpHeader);
-	offset = IPV6_HDR_LEN;
-	nextProtocol = pIpv6Hdr->nextHdr;
-	while(nextProtocol == IPV6_NEXT_HEADER_HOP_BY_HOP)
-	{
-		if(IPv6ExtHdrHandle((RT_IPV6_EXT_HDR *)(pIpHeader + offset), &nextProtocol, &offset) == FALSE)
-			break;
-	}
-
-	for (idx = 0; idx < IPV6_MULTICAST_FILTER_EXCLUED_SIZE; idx++)
-	{
-		if (nextProtocol == IPv6MulticastFilterExclued[idx])
-			return TRUE;
-	}
-
-	/* Check non-transient multicast */
-	if (!IPv6_Transient_Multicast(&pIpv6Hdr->dstAddr))
-		return TRUE;
-
-	return FALSE;
 }
 
 /*  MLD v1 messages have the following format:
