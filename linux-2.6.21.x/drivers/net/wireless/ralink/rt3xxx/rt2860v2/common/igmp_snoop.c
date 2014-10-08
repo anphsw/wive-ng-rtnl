@@ -1140,6 +1140,7 @@ NDIS_STATUS IgmpPktClone(
 		if (pMemberEntry)
 		{
 			pMemberAddr = pMemberEntry->Addr;
+			pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 			bContinue = TRUE;
 		}
 	}
@@ -1150,7 +1151,8 @@ NDIS_STATUS IgmpPktClone(
 		
 		for(MacEntryIdx=1; MacEntryIdx<MAX_NUMBER_OF_MAC; MacEntryIdx++)
 		{
-			pMacEntry = &pAd->MacTab.Content[MacEntryIdx];
+			pMemberAddr = pAd->MacTab.Content[MacEntryIdx].Addr;
+			pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 			if ((pMacEntry && IS_ENTRY_CLIENT(pMacEntry)) &&
 			    (get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev) &&
 			    (!MAC_ADDR_EQUAL(pMacEntry->Addr, pSrcMAC))) /* DAD IPv6 issue */
@@ -1215,6 +1217,7 @@ NDIS_STATUS IgmpPktClone(
 			if (pMemberEntry)
 			{
 				pMemberAddr = pMemberEntry->Addr;
+				pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 				bContinue = TRUE;
 			}
 			else
@@ -1224,7 +1227,8 @@ NDIS_STATUS IgmpPktClone(
 		{
 			for(MacEntryIdx=pMacEntry->Aid + 1; MacEntryIdx<MAX_NUMBER_OF_MAC; MacEntryIdx++)
 			{
-				pMacEntry = &pAd->MacTab.Content[MacEntryIdx];
+				pMemberAddr = pAd->MacTab.Content[MacEntryIdx].Addr;
+				pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 				if ((pMacEntry && IS_ENTRY_CLIENT(pMacEntry)) && 
 				    (get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev) &&
 				    (!MAC_ADDR_EQUAL(pMacEntry->Addr, pSrcMAC)))
@@ -1238,7 +1242,6 @@ NDIS_STATUS IgmpPktClone(
 				bContinue = FALSE;
 		}
 	}
-
 	return NDIS_STATUS_SUCCESS;
 }
 
