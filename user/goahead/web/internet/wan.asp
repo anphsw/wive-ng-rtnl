@@ -84,6 +84,12 @@ function CheckValue(form)
 		return false;
 	}
 
+	if (!validateMac(form.wanMac.value))
+	{
+		form.wanMac.focus();
+		return false;
+	}
+
 	var wan_mtu = form.wan_mtu.value * 1;
 	if ((wan_mtu < 80) && (wan_mtu != 0))
 	{
@@ -238,7 +244,7 @@ function wanMtuChange(form)
               </select></td>
           </tr>
           <tr id="staticDNSAssignRow">
-            <td class="head" id="wMacAddressClone">Assign static DNS Server</td>
+            <td class="head" id="wStaticDns">Assign static DNS Server</td>
             <td><input name="wStaticDnsEnable" type="checkbox" onClick="dnsSwitchClick(this.form);" ></td>
           </tr>
           <tr id="priDNSrow" style="display:none;" >
@@ -250,8 +256,18 @@ function wanMtuChange(form)
             <td><input name="staticSecDns" class="mid" value="<% getDns(2); %>"></td>
           </tr>
           <tr id="natRowDisplay">
-            <td class="head" id="wMacAddressClone">Enable NAT</td>
+            <td class="head" id="wNatEnabled">Enable NAT</td>
             <td><input name="natEnabled" type="checkbox"></td>
+          </tr>
+        </table>
+        <br>
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2">MAC address</td>
+          </tr>
+          <tr id="MACrow">
+            <td class="head" id="wMacAddr">WAN MAC address</td>
+            <td><input name="wanMac" id="wanMac" class="mid" value="<% getCfgGeneral(1, "WAN_MAC_ADDR"); %>"></td>
           </tr>
         </table>
         <br>

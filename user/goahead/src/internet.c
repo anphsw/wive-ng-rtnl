@@ -2151,7 +2151,7 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 static void setWan(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*ctype, *req_ip;
-	char_t	*ip, *nm, *gw;
+	char_t	*ip, *nm, *gw, *mac, *oldmac;
 	char_t	*eth, *user, *pass;
 	char_t	*nat_enable;
 	char_t	*vpn_srv, *vpn_mode;
@@ -2160,13 +2160,13 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char_t *wan_mtu;
 	char_t *submitUrl;
 	char_t *st_en, *pd, *sd;
+	int     i, flag = 1;
 
 	char	*opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	char	*lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
 	char	*lan2enabled = nvram_get(RT2860_NVRAM, "Lan2Enabled");
 
-	ctype = ip = nm = gw = eth = user = pass =
-	vpn_srv = vpn_mode = l2tp_srv = l2tp_mode = NULL;
+	ctype = ip = nm = gw = eth = user = pass = mac = vpn_srv = vpn_mode = l2tp_srv = l2tp_mode = NULL;
 
 	ctype = websGetVar(wp, T("connectionType"), T("0"));
 	req_ip = websGetVar(wp, T("dhcpReqIP"), T(""));
@@ -2261,6 +2261,29 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	pd = websGetVar(wp, T("staticPriDns"), T(""));
 	sd = websGetVar(wp, T("staticSecDns"), T(""));
 
+	mac = websGetVar(wp, T("wanMac"), T(""));
+	oldmac = nvram_get(RT2860_NVRAM, "WAN_MAC_ADDR");
+	if (strlen(mac) == 17) {
+		for (i = 0; i < strlen(mac); i++) {
+			switch (i % 3) {
+				case 2:
+					if (mac[i] == '-')
+						mac[i] = ':';
+					flag &= (mac[i] == ':');
+					break;
+				default:
+					flag &= ( (mac[i] >= '0' && mac[i] <= '9') ||
+						(mac[i] >= 'a' && mac[i] <= 'f') ||
+						(mac[i] >= 'A' && mac[i] <= 'F') );
+			}
+		}
+	} else if (strlen(mac) == 0)
+		mac = oldmac;
+	if (!flag) {
+		websError(wp, 200, "Invalid MAC Address");
+		return;
+	}
+
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "wan_static_dns", st_en);
 
@@ -2285,9 +2308,9 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
+	if (strcmp(oldmac, mac) == 0) {
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	if ( !submitUrl[0] )
-	{
+		if ( !submitUrl[0] ) {
 		// debug print
 		websHeader(wp);
 		websWrite(wp, T("<h2>Mode: %s</h2><br>\n"), ctype);
@@ -2297,19 +2320,24 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 			websWrite(wp, T("Subnet Mask: %s<br>\n"), nm);
 			websWrite(wp, T("Default Gateway: %s<br>\n"), gw);
 		}
-		else if (!strncmp(ctype, "DHCP", 5))
-		{
-		}
-
 		websFooter(wp);
 		websDone(wp, 200);
-	}
-	else
+		} else
 		websRedirect(wp, submitUrl);
-
 	/* Prevent deadloop at WAN apply change if VPN started */
 	doSystem("ip route flush cache && service vpnhelper stop && service wan stop");
 	initInternet();
+	} else {
+		nvram_init(RT2860_NVRAM);
+		nvram_bufset(RT2860_NVRAM, "WAN_MAC_ADDR", mac);
+		nvram_bufset(RT2860_NVRAM, "CHECKMAC", "NO");
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
+		websWrite(wp, T("Please wait - reboot for mac change.\n"));
+		sleep(1);
+		sync();
+		reboot_now();
+	}
 }
 
 #ifdef CONFIG_USER_CHILLISPOT

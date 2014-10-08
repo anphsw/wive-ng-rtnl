@@ -343,12 +343,13 @@
 1) transmission: disable ipv6 by default (avoid kernel panic on some installations).<br>
 2) usb: fix double modem init.<br>
 3) goahead: cleanup and small fixes.<br>
-4) hw_nat: update to 2.51 version.<br>
-5) kernel: spi: add more flash support.<br>
-6) goahead: fix regression crash at short reset press.<br>
-7) kenrel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
-8) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
-9) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
+4) goahead: add change wan mac in webUI.<br>
+5) hw_nat: update to 2.51 version.<br>
+6) kernel: spi: add more flash support.<br>
+7) goahead: fix regression crash at short reset press.<br>
+8) kenrel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
+9) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
+10) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
 <br>
 <br>
 <br>
