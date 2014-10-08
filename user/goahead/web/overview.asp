@@ -87,7 +87,7 @@ function setLanguage()
             <a href="/adm/statistic.asp" id="ovStatistic">Statistic</a><br />
             <a href="/adm/management.asp" id="ovManagement">Management</a><br />
             <hr /><br />
-            WIVE FIRMWARE FREE ONLY FOR NOT COMMERCIAL USE.
+            WIVE FIRMWARE IS FREE FOR THE NON-COMMERCIAL USE ONLY.
             <br />
             Conditions of commercial use are discussed individually.
             <br /><br />
