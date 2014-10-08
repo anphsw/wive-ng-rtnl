@@ -436,7 +436,6 @@ int nvram_clear(int index)
 		return -1;
 	}
 	close(fd);
-
 	fb[index].dirty = 0;
 	return 0;
 }

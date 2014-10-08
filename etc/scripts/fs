@@ -77,6 +77,8 @@ nvramreset() {
     # cleanup with skip clean macs and is_wive and checkmacs flags
     ###############################################################
     echo "Load user defaults."
+    # remove backuped config
+    rm -f /etc/backup/nvram_backup.dat
     nvram_default 2860
 }
 
@@ -99,6 +101,9 @@ fullreset() {
     service checkconf genmac
     echo "Erase RW-FS partitions"
     mtd_write erase RW-FS
+    echo "Set boot flag to regenerate all."
+    nvram_set CHECKMAC "YES"
+    nvram_set IS_WIVE "NO"
     echo "Now reboot..."
     reboot
 }
