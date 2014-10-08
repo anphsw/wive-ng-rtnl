@@ -1171,7 +1171,6 @@ NDIS_STATUS IgmpPktClone(
 	/* check all members of the IGMP group. */
 	while(bContinue == TRUE)
 	{
-		pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 		if (pMacEntry && (Sst == SST_ASSOC) && (pMacEntry->PortSecured == WPA_802_1X_PORT_SECURED))
 		{
 			OS_PKT_CLONE(pAd, pPacket, pSkbClone, MEM_ALLOC_FLAG);
