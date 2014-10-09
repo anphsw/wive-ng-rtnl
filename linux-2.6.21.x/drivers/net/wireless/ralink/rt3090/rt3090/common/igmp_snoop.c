@@ -198,7 +198,7 @@ BOOLEAN MulticastFilterTableInsertEntry(
 	MULTICAST_FILTER_TABLE_ENTRY *pEntry = NULL, *pCurrEntry, *pPrevEntry;
 	PMEMBER_ENTRY pMemberEntry;
 	PMULTICAST_FILTER_TABLE pMulticastFilterTable = pAd->pMulticastFilterTable;
-	
+
 	if (pMulticastFilterTable == NULL)
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("%s Multicase filter table is not ready.\n", __FUNCTION__));
@@ -405,7 +405,7 @@ BOOLEAN MulticastFilterTableDeleteEntry(
 	} while(FALSE);
 
 	RTMP_SEM_UNLOCK(&pMulticastFilterTable->MulticastFilterTabLock);
-    
+
 	return TRUE;
 }
 
@@ -424,7 +424,7 @@ PMULTICAST_FILTER_TABLE_ENTRY MulticastFilterTableLookup(
 {
 	ULONG HashIdx, Now;
 	PMULTICAST_FILTER_TABLE_ENTRY pEntry = NULL, pPrev = NULL;
-	
+
 	if (pMulticastFilterTable == NULL)
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("%s Multicase filter table is not ready.\n", __FUNCTION__));
@@ -541,24 +541,24 @@ VOID IGMPSnooping(
 				AuxDataLen = (UCHAR)(*(pGroup + 1));
 				numOfSources = ntohs(*((UINT16 *)(pGroup + 2)));
 				pGroupIpAddr = (PUCHAR)(pGroup + 4);
-				DBGPRINT(RT_DEBUG_TRACE, ("IGMPv3 Type=%d, ADL=%d, numOfSource=%d\n", 
+				DBGPRINT(RT_DEBUG_TRACE, ("IGMPv3 Type=%d, ADL=%d, numOfSource=%d\n",
 								GroupType, AuxDataLen, numOfSources));
 				ConvertMulticastIP2MAC(pGroupIpAddr, (PUCHAR *)&pGroupMacAddr, ETH_P_IP);
 				DBGPRINT(RT_DEBUG_TRACE, ("IGMP Group=%02x:%02x:%02x:%02x:%02x:%02x\n",
-					GroupMacAddr[0], GroupMacAddr[1], GroupMacAddr[2], 
+					GroupMacAddr[0], GroupMacAddr[1], GroupMacAddr[2],
 					GroupMacAddr[3], GroupMacAddr[4], GroupMacAddr[5]));
 
 				do
 				{
-					if ((GroupType == MODE_IS_EXCLUDE) 
-						|| (GroupType == CHANGE_TO_EXCLUDE_MODE) 
+					if ((GroupType == MODE_IS_EXCLUDE)
+						|| (GroupType == CHANGE_TO_EXCLUDE_MODE)
 						|| (GroupType == ALLOW_NEW_SOURCES))
 					{
 						MulticastFilterTableInsertEntry(pAd, GroupMacAddr, pSrcMacAddr, pDev, MCAT_FILTER_DYNAMIC);
 						break;
 					}
 
-					if ((GroupType == CHANGE_TO_INCLUDE_MODE) 
+					if ((GroupType == CHANGE_TO_INCLUDE_MODE)
 						|| (GroupType == MODE_IS_INCLUDE)
 						|| (GroupType == BLOCK_OLD_SOURCES))
 					{
@@ -1134,7 +1134,7 @@ NDIS_STATUS IgmpPktClone(
 	{
 		if (!pGroupEntry)
 			return NDIS_STATUS_FAILURE;
-		
+
 		pMemberEntry = (PMEMBER_ENTRY)pGroupEntry->MemberList.pHead;
 		if (pMemberEntry)
 		{
@@ -1147,7 +1147,7 @@ NDIS_STATUS IgmpPktClone(
 	{
 		pNetDev = GET_OS_PKT_NETDEV(pPacket);
 		pSrcMAC = pSrcBufVA + 6;
-		
+
 		for(MacEntryIdx=1; MacEntryIdx<MAX_NUMBER_OF_MAC; MacEntryIdx++)
 		{
 			pMemberAddr = pAd->MacTab.Content[MacEntryIdx].Addr;
@@ -1221,7 +1221,7 @@ NDIS_STATUS IgmpPktClone(
 			else
 				bContinue = FALSE;
 		}
-		else
+		else if (IgmpPktInGroup == IGMP_PKT)
 		{
 			for(MacEntryIdx=pMacEntry->Aid + 1; MacEntryIdx<MAX_NUMBER_OF_MAC; MacEntryIdx++)
 			{
@@ -1239,6 +1239,8 @@ NDIS_STATUS IgmpPktClone(
 			if (MacEntryIdx == MAX_NUMBER_OF_MAC)
 				bContinue = FALSE;
 		}
+		else
+			bContinue = FALSE;
 	}
 
 	return NDIS_STATUS_SUCCESS;
@@ -1328,86 +1330,86 @@ BOOLEAN isMldPkt(
 	|                                                               |
 	+                                                               +
 	|                                                               |
-	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ 
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 */
 
 /*	Version 3 Membership Report Message
-	0                   1                   2                   3       
-	0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1      
-	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+      
-	|  Type = 143   |    Reserved   |           Checksum            |      
-	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+      
-	|           Reserved            |  Number of Group Records (M)  |      
-	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+      
-	|                                                               |      
-	.                                                               .      
-	.               Multicast Address Record [1]                    . 
-	.                                                               .      
-	|                                                               |      
-	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+      
-	|                                                               |      
-	.                                                               .      
-	.               Multicast Address Record [2]                    . 
-	.                                                               .      
-	|                                                               |      
-	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+      
-	|                               .                               |      
-	.                               .                               .      
-	|                               .                               |      
-	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+      
-	|                                                               |      
-	.                                                               .      
-	.               Multicast Address Record [M]                    . 
-	.                                                               .      
-	|                                                               |      
+	0                   1                   2                   3
+	0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|  Type = 143   |    Reserved   |           Checksum            |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|           Reserved            |  Number of Group Records (M)  |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|                                                               |
+	.                                                               .
+	.               Multicast Address Record [1]                    .
+	.                                                               .
+	|                                                               |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|                                                               |
+	.                                                               .
+	.               Multicast Address Record [2]                    .
+	.                                                               .
+	|                                                               |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|                               .                               |
+	.                               .                               .
+	|                               .                               |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|                                                               |
+	.                                                               .
+	.               Multicast Address Record [M]                    .
+	.                                                               .
+	|                                                               |
 	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
-	where each Group Record has the following internal format:      
-	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+      
-	|  Record Type  |  Aux Data Len |     Number of Sources (N)     |      
-	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+      
-    |                                                               |    
-    *                                                               *    
-    |                                                               |    
-    *                       Multicast Address                       *    
-    |                                                               |    
-    *                                                               *    
+	where each Group Record has the following internal format:
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|  Record Type  |  Aux Data Len |     Number of Sources (N)     |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                                                               |
-	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+      
-    |                                                               |    
-    *                                                               *    
-    |                                                               |    
-    *                       Source Address [1]                      *    
-    |                                                               |    
-    *                                                               *    
-    |                                                               |    
-    +-                                                             -+    
-    |                                                               |    
-    *                                                               *    
-    |                                                               |    
-    *                       Source Address [2]                      *    
-    |                                                               |    
-    *                                                               *    
-    |                                                               |    
-    +-                                                             -+    
-    .                               .                               .    
-    .                               .                               .    
-    .                               .                               .    
-    +-                                                             -+    
-    |                                                               |    
-    *                                                               *    
-    |                                                               |    
-    *                       Source Address [N]                      *    
-    |                                                               |    
-    *                                                               *    
-    |                                                               |    
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+    
-    |                                                               |    
-    .                                                               .    
-    .                         Auxiliary Data                        .    
-    .                                                               .    
-    |                                                               |    
+    *                                                               *
+    |                                                               |
+    *                       Multicast Address                       *
+    |                                                               |
+    *                                                               *
+    |                                                               |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                                                               |
+    *                                                               *
+    |                                                               |
+    *                       Source Address [1]                      *
+    |                                                               |
+    *                                                               *
+    |                                                               |
+    +-                                                             -+
+    |                                                               |
+    *                                                               *
+    |                                                               |
+    *                       Source Address [2]                      *
+    |                                                               |
+    *                                                               *
+    |                                                               |
+    +-                                                             -+
+    .                               .                               .
+    .                               .                               .
+    .                               .                               .
+    +-                                                             -+
+    |                                                               |
+    *                                                               *
+    |                                                               |
+    *                       Source Address [N]                      *
+    |                                                               |
+    *                                                               *
+    |                                                               |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                                                               |
+    .                                                               .
+    .                         Auxiliary Data                        .
+    .                                                               .
+    |                                                               |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 */
 
