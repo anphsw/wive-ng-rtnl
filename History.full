@@ -2054,6 +2054,7 @@
 8) kenrel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
 9) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
 10) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
+11) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
 <br>
 <br>
 <br>
