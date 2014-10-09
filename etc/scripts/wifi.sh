@@ -5,6 +5,11 @@
 
 echo ">>>>> RECONFIGURE WIFI IF = $1 <<<<<<<<<<"
 
+#####################WORKAROUND FOR TX RING FULL IN WIFI DRIVERS#############################
+iwpriv $1 set AutoFallBack=1
+iwpriv $1 set LongRetry=3
+iwpriv $1 set ShortRetry=5
+
 #############################################################################################
 eval `nvram_buf_get 2860 HiPower AutoConnect OperationMode TxPower`
 ########################################ALLMODE param########################################
