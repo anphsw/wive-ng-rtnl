@@ -79,7 +79,7 @@ config RAETH_TSO
 
 config RAETH_TSOV6
         bool "TSOV6 (Tcp Segmentaton Offload)"
-	depends on RAETH_TSO
+	depends on RAETH_TSO && IPV6
 
 config RAETH_RW_PDMAPTR_FROM_VAR
 	bool

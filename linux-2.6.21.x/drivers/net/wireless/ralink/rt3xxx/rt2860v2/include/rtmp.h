@@ -1833,11 +1833,12 @@ typedef struct _COMMON_CONFIG {
 
 	BOOLEAN HT_Disable;	/* 1: disable HT function; 0: enable HT function */
 
+#if defined (RT2883) || defined (RT3883)
 	ULONG PhyRateLimit;	/* PHY Rate limit in Mbps */
 	INT		FixedRate;	/* Fix the rate during Rate Adaptation. FixedRate is ItemNo index into RateSwitch Table. -1 => disabled. */
-#if defined(RT2883) || defined(RT3883) || defined(RT3593)
 	BOOLEAN FineAGC;	/* Fine AGC enabled */
-#endif
+#endif /* defined (RT2883) || defined (RT3883) */
+
 #ifdef PRE_ANT_SWITCH
 	BOOLEAN PreAntSwitch;	/* Preamble Antenna Switch */
 	SHORT PreAntSwitchRSSI;	/* Preamble Antenna Switch RSSI threshold */
@@ -3555,6 +3556,11 @@ struct _RTMP_ADAPTER {
 	CmdQ CmdQ;
 	NDIS_SPIN_LOCK CmdQLock;	/* CmdQLock spinlock */
 	RTMP_OS_TASK cmdQTask;
+
+
+/*****************************************************************************************/
+/*      RBUS related parameters                                                           								  */
+/*****************************************************************************************/
 
 /*****************************************************************************************/
 /*      Both PCI/USB related parameters                                                  							  */

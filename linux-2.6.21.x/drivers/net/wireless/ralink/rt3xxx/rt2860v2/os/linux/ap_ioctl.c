@@ -249,7 +249,7 @@ INT rt28xx_ap_ioctl(
 /*				PCHAR pBssidStr; */
 
 				wrqin->u.ap_addr.sa_family = ARPHRD_ETHER;
-				/*memcpy(wrqin->u.ap_addr.sa_data, &pAd->ApCfg.MBSSID[pObj->ioctl_if].Bssid, ETH_ALEN); */
+				/*memcpy(wrqin->u.ap_addr.sa_data, &pAd->ApCfg.MBSSID[pObj->ioctl_if].Bssid, MAC_ADDR_LEN); */
 
 				RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_AP_SIOCGIWAP, 0,
 								wrqin->u.ap_addr.sa_data, RT_DEV_PRIV_FLAGS_GET(net_dev));

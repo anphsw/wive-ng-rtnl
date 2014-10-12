@@ -55,21 +55,18 @@ BOOLEAN rtstrmactohex(PSTRING s1, PSTRING s2)
 
 }
 
-#define ASC_LOWER(_x)	((((_x) >= 0x41) && ((_x) <= 0x5a)) ? (_x) + 0x20 : (_x))
+
 /* we assume the s1 and s2 both are strings.*/
 BOOLEAN rtstrcasecmp(PSTRING s1, PSTRING s2)
 {
 	PSTRING p1 = s1, p2 = s2;
-	CHAR c1, c2;
 	
 	if (strlen(s1) != strlen(s2))
 		return FALSE;
 	
 	while(*p1 != '\0')
 	{
-		c1 = ASC_LOWER(*p1);
-		c2 = ASC_LOWER(*p2);
-		if(c1 != c2)
+		if((*p1 != *p2) && ((*p1 ^ *p2) != 0x20))
 			return FALSE;
 		p1++;
 		p2++;
@@ -592,7 +589,7 @@ static int rtmp_parse_key_buffer_from_file(IN  PRTMP_ADAPTER pAd,IN  PSTRING buf
 	    ((KeyType == 0) && (KeyLen != 10) && (KeyLen != 26)) ||
 	    ((KeyType== 1) && (KeyLen != 5) && (KeyLen != 13)))
 	{
-		DBGPRINT(RT_DEBUG_ERROR, ("Key%dStr is Invalid key length(%ld) or Type(%ld)\n", 
+		DBGPRINT(RT_DEBUG_TRACE, ("Key%dStr is Invalid key length(%ld) or Type(%ld)\n", 
 								KeyIdx+1, KeyLen, KeyType));
 		return FALSE;
 	}
@@ -1889,10 +1886,9 @@ static void HTParametersHook(
     if (RTMPGetKeyParameter("HT_MIMOPSMode", pValueStr, 25, pInput, TRUE))
     {
         Value = simple_strtol(pValueStr, 0, 10);
-	/* Current only always enable/disable support */
-        if ((Value == 0) || (Value > MMPS_ENABLE))
+        if (Value > MMPS_ENABLE)
         {
-			pAd->CommonCfg.BACapability.field.MMPSmode = MMPS_STATIC;
+			pAd->CommonCfg.BACapability.field.MMPSmode = MMPS_ENABLE;
         }
         else
         {
@@ -5430,6 +5426,7 @@ free_resource:
 
 	os_free_mem(NULL, buffer);
 
+	return TRUE;
 }
 
 VOID InitSkuRateDiffTable(

@@ -471,6 +471,7 @@ PNET_DEV RtmpPhyNetDevInit(
 	return net_dev;
 }
 
+
 VOID *RtmpNetEthConvertDevSearch(
 	IN	VOID			*net_dev_,
 	IN	UCHAR			*pData)

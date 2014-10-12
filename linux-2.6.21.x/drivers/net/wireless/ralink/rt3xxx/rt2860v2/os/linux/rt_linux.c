@@ -366,7 +366,6 @@ PNDIS_PACKET RTMP_AllocateFragPacketBuffer(
 
 	if (pkt) {
 		MEM_DBG_PKT_ALLOC_INC(pkt);
-		RTMP_SET_PACKET_SOURCE(OSPKT_TO_RTPKT(pkt), PKTSRC_NDIS);
 	}
 
 	return (PNDIS_PACKET) pkt;
@@ -410,7 +409,6 @@ NDIS_STATUS RTMPAllocateNdisPacket(
 	/* 3. update length of packet */
 	skb_put(GET_OS_PKT_TYPE(pPacket), HeaderLen + DataLen);
 
-	RTMP_SET_PACKET_SOURCE(pPacket, PKTSRC_NDIS);
 /*	printk(KERN_ERR "%s : pPacket = %p, len = %d\n", __FUNCTION__,
 	pPacket, GET_OS_PKT_LEN(pPacket));*/
 	*ppPacket = pPacket;
@@ -1198,8 +1196,8 @@ static inline void __RtmpOSFSInfoChange(OS_FS_INFO * pOSFSInfo,
 		pOSFSInfo->fsgid = current->fsgid;
 		current->fsuid = current->fsgid = 0;
 #else
-		pOSFSInfo->fsuid = 0;//current_fsuid();  
-		pOSFSInfo->fsgid = 0;//current_fsgid();
+		pOSFSInfo->fsuid = current_fsuid();
+		pOSFSInfo->fsgid = current_fsgid();
 #endif
 		pOSFSInfo->fs = get_fs();
 		set_fs(KERNEL_DS);
@@ -2495,7 +2493,7 @@ VOID RtmpOsPktNatNone(IN PNDIS_PACKET pNetPkt) {
 #if !defined(CONFIG_RA_NAT_NONE)
 #if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
 	struct sk_buff *pRxPkt = RTPKT_TO_OSPKT(pNetPkt);
-	FOE_AI_UNHIT(pRxPkt);
+	FOE_AI(pRxPkt) = UN_HIT;
 #endif /* CONFIG_RA_HW_NAT || CONFIG_RA_HW_NAT_MODULE */
 #endif /* CONFIG_RA_NAT_NONE */
 #endif /* RTMP_RBUS_SUPPORT */
@@ -4962,7 +4960,6 @@ VOID RtmpOsPktBodyCopy(IN PNET_DEV pNetDev,
 		       IN PUCHAR pData) {
 	memcpy(skb_put(pNetPkt, ThisFrameLen), pData, ThisFrameLen);
 	SET_OS_PKT_NETDEV(pNetPkt, pNetDev);
-	RTMP_SET_PACKET_SOURCE(OSPKT_TO_RTPKT(pNetPkt), PKTSRC_NDIS);
 }
 
 /*

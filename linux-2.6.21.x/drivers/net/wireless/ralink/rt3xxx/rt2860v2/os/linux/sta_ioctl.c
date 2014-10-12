@@ -857,37 +857,35 @@ int rt_ioctl_giwscan(struct net_device *dev,
 	}
 
 #if WIRELESS_EXT >= 17
-    if (data->length > 0)
-        end_buf = extra + data->length;
-    else
-        end_buf = extra + IW_SCAN_MAX_DATA;
+	if (data->length > 0)
+    	    end_buf = extra + data->length;
+	else
+    	    end_buf = extra + IW_SCAN_MAX_DATA;
 #else
-    end_buf = extra + IW_SCAN_MAX_DATA;
+        end_buf = extra + IW_SCAN_MAX_DATA;
 #endif
 
-	for (i = 0; i < pIoctlScan->BssNr; i++) 
+	for (i = 0; i < pIoctlScan->BssNr; i++)
 	{
-		if (current_ev >= end_buf)
-        {
+		if (current_ev >= end_buf) {
 #if WIRELESS_EXT >= 17
 			status = -E2BIG;
 			goto go_out;
 #else
 			break;
 #endif
-        }
-		
-		/*MAC address */
-		/*================================ */
-		memset(&iwe, 0, sizeof(iwe));
-		iwe.cmd = SIOCGIWAP;
-		iwe.u.ap_addr.sa_family = ARPHRD_ETHER;
-				memcpy(iwe.u.ap_addr.sa_data, &pIoctlScan->pBssTable[i].Bssid, ETH_ALEN);
+        	}
+
+	/*MAC address */
+	/*================================ */
+	memset(&iwe, 0, sizeof(iwe));
+	iwe.cmd = SIOCGIWAP;
+	iwe.u.ap_addr.sa_family = ARPHRD_ETHER;
+	memcpy(iwe.u.ap_addr.sa_data, &pIoctlScan->pBssTable[i].Bssid, ETH_ALEN);
 
         previous_ev = current_ev;
-		current_ev = IWE_STREAM_ADD_EVENT(info, current_ev,end_buf, &iwe, IW_EV_ADDR_LEN);
-        if (current_ev == previous_ev)
-        {
+	current_ev = IWE_STREAM_ADD_EVENT(info, current_ev, end_buf, &iwe, IW_EV_ADDR_LEN);
+        if (current_ev == previous_ev) {
 #if WIRELESS_EXT >= 17
             status = -E2BIG;
 			goto go_out;

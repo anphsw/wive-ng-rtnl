@@ -322,7 +322,6 @@ PNDIS_PACKET RTMP_AllocateFragPacketBuffer(
 	if (pkt)
 	{
 		MEM_DBG_PKT_ALLOC_INC(pAd);
-		RTMP_SET_PACKET_SOURCE(OSPKT_TO_RTPKT(pkt), PKTSRC_NDIS);
 	}
 
 	return (PNDIS_PACKET) pkt;
@@ -403,7 +402,6 @@ NDIS_STATUS RTMPAllocateNdisPacket(
 	// 3. update length of packet
  	skb_put(GET_OS_PKT_TYPE(pPacket), HeaderLen+DataLen);
 
-	RTMP_SET_PACKET_SOURCE(pPacket, PKTSRC_NDIS);
 //	printk("%s : pPacket = %p, len = %d\n", __FUNCTION__, pPacket, GET_OS_PKT_LEN(pPacket));
 	*ppPacket = pPacket;
 	return NDIS_STATUS_SUCCESS;
@@ -854,7 +852,7 @@ void announce_802_3_packet(
 	} else
 #else
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-		FOE_AI_UNHIT(pRxPkt);
+		FOE_AI(pRxPkt) = UN_HIT;
 #endif // defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) //
 #endif // !defined(CONFIG_RA_NAT_NONE) //
 #endif // RTMP_RBUS_SUPPORT //

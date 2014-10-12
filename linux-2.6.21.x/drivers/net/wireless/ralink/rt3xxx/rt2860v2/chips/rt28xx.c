@@ -29,7 +29,6 @@
 #ifdef RT28xx
 
 #include "rt_config.h"
-#include <asm/rt2880/rt_mmap.h>
 
 VOID RT28xx_ChipSwitchChannel(
 	IN PRTMP_ADAPTER 			pAd,

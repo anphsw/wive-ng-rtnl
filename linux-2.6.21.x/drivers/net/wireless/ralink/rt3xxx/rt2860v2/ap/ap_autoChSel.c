@@ -406,7 +406,7 @@ static inline UCHAR SelectClearChannelCCA(
 			
 	AutoChannelSkipListSetDirty(pAd);	
 	
-	printk("======================RT3xxx=========================\n");
+	printk("=======================APSOC==========================\n");
 	for (channel_idx = 0; channel_idx < pAd->ChannelListNum; channel_idx++)
 	{
 		printk("Channel %d : Dirty = %ld, False CCA = %u, Busy Time = %u, Skip Channel = %s\n",

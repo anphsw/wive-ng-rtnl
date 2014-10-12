@@ -30,7 +30,6 @@
 */
 #include	"rt_config.h"
 
-#include <linux/prefetch.h>
 
 VOID DBGPRINT_TX_RING(
 	IN PRTMP_ADAPTER  pAd,
@@ -621,7 +620,7 @@ NDIS_STATUS RTMPCheckRxError(
 			return(NDIS_STATUS_SUCCESS);
 		return(NDIS_STATUS_FAILURE);
 	}
-
+	
 	return(NDIS_STATUS_SUCCESS);
 }
 #endif /* CONFIG_STA_SUPPORT */
@@ -644,6 +643,7 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 #ifdef UAPSD_SUPPORT
 	UINT8 TXWISize = pAd->chipCap.TXWISize;
 #endif
+
 	ASSERT(QueIdx < NUM_OF_TX_RING);
 	if (QueIdx >= NUM_OF_TX_RING)
 		return FALSE;

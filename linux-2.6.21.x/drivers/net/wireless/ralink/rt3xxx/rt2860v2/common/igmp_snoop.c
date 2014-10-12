@@ -52,9 +52,6 @@ static inline VOID FreeGrpMemberEntry(
 static VOID IGMPTableDisplay(
 	IN PRTMP_ADAPTER pAd);
 
-static BOOLEAN isIgmpMacAddr(
-	IN PUCHAR pMacAddr);
-
 static VOID InsertIgmpMember(
 	IN PMULTICAST_FILTER_TABLE pMulticastFilterTable,
 	IN PLIST_HEADER pList,
@@ -1178,10 +1175,6 @@ NDIS_STATUS IgmpPktClone(
 				return NDIS_STATUS_FAILURE;
 
 			RTMP_SET_PACKET_WCID(pSkbClone, (UCHAR)pMacEntry->Aid);
-			/* Pkt type must set to PKTSRC_NDIS. */
-			/* It cause of the deason that APHardTransmit() */
-			/* doesn't handle PKTSRC_DRIVER pkt type in version 1.3.0.0. */
-			RTMP_SET_PACKET_SOURCE(pSkbClone, PKTSRC_NDIS);
 
 			if (PsMode == PWR_SAVE)
 			{
@@ -1196,7 +1189,7 @@ NDIS_STATUS IgmpPktClone(
 					StopNetIfQueue(pAd, QueIdx, pSkbClone);
 #endif /* BLOCK_NET_IF */
 					RELEASE_NDIS_PACKET(pAd, pSkbClone, NDIS_STATUS_FAILURE);
-					return NDIS_STATUS_FAILURE;
+					return NDIS_STATUS_RESOURCES;
 				}
 				else
 				{

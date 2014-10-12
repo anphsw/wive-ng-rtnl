@@ -29,13 +29,10 @@
 #ifdef RT5350
 
 #include	"rt_config.h"
-#include        <asm/rt2880/rt_mmap.h>
 
 #ifndef RTMP_RF_RW_SUPPORT
 #error "You Should Enable compile flag RTMP_RF_RW_SUPPORT for this chip"
 #endif // RTMP_RF_RW_SUPPORT //
-
-VOID RT5350_ChipAGCInit(IN PRTMP_ADAPTER pAd, IN UCHAR BandWidth);
 
 UCHAR	RT5350_EeBuffer[EEPROM_SIZE] = {
 	0x52, 0x33, 0x01, 0x01, 0x00, 0x0c, 0x43, 0x30, 0x52, 0x88, 0xff, 0xff, 0xff, 0xff, 
@@ -1247,7 +1244,7 @@ VOID RT5350_AsicTxAlcGetAutoAgcOffset(
 	CHAR TotalDeltaPower = 0; 
 	BBP_R49_STRUC BbpR49;
 	UINT32 desiredTSSI = 0, currentTSSI = 0, room_up = 0, room_down = 0;
-	const TX_POWER_TUNING_ENTRY_STRUCT *TxPowerTuningTable = pAd->chipCap.TxPowerTuningTable_2G;
+	TX_POWER_TUNING_ENTRY_STRUCT *TxPowerTuningTable = pAd->chipCap.TxPowerTuningTable_2G;
 	PTX_POWER_TUNING_ENTRY_STRUCT pTxPowerTuningEntry = NULL;
 	UCHAR RFValue = 0;
 	CHAR DeltaPwr = 0, TuningTableIndex = 0;

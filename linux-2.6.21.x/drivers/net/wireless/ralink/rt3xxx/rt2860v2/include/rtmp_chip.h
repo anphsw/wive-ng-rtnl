@@ -38,23 +38,10 @@ struct _RSSI_SAMPLE;
 #include "chip/mac_pci.h"
 #endif /* RTMP_MAC_PCI */
 
-
-#ifdef RT2860
-#include "chip/rt2860.h"
-#include "chip/rt28xx.h"
-#endif /* RT2860 */
-
-
-
-
 #ifdef RT2880
 #include "chip/rt2880.h"
 #include "chip/rt28xx.h"
 #endif /* RT2880 */
-
-#ifdef RT2883
-#include "chip/rt2883.h"
-#endif /* RT2883 */
 
 #ifdef RT3883
 #include "chip/rt3883.h"
@@ -837,7 +824,7 @@ struct _RTMP_CHIP_CAP_ {
 
 #if defined(RTMP_INTERNAL_TX_ALC) || defined(RTMP_TEMPERATURE_COMPENSATION)
 	UINT8 TxAlcTxPowerUpperBound_2G;
-	const TX_POWER_TUNING_ENTRY_STRUCT *TxPowerTuningTable_2G;
+	TX_POWER_TUNING_ENTRY_STRUCT *TxPowerTuningTable_2G;
 #ifdef RT305x
 #if defined(RT3352) || defined(RT5350)
 	UINT8 TxPowerMaxCompenStep;
@@ -846,7 +833,7 @@ struct _RTMP_CHIP_CAP_ {
 #endif /* RT305x */
 #ifdef A_BAND_SUPPORT
 	UINT8 TxAlcTxPowerUpperBound_5G;
-	const TX_POWER_TUNING_ENTRY_STRUCT *TxPowerTuningTable_5G;
+	TX_POWER_TUNING_ENTRY_STRUCT *TxPowerTuningTable_5G;
 #endif /* A_BAND_SUPPORT */
 #endif /* defined(RTMP_INTERNAL_TX_ALC) || defined(RTMP_TEMPERATURE_COMPENSATION) */
 

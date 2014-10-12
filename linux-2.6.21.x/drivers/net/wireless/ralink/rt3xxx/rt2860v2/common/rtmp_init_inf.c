@@ -723,6 +723,7 @@ int rt28xx_init(
 
 	}
 #endif /* CONFIG_STA_SUPPORT */
+
 	/* auto-fall back settings */
 	RTMP_IO_WRITE32(pAd, HT_FBK_CFG1, 0xedcba980); /* Fallback MCS8->MCS0 */
 #ifdef DOT11N_SS3_SUPPORT
@@ -1032,8 +1033,10 @@ VOID RTMPDrvClose(
 		os_free_mem(NULL, pAd->CommonCfg.pChDesp);
 	pAd->CommonCfg.pChDesp = NULL;
 	pAd->CommonCfg.DfsType = MAX_RD_REGION;
-	pAd->CommonCfg.bCountryFlag = 0;
 #endif /* EXT_BUILD_CHANNEL_LIST */
+	pAd->CommonCfg.bCountryFlag = 0;
+
+
 
 #ifdef WDS_SUPPORT
 	WdsDown(pAd);

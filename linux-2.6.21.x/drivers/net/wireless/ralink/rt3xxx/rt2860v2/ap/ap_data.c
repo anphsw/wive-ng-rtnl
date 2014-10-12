@@ -198,7 +198,6 @@ VOID	APSendPackets(
 		{
 			/* For packet send from OS, we need to set the wcid here, it will used directly in APSendPacket. */
 			RTMP_SET_PACKET_WCID(pPacket, wcid);
-			RTMP_SET_PACKET_SOURCE(pPacket, PKTSRC_NDIS);
 			NDIS_SET_PACKET_STATUS(pPacket, NDIS_STATUS_PENDING);
 			pAd->RalinkCounters.PendingNdisPacketCount++;
 			
@@ -248,6 +247,12 @@ VOID	APSendPackets(
 
 ========================================================================
 */
+#ifdef IGMP_SNOOP_SUPPORT
+#define MCAST_DROP_BUDGET	(MAX_PACKETS_IN_QUEUE*2)			/* how many pkts skip by snoop if tx full for help free txq */
+static INT IgmpSnoopEnable, IgmpSnoopDropCountLimit, RetryLimitsNeedRestore;	/* need global */
+TX_RTY_CFG_STRUC TxRtyCfg,TxRtyCfgtmp;						/* temp store retry limits */
+#endif
+
 NDIS_STATUS APSendPacket(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket)
@@ -269,7 +274,6 @@ NDIS_STATUS APSendPacket(
 	PMULTICAST_FILTER_TABLE_ENTRY pGroupEntry = NULL;
 #endif /* IGMP_SNOOP_SUPPORT */
 	MULTISSID_STRUCT *pMbss = NULL;
-
 
 	RTMP_QueryPacketInfo(pPacket, &PacketInfo, &pSrcBufVA, &SrcBufLen);
 
@@ -402,23 +406,22 @@ NDIS_STATUS APSendPacket(
 		pMbss = &pAd->ApCfg.MBSSID[apidx];
 
 #ifdef IGMP_SNOOP_SUPPORT
-	if (pAd->ApCfg.IgmpSnoopEnable)
+	if (IgmpSnoopEnable)
 	{
 		UCHAR FromWhichBSSID, checkIgmpPkt = TRUE;
 
-		if (IS_ENTRY_WDS(pMacEntry))		
-			FromWhichBSSID = pMacEntry->MatchWDSTabIdx + MIN_NET_DEVICE_FOR_WDS;		
-		else if ((Wcid == MCAST_WCID) || IS_ENTRY_CLIENT(pMacEntry))		
-			FromWhichBSSID = apidx;		
-		else		
-			checkIgmpPkt = FALSE;		
-		  
+		if (IS_ENTRY_WDS(pMacEntry))
+			FromWhichBSSID = pMacEntry->MatchWDSTabIdx + MIN_NET_DEVICE_FOR_WDS;
+		else if ((Wcid == MCAST_WCID) || IS_ENTRY_CLIENT(pMacEntry))
+			FromWhichBSSID = apidx;
+		else
+			checkIgmpPkt = FALSE;
+
 		if (checkIgmpPkt)
 		{
-			if (IgmpPktInfoQuery(pAd, pSrcBufVA, pPacket, FromWhichBSSID,
-						&InIgmpGroup, &pGroupEntry) != NDIS_STATUS_SUCCESS)
+			if (IgmpPktInfoQuery(pAd, pSrcBufVA, pPacket, FromWhichBSSID, &InIgmpGroup, &pGroupEntry) != NDIS_STATUS_SUCCESS)
 				return NDIS_STATUS_FAILURE;
-		} 
+		}
 	}
 #endif  /* IGMP_SNOOP_SUPPORT */
 
@@ -570,8 +573,7 @@ NDIS_STATUS APSendPacket(
 	else if ((PsMode == PWR_SAVE) && pMacEntry &&
 				IS_ENTRY_CLIENT(pMacEntry) && (Sst == SST_ASSOC))
 	{
-		if (APInsertPsQueue(pAd, pPacket, pMacEntry, QueIdx)
-				!= NDIS_STATUS_SUCCESS)
+		if (APInsertPsQueue(pAd, pPacket, pMacEntry, QueIdx) != NDIS_STATUS_SUCCESS)
 			return NDIS_STATUS_FAILURE;
 	}
 	/* 3. otherwise, transmit the frame */
@@ -582,14 +584,26 @@ NDIS_STATUS APSendPacket(
 #ifdef IGMP_SNOOP_SUPPORT
 		/* if it's a mcast packet in igmp gourp. */
 		/* ucast clone it for all members in the gourp. */
-		if (((InIgmpGroup == IGMP_IN_GROUP)
-				&& pGroupEntry
-				&&  (IgmpMemberCnt(&pGroupEntry->MemberList) > 0))
-			|| (InIgmpGroup == IGMP_PKT))
+		if (IgmpSnoopEnable && (((InIgmpGroup == IGMP_IN_GROUP) && pGroupEntry && (IgmpMemberCnt(&pGroupEntry->MemberList) > 0)) ||
+		     (InIgmpGroup == IGMP_PKT)))
 		{
-			NDIS_STATUS PktCloneResult = IgmpPktClone(pAd, pSrcBufVA, pPacket, InIgmpGroup, 
-								pGroupEntry, QueIdx, UserPriority);
+			NDIS_STATUS PktCloneResult = IgmpPktClone(pAd, pSrcBufVA, pPacket, InIgmpGroup, pGroupEntry, QueIdx, UserPriority);
 			RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_SUCCESS);
+			if (PktCloneResult == NDIS_STATUS_RESOURCES) {
+			    /* disable multicast to unicast before txq not freed */
+			    //printk("TxSwQueue FULL, temp disable M2U!\n");
+			    IgmpSnoopEnable=0;
+			    IgmpSnoopDropCountLimit=MCAST_DROP_BUDGET;
+			    /* temp set S/L retry to 0 for fast drop packets */
+			    RTMP_IO_READ32(pAd, TX_RTY_CFG, &TxRtyCfg.word);
+			    TxRtyCfgtmp.word = TxRtyCfg.word;
+			    TxRtyCfg.field.LongRtyLimit = 0x0;
+			    TxRtyCfg.field.ShortRtyLimit = 0x0;
+			    RTMP_IO_WRITE32(pAd, TX_RTY_CFG, TxRtyCfg.word);
+			    RetryLimitsNeedRestore=1;
+			    /* do not return STATUS RESOURCE */
+			    return NDIS_STATUS_FAILURE;
+			}
 			return PktCloneResult; /* need to alway return to prevent skb double free. */
 		}
 		else
@@ -603,11 +617,11 @@ NDIS_STATUS APSendPacket(
 				StopNetIfQueue(pAd, QueIdx, pPacket);
 #endif /* BLOCK_NET_IF */
 				RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
-				return NDIS_STATUS_FAILURE;			
+				return NDIS_STATUS_FAILURE;
 
 			}
 			else
-			{			
+			{
 				RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
 				InsertTailQueueAc(pAd, pMacEntry, &pAd->TxSwQueue[QueIdx], PACKET_TO_QUEUE_ENTRY(pPacket));
 				RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
@@ -618,7 +632,24 @@ NDIS_STATUS APSendPacket(
 #ifdef DOT11_N_SUPPORT
 	RTMP_BASetup(pAd, pMacEntry, UserPriority);
 #endif /* DOT11_N_SUPPORT */
+#ifdef IGMP_SNOOP_SUPPORT
+	if (IgmpSnoopDropCountLimit > 0) {
+	    IgmpSnoopDropCountLimit--;
+	} else {
+	    /* activate/reactivate snooping after some normal ptk recived */
+	    if (IgmpSnoopEnable != pAd->ApCfg.IgmpSnoopEnable)
+		IgmpSnoopEnable = pAd->ApCfg.IgmpSnoopEnable;
 
+	    /* restore S/L retry limits */
+	    if (RetryLimitsNeedRestore) {
+		RTMP_IO_READ32(pAd, TX_RTY_CFG, &TxRtyCfg.word);
+		TxRtyCfg.field.LongRtyLimit = TxRtyCfgtmp.field.LongRtyLimit;
+		TxRtyCfg.field.ShortRtyLimit = TxRtyCfgtmp.field.ShortRtyLimit;
+		RTMP_IO_WRITE32(pAd, TX_RTY_CFG, TxRtyCfg.word);
+		RetryLimitsNeedRestore=0;
+	    }
+	}
+#endif
 	return NDIS_STATUS_SUCCESS;
 }
 
@@ -4082,9 +4113,8 @@ VOID APRxDataFrameAnnounce(
 
 
 #ifdef IGMP_SNOOP_SUPPORT
-		if (pEntry
+		if (pEntry && (IgmpSnoopEnable)
 			&& (IS_ENTRY_CLIENT(pEntry) || IS_ENTRY_WDS(pEntry))
-			&& (pAd->ApCfg.IgmpSnoopEnable) 
 			&& IS_MULTICAST_MAC_ADDR(pRxBlk->pHeader->Addr3))
 		{
 			PUCHAR pDA = pRxBlk->pHeader->Addr3;
@@ -5202,7 +5232,7 @@ BOOLEAN APFowardWirelessStaToWirelessSta(
 		/* if destinated STA is a associated wireless STA */
 		pEntry = MacTableLookup(pAd, pHeader802_3);
 
-		if (pEntry && pEntry->Sst == SST_ASSOC)
+		if (pEntry && (pEntry->Sst == SST_ASSOC) && IS_ENTRY_CLIENT(pEntry))
 		{
 			bDirectForward = TRUE;
 			bAnnounce = FALSE;
@@ -5263,7 +5293,6 @@ BOOLEAN APFowardWirelessStaToWirelessSta(
 				RTMP_SET_PACKET_NET_DEVICE_MBSSID(pForwardPacket, FromWhichBSSID);
 
 			RTMP_SET_PACKET_WCID(pForwardPacket, pEntry ? pEntry->Aid : MCAST_WCID);			
-			RTMP_SET_PACKET_SOURCE(pForwardPacket, PKTSRC_NDIS);
 			RTMP_SET_PACKET_MOREDATA(pForwardPacket, FALSE);
 #ifdef P2P_SUPPORT
 			RTMP_SET_PACKET_OPMODE(pForwardPacket, OPMODE_AP);

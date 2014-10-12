@@ -29,7 +29,6 @@
 #ifdef RT6352
 
 #include	"rt_config.h"
-#include        <asm/rt2880/rt_mmap.h>
 
 #ifndef RTMP_RF_RW_SUPPORT
 #error "You Should Enable compile flag RTMP_RF_RW_SUPPORT for this chip"
@@ -4050,6 +4049,8 @@ UCHAR GetSkuMinPwr(
 		else if (pAd->CommonCfg.BBPCurrentBW == BW_40)
 			return (sku_min_pwr_40bw[pAd->CommonCfg.SkuChannel - 1] * 2);
 }
+
+	return 0x20; /* default is 16 dBm */
 }
 
 UCHAR GetSkuRatePwr(

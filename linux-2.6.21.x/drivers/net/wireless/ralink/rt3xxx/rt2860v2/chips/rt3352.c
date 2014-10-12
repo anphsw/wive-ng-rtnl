@@ -29,15 +29,10 @@
 #ifdef RT3352
 
 #include	"rt_config.h"
-#include	<asm/rt2880/rt_mmap.h>
 
 #ifndef RTMP_RF_RW_SUPPORT
 #error "You Should Enable compile flag RTMP_RF_RW_SUPPORT for this chip"
 #endif // RTMP_RF_RW_SUPPORT //
-
-#ifdef RTMP_INTERNAL_TX_ALC
-VOID RT3352_AsicInitDesiredTSSITable(IN PRTMP_ADAPTER pAd);
-#endif
 
 UCHAR	RT3352_EeBuffer[EEPROM_SIZE] = {
 	0x52, 0x33, 0x01, 0x01, 0x00, 0x0c, 0x43, 0x30, 0x52, 0x88, 0xff, 0xff, 0xff, 0xff, 
@@ -320,16 +315,16 @@ TX_POWER_TUNING_ENTRY_STRUCT RT3352_TxPowerTuningTable[] =
 };
 
 /* The desired TSSI over CCK */
-extern CHAR desiredTSSIOverCCK[4];
+CHAR desiredTSSIOverCCK[4] = {0};
 
 /* The desired TSSI over OFDM */
-extern CHAR desiredTSSIOverOFDM[8];
+CHAR desiredTSSIOverOFDM[8] = {0};
 
 /* The desired TSSI over HT */
-extern CHAR desiredTSSIOverHT[16];
+CHAR desiredTSSIOverHT[16] = {0};
 
 /* The desired TSSI over HT using STBC */
-extern CHAR desiredTSSIOverHTUsingSTBC[8];
+CHAR desiredTSSIOverHTUsingSTBC[8] = {0};
 #endif /* RTMP_INTERNAL_TX_ALC */
 
 /*
@@ -1662,12 +1657,13 @@ VOID RT3352_AsicTxAlcGetAutoAgcOffset(
 	IN PCHAR					pAgcCompensate,
 	IN PCHAR 					pDeltaPowerByBbpR1)
 {
-	const TX_POWER_TUNING_ENTRY_STRUCT *TxPowerTuningTable = pAd->chipCap.TxPowerTuningTable_2G;
+	TX_POWER_TUNING_ENTRY_STRUCT *TxPowerTuningTable = pAd->chipCap.TxPowerTuningTable_2G;
 	PTX_POWER_TUNING_ENTRY_STRUCT pTxPowerTuningEntry = NULL, pTxPowerTuningEntry2 = NULL;
 	static UCHAR	LastChannel = 0;
 	BBP_R49_STRUC 	BbpR49;
 	UCHAR 			RFValue = 0;
 	UCHAR 			RFValue2 = 0;
+	UCHAR 			TmpValue = 0;
 	UCHAR 			TssiChannel = 0;
 	CHAR 			desiredTSSI = 0;
 	CHAR 			currentTSSI = 0;

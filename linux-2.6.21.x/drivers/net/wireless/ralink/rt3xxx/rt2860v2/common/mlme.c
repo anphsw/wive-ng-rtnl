@@ -1357,7 +1357,6 @@ VOID MlmePeriodicExec(
 #ifdef RTMP_INTERNAL_TX_ALC
 		if (pAd->TxPowerCtrl.bInternalTxALC)
 		{
-#ifdef RT6352
 
 			if (RT635xCheckTssiCompensation(pAd))
 			{
@@ -1366,7 +1365,6 @@ VOID MlmePeriodicExec(
 #endif /* RTMP_TEMPERATURE_CALIBRATION */
 				DoDPDCalibration(pAd);
 			}
-#endif
 		}
 		else
 #endif /* RTMP_INTERNAL_TX_ALC */
@@ -1494,15 +1492,6 @@ VOID STAMlmePeriodicExec(
 	TxTotalCnt = pAd->RalinkCounters.OneSecTxNoRetryOkCount + 
 					 pAd->RalinkCounters.OneSecTxRetryOkCount + 
 					 pAd->RalinkCounters.OneSecTxFailCount;
-
-	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS) 
-	)
-	{
-		ULONG Now;
-		bCheckBeaconLost = FALSE;
-		NdisGetSystemUpTime(&Now);
-		pAd->StaCfg.LastBeaconRxTime = Now;
-	}
 
 	if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED) && 
 		(!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS)))
