@@ -294,11 +294,6 @@ static inline int RemoveVlanTag(struct sk_buff * skb)
 uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 {
 	uint16_t VirIfIdx = 0;
-#if defined (CONFIG_RALINK_MT7621)
-	int hwaccel_tx = 1;	// support full range VLAN 1..4095
-#else
-	int hwaccel_tx = 0;
-#endif
 
 	/* offload packet types not support for extif:
 	   1. VLAN tagged packets (avoid double tag issue).
@@ -320,12 +315,10 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 
 	if (skb->dev == DstPort[DP_RA0]) {
 		VirIfIdx = DP_RA0;
-		hwaccel_tx = 1;
 	}
 #if defined (HWNAT_DP_RA_MBSS)
 	else if (skb->dev == DstPort[DP_RA1]) {
 		VirIfIdx = DP_RA1;
-		hwaccel_tx = 1;
 	}
 #if defined (HWNAT_MBSS_ALL)
 	else if (skb->dev == DstPort[DP_RA2]) {
@@ -367,12 +360,10 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 #if defined (HWNAT_DP_RAI_AP)
 	else if (skb->dev == DstPort[DP_RAI0]) {
 		VirIfIdx = DP_RAI0;
-		hwaccel_tx = 1;
 	}
 #if defined (HWNAT_DP_RAI_MBSS)
 	else if (skb->dev == DstPort[DP_RAI1]) {
 		VirIfIdx = DP_RAI1;
-		hwaccel_tx = 1;
 	}
 #if defined (HWNAT_MBSS_ALL)
 	else if (skb->dev == DstPort[DP_RAI2]) {
@@ -415,7 +406,6 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 #if defined (CONFIG_RA_HW_NAT_PCI)
 	else if (skb->dev == DstPort[DP_NIC0]) {
 		VirIfIdx = DP_NIC0;
-		hwaccel_tx = 1;
 	}
 	else if (skb->dev == DstPort[DP_NIC1]) {
 		VirIfIdx = DP_NIC1;
@@ -426,24 +416,15 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 		return 1;
 	}
 
+	/* push vlan tag to stand for actual incoming interface,
+	    so HNAT module can know the actual incoming interface from vlan id. */
+
 	/* set pointer to L2 header before call dev_queue_xmit */
 	skb_reset_network_header(skb);
 	skb_push(skb, ETH_HLEN);
-
-	/* push vlan tag to stand for actual incoming interface,
-	    so HNAT module can know the actual incoming interface from vlan id. */
-#if defined (CONFIG_RAETH_HW_VLAN_TX)
-	if (hwaccel_tx) {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
-		__vlan_hwaccel_put_tag(skb, __constant_htons(ETH_P_8021Q), VirIfIdx);
-#else
-		__vlan_hwaccel_put_tag(skb, VirIfIdx);
-#endif
-	} else
-#endif
-	{
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
-		skb = __vlan_put_tag(skb, __constant_htons(ETH_P_8021Q), VirIfIdx);
+	skb->vlan_proto = __constant_htons(ETH_P_8021Q);
+	skb = __vlan_put_tag(skb, skb->vlan_proto, VirIfIdx);
 #else
 	skb = __vlan_put_tag(skb, VirIfIdx);
 #endif
@@ -451,12 +432,11 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 		NAT_DEBUG("HNAT: %s, unable tagging skb, memleak ? (VirIfIdx=%d)\n", __FUNCTION__, VirIfIdx);
 		return 0;
 	}
-	}
 
-	/* redirect to PPE via GMAC1 (check FOE_MAGIC_PPE in raeth) */
+	/* redirect to PPE (check this in raeth) */
 	FOE_MAGIC_TAG(skb) = FOE_MAGIC_PPE;
 	DO_FILL_FOE_DESC(skb, 0);
-	skb->dev = DstPort[DP_GMAC1];
+	skb->dev = DstPort[DP_GMAC1];  /* we use GMAC1 to send the packet to PPE */
 	dev_queue_xmit(skb);
 
 	return 0;
