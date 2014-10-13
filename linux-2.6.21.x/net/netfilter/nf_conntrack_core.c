@@ -1227,9 +1227,11 @@ skip:
 
 	return ret;
 }
+#ifndef CONFIG_SPEEDHACK
 EXPORT_SYMBOL_GPL(nf_conntrack_in);
+#endif
 
-int FASTPATHNET nf_ct_invert_tuplepr(struct nf_conntrack_tuple *inverse,
+int inline nf_ct_invert_tuplepr(struct nf_conntrack_tuple *inverse,
 			 const struct nf_conntrack_tuple *orig)
 {
 	int ret;
