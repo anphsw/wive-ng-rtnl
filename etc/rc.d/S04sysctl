@@ -19,6 +19,12 @@ start() {
     fi
     sysctl -wq kernel.domainname="$krn_domain"
 
+    # disable forward at boot
+    sysctl -wq net.ipv4.conf.all.forwarding=0
+    sysctl -wq net.ipv4.conf.default.forwarding=0
+    sysctl -wq net.ipv6.conf.all.forwarding=0
+    sysctl -wq net.ipv6.conf.default.forwarding=0
+
 ###################### SECTION FOR SAMBA AND TRANSMISION KERNEL TUNE ###################
     if [ "$SmbEnabled" = "1" ] || [ "$TransmissionEnabled" = "1" ] || [ "$xupnpd" = "1" ] || [ "$UDPXYMode" != "0" ]; then
 	# banish core dump files to /dev/null
