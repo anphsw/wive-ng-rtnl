@@ -127,13 +127,12 @@ int websDefaultHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
 	if (flags & WEBS_IF_MODIFIED && !(flags & WEBS_ASP)) {
 		if (sbuf.mtime <= wp->since) {
 			websWrite(wp, T("HTTP/1.0 304 Use local copy\r\n"));
-
+			websWrite(wp, WEBS_CACHE_CONTROL_STRING);
 /*
  *			by license terms the following line of code must
  *			not be modified.
  */
 			websWrite(wp, T("Server: %s\r\n"), WEBS_NAME);
-
 			if (flags & WEBS_KEEP_ALIVE) {
 				websWrite(wp, T("Connection: keep-alive\r\n"));
 			}
@@ -150,7 +149,7 @@ int websDefaultHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
  */
 	if ((date = websGetDateString(NULL)) != NULL) {
 		websWrite(wp, T("HTTP/1.0 200 OK\r\nDate: %s\r\n"), date);
-
+		websWrite(wp, WEBS_CACHE_CONTROL_STRING);
 /*
  *		By license terms the following line of code must not be modified.
  */

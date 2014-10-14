@@ -276,6 +276,7 @@ void websCgiGatherOutput (cgiRec *cgip)
  */
 			if (cgip->fplacemark == 0) {
 				websWrite(wp, T("HTTP/1.0 200 OK\r\n"));
+				websWrite(wp, WEBS_CACHE_CONTROL_STRING);
 			}
 			glseek(fdout, cgip->fplacemark, SEEK_SET);
 			while ((nRead = gread(fdout, cgiBuf, FNAMESIZE)) > 0) {

@@ -1350,8 +1350,10 @@ void websResponse(webs_t wp, int code, char_t *message, char_t *redirect)
  */
 		if (redirect != NULL) {
 			websWrite(wp, T("HTTP/1.0 %d %s\r\n"), code, websErrorMsg(code));
+			websWrite(wp, WEBS_CACHE_CONTROL_STRING);
 		} else {
 			websWrite(wp, T("HTTP/1.1 %d %s\r\n"), code, websErrorMsg(code));
+			websWrite(wp, WEBS_CACHE_CONTROL_STRING);
 		}
 
 /*		

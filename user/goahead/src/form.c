@@ -130,13 +130,11 @@ void websHeader(webs_t wp)
 	a_assert(websValid(wp));
 
 	websWrite(wp, T("HTTP/1.0 200 OK\n"));
-
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
 /*
  *	By license terms the following line of code must not be modified
  */
 	websWrite(wp, T("Server: %s\r\n"), WEBS_NAME);
-
-	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
 	websWrite(wp, T("Content-Type: text/html\n"));
 	websWrite(wp, T("\n"));
 	websWrite(wp, T("<html>\n<head>\n"));
