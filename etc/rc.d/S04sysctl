@@ -19,11 +19,14 @@ start() {
     fi
     sysctl -wq kernel.domainname="$krn_domain"
 
-    # disable forward at boot
-    sysctl -wq net.ipv4.conf.all.forwarding=0
-    sysctl -wq net.ipv4.conf.default.forwarding=0
-    sysctl -wq net.ipv6.conf.all.forwarding=0
-    sysctl -wq net.ipv6.conf.default.forwarding=0
+    # only at boot time
+    if [ ! -f /var/run/goahead.pid ]; then
+        # disable forward at boot
+	sysctl -wq net.ipv4.conf.all.forwarding=0
+	sysctl -wq net.ipv4.conf.default.forwarding=0
+	sysctl -wq net.ipv6.conf.all.forwarding=0
+	sysctl -wq net.ipv6.conf.default.forwarding=0
+    fi
 
 ###################### SECTION FOR SAMBA AND TRANSMISION KERNEL TUNE ###################
     if [ "$SmbEnabled" = "1" ] || [ "$TransmissionEnabled" = "1" ] || [ "$xupnpd" = "1" ] || [ "$UDPXYMode" != "0" ]; then
