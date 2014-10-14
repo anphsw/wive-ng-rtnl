@@ -50,7 +50,7 @@
 #define BLK_COOKIE      0x04
 #define BLK_PROXY       0x08
 
-extern int web_str_loaded;
+extern unsigned int web_str_loaded;
 
 typedef char *(*proc_ipt_search) (char *, char *, int, int);
 

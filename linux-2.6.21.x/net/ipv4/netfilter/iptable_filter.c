@@ -19,7 +19,7 @@
 #include <net/netfilter/nf_conntrack.h>
 extern int nf_ct_skip_established;
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
-extern int web_str_loaded;
+extern unsigned int web_str_loaded;
 #endif
 #endif
 

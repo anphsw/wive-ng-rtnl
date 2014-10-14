@@ -415,7 +415,7 @@ static ctl_table nf_ct_netfilter_table[] = {
 		.data		= &nf_conntrack_nat_mode,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
-		.proc_handler	= &proc_dointvec
+		.proc_handler	= &proc_dointvec,
 	},
 #endif
 	{ .ctl_name = 0 }

@@ -45,7 +45,7 @@ static int (*ra_sw_nat_hook_rx)(struct sk_buff * skb) = NULL;
 
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
 #include <linux/tcp.h>
-int web_str_loaded=0;
+unsigned int web_str_loaded __read_mostly = 0;
 EXPORT_SYMBOL_GPL(web_str_loaded);
 #endif
 
@@ -97,6 +97,13 @@ extern char wan_name[IFNAMSIZ];
 #if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
 extern char wan_ppp[IFNAMSIZ];
 #endif
+#endif
+
+#ifdef CONFIG_BCM_NAT
+unsigned int nf_conntrack_fastnat __read_mostly;
+EXPORT_SYMBOL_GPL(nf_conntrack_fastnat);
+unsigned int nf_conntrack_fastroute __read_mostly;
+EXPORT_SYMBOL_GPL(nf_conntrack_fastroute);
 #endif
 
 #ifdef CONFIG_NF_FLUSH_CONNTRACK

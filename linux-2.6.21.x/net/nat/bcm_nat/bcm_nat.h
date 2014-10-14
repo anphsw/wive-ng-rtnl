@@ -29,8 +29,8 @@
 #define NF_FAST_NAT		5
 #define NF_STOP			6
 
-extern int nf_conntrack_fastnat;
-extern int nf_conntrack_fastroute;
+extern unsigned int nf_conntrack_fastnat;
+extern unsigned int nf_conntrack_fastroute;
 
 extern int nf_ct_ipv4_gather_frags(struct sk_buff *skb, u_int32_t user);
 extern int ip_rcv_finish(struct sk_buff *skb);
