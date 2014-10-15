@@ -1238,7 +1238,7 @@ skip:
 EXPORT_SYMBOL_GPL(nf_conntrack_in);
 #endif
 
-int __fastpathnet nf_ct_invert_tuplepr(struct nf_conntrack_tuple *inverse,
+int FASTPATHNET nf_ct_invert_tuplepr(struct nf_conntrack_tuple *inverse,
 			 const struct nf_conntrack_tuple *orig)
 {
 	int ret;
