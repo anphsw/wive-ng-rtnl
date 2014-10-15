@@ -29,8 +29,6 @@
 
 #include "rt_config.h"
 
-#include <asm/rt2880/rt_mmap.h>
-
 /* Ralink GPIO definations */
 #define outw(address, value)    *((volatile uint32_t *)(address)) = cpu_to_le32(value)
 #define inw(address)            le32_to_cpu(*(volatile u32 *)(address))

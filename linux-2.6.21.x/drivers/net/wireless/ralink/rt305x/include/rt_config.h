@@ -31,6 +31,8 @@
 #ifndef	__RT_CONFIG_H__
 #define	__RT_CONFIG_H__
 
+#include <asm/rt2880/rt_mmap.h>
+
 #define VENDOR_FEATURE1_SUPPORT
 //#define VENDOR_FEATURE2_SUPPORT
 //#define VENDOR_FEATURE3_SUPPORT
