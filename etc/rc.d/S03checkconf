@@ -202,7 +202,7 @@ genmac() {
 	nvram_set 2860 CHECKMAC NO
 	MAC="$OLDMACWAN"
 	LANMAC="$OLDMACLAN"
-	VENDMASK=`echo $MAC | cut -f 4- -d :`
+	VENDMASK=`echo $MAC | cut -f -3 -d :`
     else
 	$LOG "Write new generated wan/lan macs"
 	MAC="$VENDMASK:$mac_wan"
