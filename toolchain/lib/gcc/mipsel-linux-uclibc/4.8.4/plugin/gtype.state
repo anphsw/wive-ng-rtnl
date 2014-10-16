@@ -4,7 +4,7 @@
 ;;; Don't parse this file wihout knowing GCC gengtype internals.
 ;;; This file should be parsed by the same gengtype which wrote it.
 
-(!version  "4.8.4 20140925 (prerelease)")
+(!version  "4.8.4 20141009 (prerelease)")
 
 (!srcdir  "../../gcc-4.8.4/gcc")
 
@@ -26944,7 +26944,7 @@ nil )
 (!pair  "dchar_p"
 (!type already_seen 29)
 
-(!srcfileloc  "dwarf2out.c" 18761)
+(!srcfileloc  "dwarf2out.c" 18765)
 nil )
 (!pair  "vec<die_arg_entry,va_gc>"
 (!type already_seen 1113)
