@@ -517,5 +517,3 @@ static VOID __devexit rt2860_remove_one(
 
 	wl_proc_3090_exit();
 }
-
-MODULE_LICENSE("Proprietary");
