@@ -25,8 +25,8 @@ start() {
 	    RALINKMAC="00:0C:43"
 	    ISDEFWMAC=`eth_mac r wan | grep -i "$RALINKMAC" -c`
 	    ISDEFLMAC=`eth_mac r lan | grep -i "$RALINKMAC" -c`
-	    FIRSTBITSW=`eth_mac r wan | cut -f -1 -d :`
-	    FIRSTBITSL=`eth_mac r lan | cut -f -1 -d :`
+	    FIRSTBITSW=`eth_mac r wan | cut -f -1 -d : | awk '{ print toupper($1) }'`
+	    FIRSTBITSL=`eth_mac r lan | cut -f -1 -d : | awk '{ print toupper($1) }'`
 	    if [ "$ISDEFWMAC" != "1" ] && [ "$ISDEFLMAC" != "1" ] && [ $FIRSTBITSW != "FF" ] && [ $FIRSTBITSL != "FF" ]; then
 		$LOG "Store original mac adress."
 		OLDMACWAN=`eth_mac r wan | egrep "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$"`
