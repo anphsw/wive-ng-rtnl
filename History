@@ -355,7 +355,8 @@
 13) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
 14) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
 15) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
-16) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+16) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
+17) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
 <br>
 <br>
 <br>
