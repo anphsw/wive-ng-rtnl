@@ -347,14 +347,15 @@
 5) goahead: fix regression crash at short reset press.<br>
 6) openssl up to 0.9.8zc version.<br>
 7) toolchain: move to 4.8.4 gcc svn version (after 4.8.3 release 4.8 tree apply only bugfixes).<br>
-8) fix get vendid at new mac generate.<br>
-9) kernel: hw_nat: update to 2.51 version.<br>
-10) kernel: spi: add more flash support.<br>
-11) kenrel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
-12) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
-13) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
-14) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
-15) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+8) init.d: fix get vendid at new mac generate.<br>
+9) init.d: add check first octet in mac readed from old factory for prevent read from crashed mtd FF.<br>
+10) kernel: hw_nat: update to 2.51 version.<br>
+11) kernel: spi: add more flash support.<br>
+12) kenrel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
+13) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
+14) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
+15) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
+16) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
 <br>
 <br>
 <br>
