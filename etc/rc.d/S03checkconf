@@ -35,6 +35,14 @@ start() {
 		OLDMACWAN=""
 		OLDMACLAN=""
 	    fi
+	    if [ $FIRSTBITSW = "FF" ] || [ $FIRSTBITSL = "FF" ]; then
+		    $LOG "Clear and load defaults to nvram."
+    		    fs nvramreset
+		    ########################################
+		    # force rebuild mac if reset to defaults
+		    ########################################
+		    FORCE_REBUILD_MAC="YES"
+	    fi
 	fi
 	$LOG "Burn RF template to flash"
 	fs burnrf
