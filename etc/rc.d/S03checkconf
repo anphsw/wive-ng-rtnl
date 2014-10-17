@@ -29,8 +29,8 @@ start() {
 	    FIRSTBITSL=`eth_mac r lan | cut -f -1 -d :`
 	    if [ "$ISDEFWMAC" != "1" ] && [ "$ISDEFLMAC" != "1" ] && [ $FIRSTBITSW != "FF" ] && [ $FIRSTBITSL != "FF" ]; then
 		$LOG "Store original mac adress."
-		OLDMACWAN=`eth_mac r wan`
-		OLDMACLAN=`eth_mac r lan`
+		OLDMACWAN=`eth_mac r wan | egrep "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$"`
+		OLDMACLAN=`eth_mac r lan | egrep "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$"`
 	    else
 		OLDMACWAN=""
 		OLDMACLAN=""
