@@ -38,6 +38,7 @@ start() {
 	    if [ $FIRSTBITSW = "FF" ] || [ $FIRSTBITSL = "FF" ]; then
 		    $LOG "Clear and load defaults to nvram."
     		    fs nvramreset
+    		    rm -f /etc/backup/nvram_backup.dat
 		    ########################################
 		    # force rebuild mac if reset to defaults
 		    ########################################
