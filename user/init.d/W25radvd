@@ -82,7 +82,7 @@ start() {
 	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tun_if metric 1
         elif [ "$ipv6_mode" = "NATIVE" ]; then
 	    # this section for native/dualstack mode
-	    :
+	    dhcp6c eth2.2
 	fi
 
 	$LOG "Enable ipv6 forward"
