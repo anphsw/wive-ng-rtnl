@@ -82,6 +82,7 @@ start() {
 	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tun_if metric 1
         elif [ "$ipv6_mode" = "NATIVE" ]; then
 	    # this section for native/dualstack mode
+	    $LOG "Starting dhcp6c"
 	    dhcp6c eth2.2
 	fi
 
@@ -178,6 +179,9 @@ stop() {
 
 	killall -q dhcp6s
 	killall -q -SIGKILL dhcp6s
+
+	killall -q dhcp6c
+	killall -q -SIGKILL dhcp6c
 
 	# cleanup global adresses
 	echo "#!/bin/sh" > /tmp/ip6addrdel
