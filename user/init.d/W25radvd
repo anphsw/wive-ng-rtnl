@@ -40,6 +40,7 @@ start() {
 	    $LOG "No ipv4 adress on wan, exit..."
 	    exit 1
 	fi
+	DNSADRESSES="2001:4860:4860::8888 2001:4860:4860::8844"
 
         # calculate and set mtu
         calculate_and_set_mtu
@@ -120,6 +121,7 @@ start() {
                 MinRtrAdvInterval 3;
                 MaxRtrAdvInterval 10;
                 AdvDefaultPreference high;
+		AdvOtherConfigFlag on;
                 prefix ${ipv6prefix}:${ipv6subnet}::1/64
                 {
                         AdvOnLink off;
@@ -128,15 +130,33 @@ start() {
                         AdvPreferredLifetime 20;
                         AdvValidLifetime 30;
                 };
-                RDNSS 2001:4860:4860::8888 2001:4860:4860::8844
+                RDNSS $DNSADRESSES
                 {
                         AdvRDNSSLifetime 10;
                 };
             };
         " > /etc/radvd.conf
 
+	$LOG "Configure dhcp6s"
+        printf "
+	option domain-name-servers $DNSADRESSES;
+
+	interface br0 {
+	    allow rapid-commit;
+	    address-pool pool1 3600;
+	};
+
+	pool pool1 {
+	    range ${ipv6prefix}:${ipv6subnet}::2 to ${ipv6prefix}:${ipv6subnet}::254 ;
+	};
+        " > /etc/dhcp6s.conf
+
 	$LOG "Starting radvd"
 	radvd -C /etc/radvd.conf --debug=0 --logmethod=syslog &
+
+	$LOG "Starting dhcp6s"
+	dhcp6s -c /etc/dhcp6s.conf -P /var/run/dhcp6s.pid $lan_if &
+
 	flush_net_caches
     fi
 }
@@ -155,6 +175,9 @@ stop() {
 
 	killall -q radvd
 	killall -q -SIGKILL radvd
+
+	killall -q dhcp6s
+	killall -q -SIGKILL dhcp6s
 
 	# cleanup global adresses
 	echo "#!/bin/sh" > /tmp/ip6addrdel

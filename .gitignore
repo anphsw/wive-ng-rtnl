@@ -288,6 +288,11 @@ fulldump
 /user/tcpdump/configure
 /user/tcpdump/autom4te.cache
 /user/tcpdump/autom4te.cache/*
+/user/dhcp6/wide-dhcpv6/autom4te.cache
+/user/dhcp6/wide-dhcpv6/autom4te.cache/*
+/user/dhcp6/wide-dhcpv6/configure
+/user/dhcp6/wide-dhcpv6/configure.log
+/user/dhcp6/wide-dhcpv6/Makefile
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/binutils-2.21/*
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/build-binutils/*
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/build-gcc-bootstrap/*

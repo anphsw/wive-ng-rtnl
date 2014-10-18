@@ -97,6 +97,9 @@ bool 'snmpd(v1)'                                CONFIG_USER_SNMPD
 bool 'miniupnpd'				CONFIG_USER_MINIUPNPD
 bool 'xupnpd'					CONFIG_USER_XUPNPD
 bool 'radvd (Router Advertisement Daemon)'	CONFIG_USER_RADVD
+bool 'dhcp6 (Dynamic Confiuration Daemon)'	CONFIG_USER_DHCP6
+dep_bool '  dhcp6 server'			CONFIG_USER_DHCP6_SERVER $CONFIG_USER_DHCP6
+dep_bool '  dhcp6 client'			CONFIG_USER_DHCP6_CLIENT $CONFIG_USER_DHCP6
 bool 'Cisco Discovery Protocol'			CONFIG_USER_CDP
 bool 'Link Layer Topology Discovery Protocol'	CONFIG_USER_LLTD
 bool 'rt2860apd (802.1x Authenticator)'		CONFIG_USER_802_1X

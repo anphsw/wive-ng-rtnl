@@ -24,7 +24,7 @@ VEND=$(ROOTDIR)/vendors
 #for all cleanap
 SUBDIRS_APP =  goahead iptables miniupnp rt2880_app wpa_supplicant ethtool
 SUBDIRS_APP += igmpproxy lldt ppp strace wsc_upnp busybox inadyn udpxy xl2tpd
-SUBDIRS_APP += 802.1x dnsmasq gdbserver iproute2 wive-utils kabinet radvd wireless_tools zebra dropbear
+SUBDIRS_APP += 802.1x dnsmasq gdbserver iproute2 wive-utils kabinet radvd dhcp6 wireless_tools zebra dropbear
 SUBDIRS_APP += ntfs-3g p910nd transmission openssl samba samba3 cdp-tools xupnpd
 #
 # must run the vendor build first
@@ -62,6 +62,7 @@ dir_$(CONFIG_USER_KABINET)		    += kabinet
 dir_$(CONFIG_USER_MINIUPNPD)                += miniupnp
 dir_$(CONFIG_USER_XUPNPD)		    += xupnpd
 dir_$(CONFIG_USER_RADVD)               	    += radvd
+dir_$(CONFIG_USER_DHCP6)                    += dhcp6
 dir_$(CONFIG_USER_ZEBRA)		    += quagga
 dir_$(CONFIG_USER_SNMPD)                    += snmpd
 dir_$(CONFIG_USER_CHILLISPOT)               += chillispot

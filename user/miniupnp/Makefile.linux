@@ -136,7 +136,7 @@ endif # ($(TEST), 1)
 endif # ifdef IPTABLESPATH
 endif # ifdef PCFILE_FOUND
 
-LIBS += $(IPTABLESPATH)/libiptc/libiptc.a $(ROOTDIR)/lib/lib/libnfnetlink.so
+LIBS += $(IPTABLESPATH)/libiptc/libiptc.a
 
 TEST := $(shell pkg-config --atleast-version=1.0.2 libnetfilter_conntrack && pkg-config --atleast-version=1.0.3 libmnl && echo 1)
 ifeq ($(TEST),1)
