@@ -55,8 +55,8 @@
 #include <base64.h>
 
 #define MD5_DIGESTLENGTH 16
-#define DEFAULT_SERVER_KEYFILE SYSCONFDIR "/dhcp6sctlkey"
-#define DEFAULT_CLIENT_KEYFILE SYSCONFDIR "/dhcp6cctlkey"
+#define DEFAULT_SERVER_KEYFILE "/etc/dhcp6sctlkey"
+#define DEFAULT_CLIENT_KEYFILE "/etc/dhcp6cctlkey"
 
 static char *ctladdr;
 static char *ctlport;

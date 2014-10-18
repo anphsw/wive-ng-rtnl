@@ -93,7 +93,7 @@ int ctlsock = -1;		/* control TCP port */
 char *ctladdr = DEFAULT_CLIENT_CONTROL_ADDR;
 char *ctlport = DEFAULT_CLIENT_CONTROL_PORT;
 
-#define DEFAULT_KEYFILE SYSCONFDIR "/dhcp6cctlkey"
+#define DEFAULT_KEYFILE "/etc/dhcp6cctlkey"
 #define CTLSKEW 300
 
 static char *conffile = DHCP6C_CONF;
