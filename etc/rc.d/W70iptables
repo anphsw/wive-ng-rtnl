@@ -420,6 +420,12 @@ startv6() {
 	    ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -j DROP
 	fi
 
+	# allow dhcpv6 servers packets
+	ip6tables -A INPUT -i $lan_if -p udp -m udp --dport 547 -j ACCEPT
+
+	# allow dhcpv6 client packets
+	ip6tables -A INPUT -i $real_wan_if -p udp -m udp --dport 546 -j ACCEPT
+
 	# allow all others icmp messages (mtu probing and others) to router and clients
 	ip6tables -A INPUT -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
 	ip6tables -A FORWARD -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
