@@ -426,6 +426,9 @@ startv6() {
 	# allow dhcpv6 client packets
 	ip6tables -A INPUT -i $real_wan_if -p udp -m udp --dport 546 -j ACCEPT
 
+	# allow multicast for all
+	ip6tables -A INPUT -d ff00::/8 -j ACCEPT
+
 	# allow all others icmp messages (mtu probing and others) to router and clients
 	ip6tables -A INPUT -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
 	ip6tables -A FORWARD -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
