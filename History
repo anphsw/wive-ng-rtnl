@@ -358,6 +358,7 @@
 16) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
 17) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
 18) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+19) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
 <br>
 <br>
 <br>
