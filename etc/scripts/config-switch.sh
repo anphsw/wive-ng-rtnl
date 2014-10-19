@@ -57,12 +57,18 @@ start_sw_config() {
     # Configure double vlan tag support in kernel. Only one per start
     ##########################################################################
     if [ ! -f /var/run/goahead.pid ]; then
-	if [ -f /proc/sys/net/ipv4/vlan_double_tag ] && [ "$vlan_double_tag" = "1" ]; then
-	    $LOG "Double vlan tag enabled."
-	    DOUBLE_TAG=1
-	else
-	    $LOG "Double vlan tag disabled."
-	    DOUBLE_TAG=0
+	if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
+	    if [ "$vlan_double_tag" = "1" ] || [ "$offloadMode" = "2" ] || [ "$offloadMode" = "3" ]; then
+		if [ "$offloadMode" = "2" ] || [ "$offloadMode" = "3" ]; then
+		    $LOG "Double vlan tag and HW_NAT enabled. HW_VLAN offload disabled."
+		else
+		    $LOG "Double vlan tag enabled. HW_VLAN and HW_NAT offload disabled."
+		fi
+		DOUBLE_TAG=1
+	    else
+		$LOG "Double vlan tag and HW_NAT disabled. HW_VLAN offload enabled."
+		DOUBLE_TAG=0
+	    fi
 	    sysctl -wq net.ipv4.vlan_double_tag="$DOUBLE_TAG"
 	fi
     fi
