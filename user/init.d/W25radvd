@@ -157,6 +157,13 @@ start() {
                         AdvOnLink off;
                         AdvAutonomous on;
                         AdvRouterAddr on;
+    	    " > /etc/radvd.conf
+	    if [ "$IPv6OpMode" = "2" ] || [ "$IPv6OpMode" = "3" ]; then
+    	    printf "
+                        Base6to4Interface $real_wan_if;
+    	    " >> /etc/radvd.conf
+	    fi
+    	    printf "
                         AdvPreferredLifetime 20;
                         AdvValidLifetime 30;
                 };
@@ -165,7 +172,7 @@ start() {
                         AdvRDNSSLifetime 10;
                 };
             };
-    	    " > /etc/radvd.conf
+    	    " >> /etc/radvd.conf
 
 	    $LOG "Configure dhcp6s"
     	    printf "
