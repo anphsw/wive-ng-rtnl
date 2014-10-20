@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ -n "$new_domain_name" -o -n "$new_domain_name_servers" ]; then
+    new_resolv_conf=/etc/resolv.conf.dhcp6c-new
+    rm -f $new_resolv_conf
+    if [ -n "$new_domain_name" ]; then
+        echo search $new_domain_name >> $new_resolv_conf
+    fi
+    if [ -n "$new_domain_name_servers" ]; then
+        for nameserver in $new_domain_name_servers; do
+            echo nameserver $nameserver >> $new_resolv_conf
+        done
+    fi
+fi
