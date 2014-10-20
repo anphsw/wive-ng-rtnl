@@ -56,6 +56,9 @@ function initValue()
 	if (e!=null)
 		e.innerHTML = _("treeapp closeall");
 }
+if (ipv6b == "1") {
+	a.add(307, 300, _("treeapp ipv6"), 		    "javascript:go('internet/ipv6.asp');");
+}
 
 function setUnderFirmwareUpload(flag){
 	isFimwareUpload = flag;
@@ -77,6 +80,7 @@ function refresh(){
 <script type="text/javascript">
 var opmode = '<% getCfgZero(1, "OperationMode"); %>';
 var vpnen = '<% getVPNBuilt(); %>';
+var ipv6b = '<% getIPv6Built(); %>';
 var meshb = '<% getMeshBuilt(); %>';
 var wdsb = '<% getWDSBuilt(); %>';
 var wscb = '<% getWSCBuilt(); %>';
@@ -108,6 +112,10 @@ a.add(301, 300, _("treeapp lan"),			"javascript:go('internet/lan.asp');");
 if (opmode != '0')
 	a.add(302, 300, _("treeapp wan"),		"javascript:go('internet/wan.asp');");
 
+if (ipv6b == "1") {
+	a.add(307, 300, _("treeapp ipv6"), 		    "javascript:go('internet/ipv6.asp');");
+}
+
 a.add(303, 300, _("treeapp vpn"),			"javascript:go('internet/vpn.asp');");
 
 if (opmode != '0')
@@ -118,6 +126,7 @@ if (opmode == '4')
 
 if (swqos == '1')
 	a.add(306, 300, _("treeapp qos"),		"javascript:go('internet/qos.asp');");
+
 
 if (opmode == '2')
 {

@@ -31,7 +31,7 @@ if [ ! -f /var/run/goahead.pid ] || [ "$wan_static_dns" = "on" ]; then
 	echo "nameserver 8.8.8.8" >> $fname
 	echo "nameserver 8.8.4.4" >> $fname
     fi
-    if [ "$radvdEnabled" = "1" ]; then
+    if [ "$IPv6OpMode" != "0" ]; then
 	$LOG "Add google ipv6 servers (need replace to user manual servers from webui in future)"
 	echo "nameserver 2001:4860:4860::8888" >> $fname
 	echo "nameserver 2001:4860:4860::8844" >> $fname
@@ -42,7 +42,7 @@ fi
 }
 
 get_param() {
-    eval `nvram_buf_get 2860 wan_static_dns wan_primary_dns wan_secondary_dns dnsPEnabled HostName radvdEnabled`
+    eval `nvram_buf_get 2860 wan_static_dns wan_primary_dns wan_secondary_dns dnsPEnabled HostName IPv6OpMode`
     fname="/etc/resolv.conf"
 
     #if no file create

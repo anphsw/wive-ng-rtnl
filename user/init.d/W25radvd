@@ -33,8 +33,8 @@ calculate_and_set_mtu() {
 }
 
 start() {
-    eval `nvram_buf_get 2860 radvdEnabled`
-    if [ "$radvdEnabled" = "1" ]; then
+    eval `nvram_buf_get 2860 radvdEnabled ipv6_6to4_srv_ipaddr IPv6Dhcpc`
+    if [ "$IPv6OpMode" != "0" ]; then
 	# check wan ip set
 	if [ "$real_wan_ipaddr" = "" ]; then
 	    $LOG "No ipv4 adress on wan, exit..."
@@ -42,17 +42,23 @@ start() {
 	fi
 	DNSADRESSES="2001:4860:4860::8888 2001:4860:4860::8844"
 
-        # calculate and set mtu
-        calculate_and_set_mtu
-
 	# addr del->add change need for notify kernel and regenerage arp table
-        $LOG "Tunel ipv6 in ipv4 configure and up"
-        if [ "$ipv6_mode" = "6RD" ]; then
+        if [ "$IPv6OpMode" = "1" ]; then
+	    # this section for native/dualstack mode
+	    if [ "$IPv6Dhcpc" = "1" ]; then
+    		$LOG "Native IPv6 support with DHCP/RA uplink"
+		$LOG "Starting dhcp6c"
+		dhcp6c $real_wan_if
+	    fi
+        elif [ "$IPv6OpMode" = "2" ]; then
+    	    $LOG "Tunel ipv6 in ipv4 configure and up"
+	    # calculate and set mtu
+    	    calculate_and_set_mtu
 	    # this section for 6RD tunnel mode
 	    relay6to4="192.88.99.127"										# The 6rd IPv4-gateway
 	    ipv6subnet="$(echo -n `printf '%02X:' ${real_wan_ipaddr//./ } | awk -F: '{print($1$2":"$3$4)}'`)"	# Calculate subnet from real ipv4 adress
     	    ipv6prefix="2a02:2560"										# Your ISP's IPv6-prefix
-	    $LOG "Tune and up 6rd interface"
+	    $LOG "Tune and up $tun_if interface"
 	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::abca/128 dev $real_wan_if	> /dev/null 2>&1
 	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/128 dev $real_wan_if
 	    ip tunnel add $tun_if mode sit local $real_wan_ipaddr ttl 64
@@ -65,9 +71,12 @@ start() {
 	    $LOG "Set mtu $sitmtu to $tun_if"
 	    sysctl -wq net.ipv6.conf.$tun_if.mtu="$sitmtu"
 	    ip link set mtu $sitmtu dev $tun_if
-        elif [ "$ipv6_mode" = "6TO4" ]; then
+        elif [ "$IPv6OpMode" = "3" ]; then
+    	    $LOG "Tunel ipv6 in ipv4 configure and up"
+	    # calculate and set mtu
+    	    calculate_and_set_mtu
 	    # this section for 6to4 tunnel mode
-	    relay6to4="192.88.99.1"										# The 6to4 IPv4-gateway
+	    relay6to4="$ipv6_6to4_srv_ipaddr"									# The 6to4 IPv4-gateway
 	    ipv6subnet="2000"											# Default 6to4 subnet
     	    ipv6prefix=`echo $real_wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`	# Calculate prefix
 	    $LOG "Up $tun_if interface"
@@ -80,10 +89,6 @@ start() {
 	    ip -6 addr add ${ipv6prefix}::1/16 dev $tun_if
 	    $LOG "Add route to ${ipv6subnet}::/3 via ::${relay6to4} dev $tun_if"
 	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tun_if metric 1
-        elif [ "$ipv6_mode" = "NATIVE" ]; then
-	    # this section for native/dualstack mode
-	    $LOG "Starting dhcp6c"
-	    dhcp6c eth2.2
 	fi
 
 	$LOG "Enable ipv6 forward"
@@ -93,37 +98,61 @@ start() {
 	sysctl -wq net.ipv6.conf.all.accept_ra_pinfo=1
 	sysctl -wq net.ipv6.conf.all.autoconf=1
 
-	if [ "$ipv6_mode" = "NATIVE" ]; then
-	    $LOG "Always accept router advertisements for autoconfigure from wan $real_wan_if."
-	    sysctl -wq net.ipv6.conf.$real_wan_if.accept_ra=2
+	if [ "$IPv6OpMode" = "1" ]; then
+	    if [ "$IPv6Dhcpc" = "1" ]; then
+		$LOG "Always accept router advertisements for autoconfigure from wan $real_wan_if."
+		sysctl -wq net.ipv6.conf.$real_wan_if.accept_ra=2
+	    else
+    		$LOG "Native IPv6 support static configured"
+		sysctl -wq net.ipv6.conf.$real_wan_if.accept_ra=0
+		eval `nvram_buf_get 2860 IPv6IPAddr IPv6PrefixLen IPv6WANIPAddr IPv6WANPrefixLen IPv6GWAddr`
+
+                $LOG "Set ${IPv6WANIPAddr}/${IPv6WANPrefixLen} to $real_wan_if"
+		ip -6 addr del ${IPv6WANIPAddr}/${IPv6WANPrefixLen} dev $real_wan_if	> /dev/null 2>&1
+		ip -6 addr add ${IPv6WANIPAddr}/${IPv6WANPrefixLen} $real_wan_if
+
+                $LOG "Set ${IPv6IPAddr}/${IPv6PrefixLen} to $lan_if"
+		ip -6 addr del ${IPv6IPAddr}/${IPv6PrefixLen} dev $lan_if	> /dev/null 2>&1
+		ip -6 addr add ${IPv6IPAddr}/${IPv6PrefixLen} $lan_if
+
+		$LOG "Replace Ipv6 DGW to $IPv6GWAddr"
+		ip -6 route replace default dev "$real_wan_if" via "$IPv6WANIPAddr" metric 0
+
+		# fix me... need write logic for auto configure
+		radvdEnabled="0"
+	    fi
 	else
-	    $LOG "Used $ipv6_mode mode, disable forward from real wan interfaces(security need)."
+	    $LOG "Used tunneled ipv6 mode, disable forward from real wan interfaces(security need)."
     	    sysctl -wq net.ipv6.conf.$real_wan_if.forwarding=0
     	    sysctl -wq net.ipv6.conf.$wan_if.forwarding=0
     	    sysctl -wq net.ipv6.conf.$tun_if.forwarding=1
-	    if [ "$ipv6_mode" = "6TO4" ]; then
+	    if [ "$IPv6OpMode" = "3" ]; then
 		$LOG "6to4 mode not need ipv6 adress and route at wan ifaces - drop it."
 		ip -6 route flush dev $wan_if					> /dev/null 2>&1
 		ip -6 route flush dev $real_wan_if				> /dev/null 2>&1
 		ip -6 addr flush dev $wan_if					> /dev/null 2>&1
 		ip -6 addr flush dev $real_wan_if				> /dev/null 2>&1
 	    fi
-	    $LOG "Set ${ipv6prefix}:${ipv6subnet}::1/64 to $lan_if"
-	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if	> /dev/null 2>&1
-	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if
+	    IPv6PrefixLen="64"
+	    SUBNET="${ipv6prefix}:${ipv6subnet}"
+	    $LOG "Set ${SUBNET}::1/${IPv6PrefixLen} to $lan_if"
+	    ip -6 addr del ${SUBNET}::1/${IPv6PrefixLen} dev $lan_if	> /dev/null 2>&1
+	    ip -6 addr add ${SUBNET}::1/${IPv6PrefixLen} dev $lan_if
 	fi
+
 	flush_net_caches
 
-	$LOG "Configure radvd"
-        printf "
-        interface $lan_if
+	if [ "$radvdEnabled" = "1" ]; then
+	    $LOG "Configure radvd"
+    	    printf "
+    	    interface $lan_if
             {
                 AdvSendAdvert on;
                 MinRtrAdvInterval 3;
                 MaxRtrAdvInterval 10;
                 AdvDefaultPreference high;
 		AdvOtherConfigFlag on;
-                prefix ${ipv6prefix}:${ipv6subnet}::1/64
+                prefix ${SUBNET}::1/${IPv6PrefixLen}
                 {
                         AdvOnLink off;
                         AdvAutonomous on;
@@ -136,28 +165,28 @@ start() {
                         AdvRDNSSLifetime 10;
                 };
             };
-        " > /etc/radvd.conf
+    	    " > /etc/radvd.conf
 
-	$LOG "Configure dhcp6s"
-        printf "
-	option domain-name-servers $DNSADRESSES;
+	    $LOG "Configure dhcp6s"
+    	    printf "
+	    option domain-name-servers $DNSADRESSES;
 
-	interface br0 {
-	    allow rapid-commit;
-	    address-pool pool1 3600;
-	};
+	    interface $lan_if {
+		allow rapid-commit;
+		address-pool pool1 3600;
+	    };
 
-	pool pool1 {
-	    range ${ipv6prefix}:${ipv6subnet}::2 to ${ipv6prefix}:${ipv6subnet}::254 ;
-	};
-        " > /etc/dhcp6s.conf
+	    pool pool1 {
+		range ${SUBNET}::2 to ${SUBNET}::254 ;
+	    };
+    	    " > /etc/dhcp6s.conf
 
-	$LOG "Starting radvd"
-	radvd -C /etc/radvd.conf --debug=0 --logmethod=syslog &
+	    $LOG "Starting radvd"
+	    radvd -C /etc/radvd.conf --debug=0 --logmethod=syslog &
 
-	$LOG "Starting dhcp6s"
-	dhcp6s -c /etc/dhcp6s.conf -P /var/run/dhcp6s.pid $lan_if &
-
+	    $LOG "Starting dhcp6s"
+	    dhcp6s -c /etc/dhcp6s.conf -P /var/run/dhcp6s.pid $lan_if &
+    	fi
 	flush_net_caches
     fi
 }

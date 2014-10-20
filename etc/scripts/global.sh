@@ -32,7 +32,7 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_d
 	WLAN_MAC_ADDR WLAN2_MAC_ADDR WAN_MAC_ADDR LAN_MAC_ADDR \
 	dnsPEnabled UDPXYMode UDPXYPort igmpEnabled \
 	vpnEnabled vpnPurePPPOE vpnType vpnDGW \
-	radvdEnabled ipv6_mode \
+	IPv6OpMode \
 	ApCliBridgeOnly \
 	MODEMENABLED \
 	QoSEnable simple_qos`
@@ -158,12 +158,12 @@ getWanIfName() {
 }
 
 getTunIfName() {
-    if [ "$ipv6_mode" = "6RD" ]; then
-	tun_if="6rd"
-    elif [ "$ipv6_mode" = "6TO4" ]; then
-	tun_if="sit0"
-    elif [ "$ipv6_mode" = "NATIVE" ]; then
+    if [ "$IPv6OpMode" = "1" ]; then
 	tun_if="$real_wan_if"
+    elif [ "$IPv6OpMode" = "2" ]; then
+	tun_if="6rd"
+    elif [ "$IPv6OpMode" = "3" ]; then
+	tun_if="sit0"
     fi
 }
 

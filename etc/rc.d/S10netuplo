@@ -4,8 +4,6 @@ LOG="logger -t lo"
 
 start() {
  $LOG "Start loopback interface."
-    eval `nvram_buf_get 2860 radvdEnabled`
-
     ip link set lo up
     ip -4 addr flush dev lo
     ip -4 addr add 127.0.0.1/8 dev lo

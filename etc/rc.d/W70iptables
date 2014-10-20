@@ -393,7 +393,7 @@ start() {
 }
 
 startv6() {
-    if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
+    if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6OpMode" != "0" ]; then
 	get_param
 
         $LOG "Add netfiler rules for ipv6"

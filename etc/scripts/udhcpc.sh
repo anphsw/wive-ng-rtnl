@@ -278,7 +278,7 @@ case "$1" in
 	    		echo "nameserver 8.8.8.8" >> $RESOLV_CONF
 	    		echo "nameserver 8.8.4.4" >> $RESOLV_CONF
 		    fi
-		    if [ "$radvdEnabled" = "1" ]; then
+		    if [ "$IPv6OpMode" != "0" ]; then
 			$LOG "Add google ipv6 servers (need replace to ISP servers from dhcpv6 in future)"
 			echo "nameserver 2001:4860:4860::8888" >> $RESOLV_CONF
 			echo "nameserver 2001:4860:4860::8844" >> $RESOLV_CONF
