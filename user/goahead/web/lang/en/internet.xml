@@ -59,7 +59,7 @@
   <message msgid="lan snmp" msgstr="SNMP daemon (SNMPD)" />
   <message msgid="lan igmpp" msgstr="Multicast route (IGMP Proxy)" />
   <message msgid="lan upnp" msgstr="Auto portmap service (UPNP)" />
-  <message msgid="lan radvd" msgstr="IPv6 tunnel (6TO4 autoconfig + RADVD)" />
+  <message msgid="lan radvd" msgstr="RADVD + DHCPv6" />
   <message msgid="lan dnsp" msgstr="DNS Proxy (DNSMASQ)" />
 
   <message msgid="dhcp title" msgstr="DHCP Client List" />

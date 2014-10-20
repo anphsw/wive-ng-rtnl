@@ -33,7 +33,7 @@ calculate_and_set_mtu() {
 }
 
 start() {
-    eval `nvram_buf_get 2860 radvdEnabled ipv6_6to4_srv_ipaddr IPv6Dhcpc`
+    eval `nvram_buf_get 2860 radvdEnabled ipv6_6to4_srv_ipaddr IPv6IPAddr IPv6SrvAddr IPv6WANIPAddr IPv6PrefixLen IPv6WANPrefixLen IPv6GWAddr IPv6Dhcpc`
     if [ "$IPv6OpMode" != "0" ]; then
 	# check wan ip set
 	if [ "$real_wan_ipaddr" = "" ]; then
@@ -55,16 +55,21 @@ start() {
 	    # calculate and set mtu
     	    calculate_and_set_mtu
 	    # this section for 6RD tunnel mode
-	    relay6to4="192.88.99.127"										# The 6rd IPv4-gateway
+	    relay6to4="$IPv6SrvAddr"										# The 6rd IPv4-gateway
 	    ipv6subnet="$(echo -n `printf '%02X:' ${real_wan_ipaddr//./ } | awk -F: '{print($1$2":"$3$4)}'`)"	# Calculate subnet from real ipv4 adress
-    	    ipv6prefix="2a02:2560"										# Your ISP's IPv6-prefix
+	    if [ "$IPv6IPAddr" != "" ] && [ "$IPv6PrefixLen" != "" ]; then
+		ipv6prefix="$IPv6IPAddr"
+	    else
+    		ipv6prefix="2a02:2560"										# Your ISP's IPv6-prefix
+		IPv6PrefixLen="32"
+	    fi
 	    $LOG "Tune and up $tun_if interface"
-	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::abca/128 dev $real_wan_if	> /dev/null 2>&1
+	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::abca/128 dev $real_wan_if			> /dev/null 2>&1
 	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/128 dev $real_wan_if
 	    ip tunnel add $tun_if mode sit local $real_wan_ipaddr ttl 64
-	    ip tunnel 6rd dev $tun_if 6rd-prefix ${ipv6prefix}::/32
-	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::abca/32 dev $tun_if		> /dev/null 2>&1
-	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/32 dev $tun_if
+	    ip tunnel 6rd dev $tun_if 6rd-prefix ${ipv6prefix}::/${IPv6PrefixLen}
+	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::abca/${IPv6PrefixLen} dev $tun_if		> /dev/null 2>&1
+	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/${IPv6PrefixLen} dev $tun_if
 	    ip link set $tun_if up
 	    $LOG "Replace ipv6 dgw to ::${relay6to4} dev $tun_if"
 	    ip -6 route replace ::/0 via ::${relay6to4} dev $tun_if metric 1
@@ -105,7 +110,6 @@ start() {
 	    else
     		$LOG "Native IPv6 support static configured"
 		sysctl -wq net.ipv6.conf.$real_wan_if.accept_ra=0
-		eval `nvram_buf_get 2860 IPv6IPAddr IPv6PrefixLen IPv6WANIPAddr IPv6WANPrefixLen IPv6GWAddr`
 
                 $LOG "Set ${IPv6WANIPAddr}/${IPv6WANPrefixLen} to $real_wan_if"
 		ip -6 addr del ${IPv6WANIPAddr}/${IPv6WANPrefixLen} dev $real_wan_if	> /dev/null 2>&1
