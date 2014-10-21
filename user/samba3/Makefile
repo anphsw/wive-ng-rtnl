@@ -1,6 +1,17 @@
-CFLAGS    += -ffunction-sections -fdata-sections
-CXXFLAGS  += -ffunction-sections -fdata-sections
-LDFLAGS   += -Wl,--gc-sections
+.EXPORT_ALL_VARIABLES:
+
+-include $(CONFIG_CONFIG)
+
+CFLAGS    	+= -ffunction-sections -fdata-sections
+ifdef CONFIG_USER_STORAGE
+CFLAGS    	+= -Os -fno-caller-saves -fno-unwind-tables -fno-asynchronous-unwind-tables
+endif
+
+CXXFLAGS  	+= $(CFLAGS)
+LDFLAGS   	+= -Wl,--gc-sections
+
+SMBCFLAGS	+= -Wall $(CFLAGS) -DMAX_DEBUG_LEVEL="0"
+SMBLDFLAGS	+= $(LDFLAGS)
 
 all:
 	$(MAKE) -C source
