@@ -3,7 +3,7 @@
 -include $(CONFIG_CONFIG)
 
 CFLAGS    	+= -ffunction-sections -fdata-sections
-ifdef CONFIG_USER_STORAGE
+ifndef CONFIG_USER_STORAGE
 CFLAGS    	+= -Os -fno-caller-saves -fno-unwind-tables -fno-asynchronous-unwind-tables
 endif
 
