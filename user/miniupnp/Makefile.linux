@@ -1,4 +1,4 @@
-# $Id: Makefile.linux,v 1.86 2014/04/09 07:22:28 nanard Exp $
+# $Id: Makefile.linux,v 1.88 2014/10/21 14:04:15 nanard Exp $
 # MiniUPnP project
 # (c) 2006-2014 Thomas Bernard
 # http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
@@ -183,7 +183,7 @@ install:	miniupnpd miniupnpd.8 miniupnpd.conf genuuid \
 	$(INSTALL) linux/miniupnpd.init.d.script $(DESTDIR)$(PREFIX)/etc/init.d/miniupnpd
 	$(INSTALL) -d $(DESTDIR)$(MANINSTALLDIR)
 #	$(INSTALL) --mode=0644 miniupnpd.8 $(DESTDIR)$(MANINSTALLDIR)
-#	gzip $(DESTDIR)$(MANINSTALLDIR)/miniupnpd.8
+#	gzip -f $(DESTDIR)$(MANINSTALLDIR)/miniupnpd.8
 
 romfs: install
 	$(ROMFSINST) -S filesystem/usr/sbin/miniupnpd /bin/miniupnpd
