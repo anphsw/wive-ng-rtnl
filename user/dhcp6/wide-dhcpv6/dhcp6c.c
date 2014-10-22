@@ -373,7 +373,7 @@ client6_init()
 	    DHCP6CTL_DEF_COMMANDQUEUELEN, &ctlsock)) {
 		debug_printf(LOG_ERR, FNAME,
 		    "failed to initialize control channel");
-		exit(1);
+		//exit(1);
 	}
 
 	if (signal(SIGHUP, client6_signal) == SIG_ERR) {
