@@ -362,6 +362,7 @@
 20) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
 21) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
 22) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
+23) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
 <br>
 <br>
 <br>
