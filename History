@@ -354,13 +354,14 @@
 12) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
 13) kernel: hw_nat: update to 2.51 version.<br>
 14) kernel: spi: add more flash support.<br>
-15) kenrel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
-16) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
-17) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
-18) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
-19) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
-20) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
-21) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
+15) kernel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
+16) kernel: ipv6: Do not warn for informational ICMP messages, regardless of type.<br>
+17) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
+18) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
+19) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
+20) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
+21) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+22) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
 <br>
 <br>
 <br>
