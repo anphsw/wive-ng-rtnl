@@ -88,7 +88,7 @@
 #include <linux/seq_file.h>
 
 /* Set to 3 to get tracing... */
-#define ACONF_DEBUG 2
+#define ACONF_DEBUG 0
 
 #if ACONF_DEBUG >= 3
 #define ADBG(x) printk x
@@ -2333,7 +2333,7 @@ static int addrconf_notify(struct notifier_block *this, unsigned long event,
 		if (event == NETDEV_UP) {
 			if (!addrconf_qdisc_ok(dev)) {
 				/* device is not ready yet. */
-				printk(KERN_INFO
+				ADBG(KERN_INFO
 					"ADDRCONF(NETDEV_UP): %s: "
 					"link is not ready\n",
 					dev->name);
@@ -2361,7 +2361,7 @@ static int addrconf_notify(struct notifier_block *this, unsigned long event,
 				idev->if_flags |= IF_READY;
 			}
 
-			printk(KERN_INFO
+			ADBG(KERN_INFO
 					"ADDRCONF(NETDEV_CHANGE): %s: "
 					"link becomes ready\n",
 					dev->name);
