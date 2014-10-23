@@ -349,22 +349,23 @@
 7) toolchain: move to 4.8.4 gcc svn version (after 4.8.3 release 4.8 tree apply only bugfixes).<br>
 8) apps: port wive-dhcpv6 (need write client logic, server logic work good).<br>
 9) miniupnpd: version up to 1.8.20141022.<br>
-10) init.d: fix get vendid at new mac generate.<br>
-11) init.d: add check first octet in mac readed from old factory for prevent read from crashed mtd FF.<br>
-12) init.d: rewrite logic for ipv6 suppor (need write logic for more modes support).<br>
-13) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
-14) kernel: hw_nat: update to 2.51 version.<br>
-15) kernel: spi: add more flash support.<br>
-16) kernel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
-17) kernel: ipv6: Do not warn for informational ICMP messages, regardless of type.<br>
-18) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
-19) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
-20) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
-21) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
-22) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
-23) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
-24) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
-25) kernel: jiffies: fix timeval conversion to jiffies.<br>
+10) busybox: apply lzop and zcat upstream patchs.<br>
+11) init.d: fix get vendid at new mac generate.<br>
+12) init.d: add check first octet in mac readed from old factory for prevent read from crashed mtd FF.<br>
+13) init.d: rewrite logic for ipv6 suppor (need write logic for more modes support).<br>
+14) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
+15) kernel: hw_nat: update to 2.51 version.<br>
+16) kernel: spi: add more flash support.<br>
+17) kernel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
+18) kernel: ipv6: Do not warn for informational ICMP messages, regardless of type.<br>
+19) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
+20) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
+21) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
+22) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
+23) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+24) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
+25) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
+26) kernel: jiffies: fix timeval conversion to jiffies.<br>
 <br>
 <br>
 <br>
