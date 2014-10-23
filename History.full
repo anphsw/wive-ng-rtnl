@@ -2068,6 +2068,7 @@
 22) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
 23) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
 24) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
+25) kernel: jiffies: fix timeval conversion to jiffies.<br>
 <br>
 <br>
 <br>
