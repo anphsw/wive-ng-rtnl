@@ -2070,6 +2070,7 @@
 24) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
 25) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
 26) kernel: jiffies: fix timeval conversion to jiffies.<br>
+28) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
 <br>
 <br>
 <br>
