@@ -27,16 +27,16 @@
 #include <linux/reboot.h>
 #include <sys/reboot.h>
 
-/* for CONFIG_MTD_KERNEL_PART_SIZ  */
 #include <linux/autoconf.h>  				/* kernel config		*/
-#include "config/autoconf.h"				/* user config			*/
 #include "../../../tools/mkimage/include/image.h"	/* For Uboot image header format */
 
 /* for calculate max image size */
 #include "../../../linux/drivers/mtd/ralink/ralink-flash.h"
-#define MAX_IMG_SIZE (IMAGE1_SIZE - MTD_RWFS_PART_SIZE - MTD_FACTORY_PART_SIZE - MTD_CONFIG_PART_SIZE - MTD_BOOT_PART_SIZE)
 
-#include "../options.h"
+#define RFC_ERROR 		"RFC1867 ...."
+#define MEM_SIZE        	1024
+#define MEM_HALF        	512
+#define MIN_FIRMWARE_SIZE       2097152 		/* minium firmware size(2MB) */
 
 void *memmem(const void *buf, size_t buf_len, const void *byte_line, size_t byte_line_len)
 {

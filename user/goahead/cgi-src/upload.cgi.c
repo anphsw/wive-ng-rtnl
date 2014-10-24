@@ -1,5 +1,4 @@
 #include "upload.h"
-#include "../options.h"
 
 #ifdef UPLOAD_FIRMWARE_SUPPORT
 
@@ -114,13 +113,6 @@ static int mtd_write_firmware(char *filename, int offset, int len)
 	fprintf(stderr, "Image size is not correct!!!%d", len);
         return -1;
     }
-#endif
-#if defined(CONFIG_RT2880_ROOTFS_IN_RAM)
-    snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s Kernel", offset, len, filename);
-    status = system(cmd);
-    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
-	err++;
-#elif defined(CONFIG_RT2880_ROOTFS_IN_FLASH)
   #ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
     snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s Kernel_RootFS", offset, len, filename);
     status = system(cmd);
@@ -137,12 +129,17 @@ static int mtd_write_firmware(char *filename, int offset, int len)
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
 	err++;
   #endif
+#elif defined(CONFIG_RT2880_ROOTFS_IN_RAM)
+    snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s Kernel", offset, len, filename);
+    status = system(cmd);
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	err++;
 #else
     fprintf(stderr, "goahead: no CONFIG_RT2880_ROOTFS defined!");
 #endif
     if (err == 0)
         return 0;
-    else
+
         return -1;
 }
 
@@ -231,14 +228,7 @@ static int check(char *imagefile, int offset, int len, char *err_msg)
 	/*
 	 * compare MTD partition size and image size
 	 */
-#if defined(CONFIG_RT2880_ROOTFS_IN_RAM)
-	if(len > MAX_IMG_SIZE || len > getMTDPartSize("\"Kernel\"")){
-		munmap(ptr, len);
-		close(ifd);
-		sprintf(err_msg, "*** ERROR: the image file(0x%x) is bigger than Kernel MTD partition.\n", len);
-		return 0;
-	}
-#elif defined(CONFIG_RT2880_ROOTFS_IN_FLASH)
+#if defined(CONFIG_RT2880_ROOTFS_IN_FLASH)
   #ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
 	if(len > MAX_IMG_SIZE || len > getMTDPartSize("\"Kernel_RootFS\"")){
 		munmap(ptr, len);
@@ -261,6 +251,13 @@ static int check(char *imagefile, int offset, int len, char *err_msg)
 		return 0;
 	}
   #endif
+#elif defined(CONFIG_RT2880_ROOTFS_IN_RAM)
+	if(len > MAX_IMG_SIZE || len > getMTDPartSize("\"Kernel\"")){
+		munmap(ptr, len);
+		close(ifd);
+		sprintf(err_msg, "*** ERROR: the image file(0x%x) is bigger than Kernel MTD partition.\n", len);
+		return 0;
+	}
 #else
 #error "goahead: no CONFIG_RT2880_ROOTFS defined!"
 #endif
@@ -373,15 +370,16 @@ int main (int argc, char *argv[])
 		return -1;
 	}
 
+	// firmware update timeouts
 	// examination, reset NVRAM if needed
 	// start web timer and crash rwfs BEFORE flash destroy
 	if (reset_rwfs)
 	{
 		system("echo \"1234567890\" > /dev/mtdblock5");
-		html_success(20*(IMAGE1_SIZE/0x100000) + 55);
+		html_success(18*(IMAGE1_SIZE/0x100000) + 55);
 	}
 	else
-		html_success(20*(IMAGE1_SIZE/0x100000) + 35);
+		html_success(18*(IMAGE1_SIZE/0x100000) + 45);
 
 	// Output success message
 	fflush(stdout);
@@ -393,7 +391,6 @@ int main (int argc, char *argv[])
 		return -1;
 	}
 
-	//printf("Update complete. Reboot...\n");
 	sleep (3);
 	reboot(RB_AUTOBOOT);
 	return 0;

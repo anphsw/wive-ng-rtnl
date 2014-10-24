@@ -107,6 +107,17 @@ function onImportSettings(form)
 			ajaxShowProgress);
 }
 
+function onUploadRWFSSubmit(form)
+{
+	if (checkFilePresent(form.filename))
+		ajaxPostForm(
+			'Proceed uploading RWFS?',
+			form,
+			'RWFSReloader',
+			'/messages/wait_rwfs.asp',
+			ajaxShowProgress);
+}
+
 </script>
 </head>
 <body onLoad="initValue();">
@@ -174,7 +185,7 @@ function onImportSettings(form)
             <td colspan="2" class="title">Firmware update</td>
           </tr>
           <tr>
-            <td class="head" id="uploadFWLocation">Firmware update:</td>
+            <td class="head" id="uploadFWLocation">Filename:</td>
             <td class="value"><form method="POST" name="UploadFirmware" action="/cgi-bin/upload.cgi" enctype="multipart/form-data" onSubmit="return uploadFirmwareCheck();" >
                 <input type="checkbox" name="reset_rwfs" checked="checked">
                 Reset RWFS on update <br>
@@ -182,6 +193,20 @@ function onImportSettings(form)
                 <input type="button" value="Update" id="uploadFWApply" class="half" name="UploadFirmwareSubmit" onClick="onUploadFirmwareSubmit(this.form);">
                 <br>
                 <iframe id="firmwareReloader" name="firmwareReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
+              </form></td>
+          </tr>
+        </table>
+        <!-- ================= RwFs ================= -->
+        <table class="form">
+          <tr>
+            <td colspan="2" class="title">RW-FS Upload</td>
+          </tr>
+          <tr>
+            <td class="head" id="uploadRWFSLocation">Filename:</td>
+            <td class="value"><form method="POST" name="UploadRWFS" action="/cgi-bin/upload_rwfs.cgi" enctype="multipart/form-data">
+                <input type="file" name="filename" maxlength="256">
+                <input type="button" value="Load" id="uploadRWFSApply" class="half" onClick="onUploadRWFSSubmit(this.form);">
+                <iframe id="RWFSReloader" name="RWFSReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
               </form></td>
           </tr>
         </table>

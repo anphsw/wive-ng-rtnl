@@ -5,7 +5,7 @@ void import(char *filename, int offset, int len)
 	char cmd[4096];
 	char data;
 	FILE *fp, *src;
-	char *pname = tempnam("/var", "set");
+	char *pname = "/tmp/rwfstmp.tar.bz2";
 
 	snprintf(cmd, 4096, "cp %s /var/tmpcgi", filename);
 	system(cmd);
@@ -33,11 +33,8 @@ void import(char *filename, int offset, int len)
 	fclose(fp);
 	fclose(src);
 
-	system("ralink_init clear 2860");
-	snprintf(cmd, 4096, "ralink_init renew 2860 %s", pname);
+	snprintf(cmd, 4096, "unpackrwfs.sh %s", pname);
 	system(cmd);
-	system("fs backup_nvram");
-	system("fs save");
 }
 
 int main (int argc, char *argv[])
@@ -130,7 +127,7 @@ int main (int argc, char *argv[])
 
 	import(filename, file_begin, file_end - file_begin);
 
-	// settings update base timeout
+	// rwfs update base timeout
 	html_success(50);
 
 	fflush(stdout);
