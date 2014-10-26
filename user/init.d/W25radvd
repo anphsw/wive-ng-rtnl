@@ -33,7 +33,7 @@ calculate_and_set_mtu() {
 }
 
 start() {
-    eval `nvram_buf_get 2860 radvdEnabled ipv6_6to4_srv_ipaddr IPv6IPAddr IPv6SrvAddr IPv6WANIPAddr IPv6PrefixLen IPv6WANPrefixLen IPv6GWAddr IPv6Dhcpc`
+    eval `nvram_buf_get 2860 radvdEnabled IPv6IPAddr IPv6SrvAddr IPv6WANIPAddr IPv6PrefixLen IPv6WANPrefixLen IPv6GWAddr IPv6Dhcpc`
     if [ "$IPv6OpMode" != "0" ]; then
 	# check wan ip set
 	if [ "$real_wan_ipaddr" = "" ]; then
@@ -81,7 +81,7 @@ start() {
 	    # calculate and set mtu
     	    calculate_and_set_mtu
 	    # this section for 6to4 tunnel mode
-	    relay6to4="$ipv6_6to4_srv_ipaddr"									# The 6to4 IPv4-gateway
+	    relay6to4="$IPv6SrvAddr"										# The 6to4 IPv4-gateway
 	    ipv6subnet="2000"											# Default 6to4 subnet
     	    ipv6prefix=`echo $real_wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`	# Calculate prefix
 	    $LOG "Up $tun_if interface"

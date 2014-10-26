@@ -45,7 +45,7 @@ function SwitchOpMode()
 	document.ipv6_cfg.ipv6_6rd_border_ipaddr.disabled = true;
 	document.getElementById("6to4Table").style.visibility = "hidden";
 	document.getElementById("6to4Table").style.display = "none";
-	document.ipv6_cfg.ipv6_6to4_srv_ipaddr.disabled = true;
+	document.ipv6_cfg.IPv6SrvAddr.disabled = true;
 
 	if (document.ipv6_cfg.ipv6_opmode.options.selectedIndex == 1) {
 		document.getElementById("v6StaticTable").style.visibility = "visible";
@@ -64,7 +64,7 @@ function SwitchOpMode()
 	} else if (document.ipv6_cfg.ipv6_opmode.options.selectedIndex == document.ipv6_cfg.ipv6_opmode.options.length-1) {
 		document.getElementById("6to4Table").style.visibility = "visible";
 		document.getElementById("6to4Table").style.display = display_on();
-		document.ipv6_cfg.ipv6_6to4_srv_ipaddr.disabled = false;
+		document.ipv6_cfg.IPv6SrvAddr.disabled = false;
 	}
 }
 
@@ -102,7 +102,7 @@ function initValue()
 		document.ipv6_cfg.ipv6_6rd_prefix_len.value = "<% getCfgGeneral(1, "IPv6PrefixLen"); %>";
 		document.ipv6_cfg.ipv6_6rd_border_ipaddr.value = "<% getCfgGeneral(1, "IPv6SrvAddr"); %>";
 	} else if (opmode == "3") {
-		document.ipv6_cfg.ipv6_6to4_srv_ipaddr.value = "<% getCfgGeneral(1, "ipv6_6to4_srv_ipaddr"); %>";
+		document.ipv6_cfg.IPv6SrvAddr.value = "<% getCfgGeneral(1, "IPv6SrvAddr"); %>";
 	}
 }
 
@@ -266,14 +266,14 @@ function CheckValue()
 			return false;
 		}
 	} else if (document.ipv6_cfg.ipv6_opmode.value == "3") {
-		if (document.ipv6_cfg.ipv6_6to4_srv_ipaddr.value == "" ) {
+		if (document.ipv6_cfg.IPv6SrvAddr.value == "" ) {
 			alert("Please fill all fields!");
 			return false;
 		}
-		if (!checkIpv4Addr(document.ipv6_cfg.ipv6_6to4_srv_ipaddr.value)) {
+		if (!checkIpv4Addr(document.ipv6_cfg.IPv6SrvAddr.value)) {
 			alert("invalid IPv4 ip address!");
-			document.ipv6_cfg.ipv6_6to4_srv_ipaddr.focus();
-			document.ipv6_cfg.ipv6_6to4_srv_ipaddr.select();
+			document.ipv6_cfg.IPv6SrvAddr.focus();
+			document.ipv6_cfg.IPv6SrvAddr.select();
 			return false;
 		}
 	}
@@ -344,7 +344,7 @@ function CheckValue()
 </tr>
 <tr>
   <td class="head" id="v66to4SrvIpaddr"> IPv4 to IPv6 server address </td>
-  <td><input name="ipv6_6to4_srv_ipaddr" maxlength=39 size=27></td>
+  <td><input name="IPv6SrvAddr" maxlength=39 size=27></td>
 </tr>
 </table>
 <table width="95%" cellpadding="2" cellspacing="1">

@@ -2409,8 +2409,8 @@ static void setIPv6(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "IPv6SrvAddr", srv_ipaddr);
 #endif
 	} else if (!strcmp(opmode, "3")) {
-		ipaddr = websGetVar(wp, T("ipv6_6to4_srv_ipaddr"), T(""));
-		nvram_bufset(RT2860_NVRAM, "ipv6_6to4_srv_ipaddr", ipaddr);
+		ipaddr = websGetVar(wp, T("IPv6SrvAddr"), T(""));
+		nvram_bufset(RT2860_NVRAM, "IPv6SrvAddr", ipaddr);
 #endif
 	}
 	nvram_bufset(RT2860_NVRAM, "IPv6OpMode", opmode);
@@ -2435,7 +2435,7 @@ static void setIPv6(webs_t wp, char_t *path, char_t *query)
 #endif
 #if defined (CONFIG_IPV6_SIT) ||  defined (CONFIG_IPV6_SIT_MODULE)
 	} else if (!strcmp(opmode, "3")) {
-		websWrite(wp, T("ipv6_6to4_srv_ipaddr: %s<br>\n"), ipaddr);
+		websWrite(wp, T("IPv6SrvAddr: %s<br>\n"), ipaddr);
 #endif
 	}
 
