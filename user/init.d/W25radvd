@@ -145,6 +145,12 @@ start() {
 
 	flush_net_caches
 
+	# check parametrs
+	if [ "$SUBNET" = "" ] || [ "$IPv6PrefixLen" = "" ]; then
+	    $LOG "Configuration is not correct, need check config in setwork settings => IPv6, radvd and dhcpv6 server not started."
+	    exit 0
+	fi
+
 	# read dnsservers reciverd from dhcp
 	if [ -f /etc/resolvipv6.conf ]; then
 	    DNSADRESSES=`echo $(cat /etc/resolvipv6.conf | grep nameserver | grep : |  sed -e 's/nameserver//g')`
