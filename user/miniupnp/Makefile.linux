@@ -27,7 +27,7 @@ IPTABLESPATH=../iptables
 CFLAGS += -Wall -Os -D_GNU_SOURCE -I../iptables -I../iptables/include -I../iptables/libiptc
 LDFLAGS += $(ROOTDIR)/lib/lib
 
-CFLAGS += -ffunction-sections -fdata-sections
+CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
 LDFLAGS += -Wl,--gc-sections
 
 CC ?= gcc

@@ -64,7 +64,7 @@ CONFIG_FEATURE_HAVE_RPC=y
 CONFIG_LFS=y
 CONFIG_CROSS_COMPILER_PREFIX="../../toolchain/bin/mipsel-linux-uclibc-"
 CONFIG_SYSROOT=""
-CONFIG_EXTRA_CFLAGS="-Os -ffast-math -fforce-addr -fno-stack-protector -fno-strict-overflow -fno-var-tracking-assignments -fno-aggressive-loop-optimizations -fno-tree-slsr -fomit-frame-pointer -fno-delete-null-pointer-checks -femit-struct-debug-baseonly -fno-var-tracking"
+CONFIG_EXTRA_CFLAGS="-Os -ffast-math -fforce-addr -fno-stack-protector -fno-strict-overflow -fno-var-tracking-assignments -fno-aggressive-loop-optimizations -fno-tree-slsr -fomit-frame-pointer -fno-delete-null-pointer-checks -femit-struct-debug-baseonly -fno-var-tracking -fno-strict-aliasing"
 CONFIG_EXTRA_LDFLAGS=""
 CONFIG_EXTRA_LDLIBS=""
 
