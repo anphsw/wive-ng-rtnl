@@ -161,7 +161,7 @@ void session_loop(void(*loophandler)()) {
 		FD_SET(ses.signal_pipe[0], &readfd);
 
 		/* set up for channels which can be read/written */
-			setchannelfds(&readfd, &writefd);
+		setchannelfds(&readfd, &writefd);
 
 		val = select(ses.maxfd+1, &readfd, &writefd, NULL, &timeout);
 
@@ -200,8 +200,8 @@ void session_loop(void(*loophandler)()) {
 					/* blocking read of the version string */
 					read_session_identification();
 				} else {
-				read_packet();
-			}
+					read_packet();
+				}
 			}
 			
 			/* Process the decrypted packet. After this, the read buffer
@@ -217,7 +217,7 @@ void session_loop(void(*loophandler)()) {
 
 		/* process pipes etc for the channels, ses.dataallowed == 0
 		 * during rekeying ) */
-			channelio(&readfd, &writefd);
+		channelio(&readfd, &writefd);
 
 		/* process session socket's outgoing data */
 		if (ses.sock_out != -1) {
@@ -246,11 +246,11 @@ void session_cleanup() {
 		TRACE(("leave session_cleanup: !sessinitdone"))
 		return;
 	}
-	
+
 	if (ses.extra_session_cleanup) {
 		ses.extra_session_cleanup();
 	}
-	
+
 	chancleanup();
 	
 	/* Cleaning up keys must happen after other cleanup
@@ -433,7 +433,7 @@ static void checktimeouts() {
 
 	time_t now;
 	now = monotonic_now();
-
+	
 	/* we can't rekey if we haven't done remote ident exchange yet */
 	if (ses.remoteident == NULL) {
 		return;
@@ -460,7 +460,7 @@ static void checktimeouts() {
 		if (now - ses.last_packet_time_keepalive_recv >= opts.keepalive_secs
 			&& now - ses.last_packet_time_keepalive_sent >= opts.keepalive_secs) {
 			send_msg_keepalive();
-	}
+		}
 
 		if (now - ses.last_packet_time_keepalive_recv 
 			>= opts.keepalive_secs * DEFAULT_KEEPALIVE_LIMIT) {
@@ -485,8 +485,8 @@ static long select_timeout() {
 		ret = MIN(AUTH_TIMEOUT, ret);
 	if (opts.keepalive_secs > 0)
 		ret = MIN(opts.keepalive_secs, ret);
-    if (opts.idle_timeout_secs > 0)
-        ret = MIN(opts.idle_timeout_secs, ret);
+	if (opts.idle_timeout_secs > 0)
+		ret = MIN(opts.idle_timeout_secs, ret);
 	return ret;
 }
 

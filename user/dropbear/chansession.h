@@ -51,9 +51,12 @@ struct ChanSess {
 	/* exit details */
 	struct exitinfo exit;
 
-	/* Used to set $SSH_CONNECTION in the child session. 
-	Is only set temporarily before forking */
+
+	/* These are only set temporarily before forking */
+	/* Used to set $SSH_CONNECTION in the child session.  */
 	char *connection_string;
+	/* Used to set $SSH_CLIENT in the child session. */
+	char *client_string;
 	
 #ifndef DISABLE_X11FWD
 	struct Listener * x11listener;
@@ -69,6 +72,7 @@ struct ChanSess {
 	char * agentfile;
 	char * agentdir;
 //#endif
+
 #ifdef ENABLE_SVR_PUBKEY_OPTIONS
 	char *original_command;
 #endif

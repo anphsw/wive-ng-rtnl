@@ -98,7 +98,6 @@ struct ChanType {
 	int (*check_close)(struct Channel*);
 	void (*reqhandler)(struct Channel*);
 	void (*closehandler)(struct Channel*);
-
 };
 
 void chaninitialise(const struct ChanType *chantypes[]);
@@ -136,5 +135,6 @@ void start_send_channel_request(struct Channel *channel, unsigned char *type);
 
 void send_msg_request_success();
 void send_msg_request_failure();
+
 
 #endif /* _CHANNEL_H_ */

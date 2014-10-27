@@ -236,7 +236,7 @@ static void cli_sessionloop() {
 			cli_ses.state = USERAUTH_REQ_SENT;
 			TRACE(("leave cli_sessionloop: sent userauth methods req"))
 			return;
-			
+
 		case USERAUTH_REQ_SENT:
 			TRACE(("leave cli_sessionloop: waiting, req_sent"))
 			return;

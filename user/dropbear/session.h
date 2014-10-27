@@ -113,7 +113,7 @@ struct sshsession {
 	/* remotehost will be initially NULL as we delay
 	 * reading the remote version string. it will be set
 	 * by the time any recv_() packet methods are called */
-	unsigned char *remoteident;
+	unsigned char *remoteident; 
 
 	int maxfd; /* the maximum file descriptor to check with select() */
 
@@ -192,7 +192,7 @@ struct sshsession {
 
 	/* TCP priority level for the main "port 22" tcp socket */
 	enum dropbear_prio socket_prio;
-	
+
 	/* TCP forwarding - where manage listeners */
 	struct Listener ** listeners;
 	unsigned int listensize;

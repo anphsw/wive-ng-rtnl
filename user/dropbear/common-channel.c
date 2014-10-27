@@ -258,7 +258,7 @@ void channelio(fd_set *readfds, fd_set *writefds) {
 			writechannel(channel, channel->errfd, channel->extrabuf);
 			do_check_close = 1;
 		}
-	
+
 		if (ses.channel_signal_pending) {
 			/* SIGCHLD can change channel state for server sessions */
 			do_check_close = 1;
@@ -267,7 +267,7 @@ void channelio(fd_set *readfds, fd_set *writefds) {
 	
 		/* handle any channel closing etc */
 		if (do_check_close) {
-		check_close(channel);
+			check_close(channel);
 		}
 	}
 
@@ -316,7 +316,7 @@ static void check_close(struct Channel *channel) {
 	   retrieved) before we close things up. */
 	if (!channel->type->check_close	
 		|| channel->close_handler_done
-			|| channel->type->check_close(channel)) {
+		|| channel->type->check_close(channel)) {
 		close_allowed = 1;
 	}
 
@@ -520,7 +520,7 @@ void setchannelfds(fd_set *readfds, fd_set *writefds) {
 		}
 
 		if (ERRFD_IS_WRITE(channel) && channel->errfd >= 0 
-				&& cbuf_getused(channel->extrabuf) > 0 ) {
+				&& cbuf_getused(channel->extrabuf) > 0) {
 				FD_SET(channel->errfd, writefds);
 		}
 
@@ -583,14 +583,14 @@ static void remove_channel(struct Channel * channel) {
 
 
 	if (IS_DROPBEAR_SERVER || (channel->writefd != STDOUT_FILENO)) {
-	/* close the FDs in case they haven't been done
-	 * yet (they might have been shutdown etc) */
-	TRACE(("CLOSE writefd %d", channel->writefd))
-	close(channel->writefd);
-	TRACE(("CLOSE readfd %d", channel->readfd))
-	close(channel->readfd);
-	TRACE(("CLOSE errfd %d", channel->errfd))
-	close(channel->errfd);
+		/* close the FDs in case they haven't been done
+		 * yet (they might have been shutdown etc) */
+		TRACE(("CLOSE writefd %d", channel->writefd))
+		close(channel->writefd);
+		TRACE(("CLOSE readfd %d", channel->readfd))
+		close(channel->readfd);
+		TRACE(("CLOSE errfd %d", channel->errfd))
+		close(channel->errfd);
 	}
 
 	if (!channel->close_handler_done
@@ -602,7 +602,7 @@ static void remove_channel(struct Channel * channel) {
 	ses.channels[channel->index] = NULL;
 	m_free(channel);
 	ses.chancount--;
-	
+
 	update_channel_prio();
 
 	TRACE(("leave remove_channel"))
@@ -917,7 +917,7 @@ failure:
 
 cleanup:
 	m_free(type);
-
+	
 	update_channel_prio();
 
 	TRACE(("leave recv_msg_channel_open"))
