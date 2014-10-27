@@ -109,9 +109,11 @@ mkdir -p ${TARGET}-toolchain  && cd ${TARGET}-toolchain
 ##################################TUNE FOR CURRENT VERSION GCC BUILD####################################
 HOSTGCCVER=`gcc -dumpversion | cut -f -2 -d .`
 if [ "$HOSTGCCVER" = "4.5" ] || [ "$HOSTGCCVER" = "4.6" ] || [ "$HOSTGCCVER" = "4.7" ] || [ "$HOSTGCCVER" = "4.8" ]; then
-    WARN_OPTS="-Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security -Wno-long-long -Wno-sizeof-pointer-memaccess"
+    WARN_OPTS="-Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security -Wno-long-long -Wno-sizeof-pointer-memaccess -fno-strict-overflow -fno-delete-null-pointer-checks"
 fi
-
+if [ "$HOSTGCCVER" = "4.8" ]; then
+    WARN_OPTS="$WARN_OPTS -fno-aggressive-loop-optimizations -fno-tree-slsr -fno-var-tracking-assignments"
+fi
 export CFLAGS="-O2 $WARN_OPTS"
 
 EXT_OPT="$EXT_OPT --disable-lto --enable-ld=yes --enable-gold=no --disable-sanity-checks --disable-werror"
