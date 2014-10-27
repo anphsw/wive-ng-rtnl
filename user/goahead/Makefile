@@ -86,8 +86,6 @@ ifeq ("$(CONFIG_USB_MODESWITCH)", "")
 endif
 	for i in $(DIRS) ; do make -C $$i $@ ; done
 	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/cgi-bin/.keep_me
-	###for user pages and scripts###
-	mkdir -p $(ROMFSDIR)/etc/web
 
 clean:
 	for i in $(DIRS) ; do make -C $$i clean ; done
