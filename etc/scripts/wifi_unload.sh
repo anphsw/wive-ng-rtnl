@@ -107,7 +107,7 @@ unload_apps() {
 	(killall -q $apps && usleep 20000 && killall -q -SIGKILL $apps) > /dev/null 2>&1
     done
     # remove web pages from tmpfs and link to rootfs
-    if [ -d /etc/web ]; then
+    if [ -d /tmp/web ]; then
 	echo "Remove web pages from tmpfs before firmware burn to flash"
 	rm -rf /tmp/web
 	ln -sf /web /tmp/web
