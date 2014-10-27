@@ -57,7 +57,7 @@ LOG_MINIUPNPD="LOG_DAEMON"
 
 # detecting the OS name and version
 OS_NAME=Wifi-Router
-OS_VERSION=WIVE-NT-RTNL
+OS_VERSION=WIVE-NG-RTNL
 OS_URL=http://wive-ng.sf.net
 
 ${RM} ${CONFIGFILE}
