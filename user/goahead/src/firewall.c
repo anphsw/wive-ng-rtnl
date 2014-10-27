@@ -375,7 +375,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 	}
 
 	// Add forwarding rule
-	rc = snprintf(pos, len, "iptables -t nat -A %s -i %s -d ! %s/%s ", PORT_FORWARD_PRE_CHAIN, wan_name, lan_ip, lan_nm);
+	rc = snprintf(pos, len, "iptables -t nat -A %s -i %s ! -d %s/%s ", PORT_FORWARD_PRE_CHAIN, wan_name, lan_ip, lan_nm);
 	pos += rc;
 	len -= rc;
 
@@ -510,7 +510,7 @@ static void makePortForwardRuleVPN(char *buf, int len, char *wan_name, char *ip_
 	}
 
 	// Add forwarding rule
-	rc = snprintf(pos, len, "iptables -t nat -$1 %s -i %s -d ! %s/%s ", PORT_FORWARD_PRE_CHAIN_VPN, wan_name, lan_ip, lan_nm);
+	rc = snprintf(pos, len, "iptables -t nat -$1 %s -i %s ! -d %s/%s ", PORT_FORWARD_PRE_CHAIN_VPN, wan_name, lan_ip, lan_nm);
 	pos += rc;
 	len -= rc;
 

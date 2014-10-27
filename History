@@ -345,18 +345,18 @@
 3) goahead: cleanup and small fixes.<br>
 4) goahead: add change wan mac in webUI.<br>
 5) goahead: fix regression crash at short reset press.<br>
-6) goahead: add replace RWFS (/etc folder) by webui (full or different components).<br>
-7) goahead: fix Russia timezones.<br>
-8) openssl up to 0.9.8zc version.<br>
-9) toolchain: move to 4.8.4 gcc svn version (after 4.8.3 release 4.8 tree apply only bugfixes).<br>
-10) apps: port wive-dhcpv6 (need write client logic, server logic work good).<br>
-11) apps: dropbear: up to 2014.66 version.<br>
-12) miniupnpd: version up to 1.8.20141022.<br>
-13) busybox: apply lzop upstream patch (zcat suspended - break depmod).<br>
-14) init.d: fix get vendid at new mac generate.<br>
-15) init.d: add check first octet in mac readed from old factory for prevent read from crashed mtd FF.<br>
-16) init.d: rewrite logic for ipv6 suppor (need write logic for more modes support).<br>
-17) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
+6) openssl up to 0.9.8zc version.<br>
+7) toolchain: move to 4.8.4 gcc svn version (after 4.8.3 release 4.8 tree apply only bugfixes).<br>
+8) apps: port wive-dhcpv6 (need write client logic, server logic work good).<br>
+9) miniupnpd: version up to 1.8.20141022.<br>
+10) busybox: apply lzop and zcat upstream patchs.<br>
+11) init.d: fix get vendid at new mac generate.<br>
+12) init.d: add check first octet in mac readed from old factory for prevent read from crashed mtd FF.<br>
+13) init.d: rewrite logic for ipv6 suppor (need write logic for more modes support).<br>
+14) init.d: radvd,dhcpv6: read dns server from uplink if recived.<br>
+15) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
+16) goahead: add dhcpv6 server control in misc.<br>
+17) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
 18) kernel: hw_nat: update to 2.51 version.<br>
 19) kernel: spi: add more flash support.<br>
 20) kernel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>

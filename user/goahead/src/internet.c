@@ -54,7 +54,6 @@ static int getCdpBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getLltdBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getUpnpBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getXupnpdBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int getRadvdBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getDynamicRoutingBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getSWQoSBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getDATEBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -82,12 +81,12 @@ static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv);
 static void formVPNSetup(webs_t wp, char_t *path, char_t *query);
 static void setLan(webs_t wp, char_t *path, char_t *query);
 static void setWan(webs_t wp, char_t *path, char_t *query);
-#if defined (CONFIG_IPV6)
+static int getRadvdBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getDhcpv6Built(int eid, webs_t wp, int argc, char_t **argv);
 static int getIPv6Built(int eid, webs_t wp, int argc, char_t **argv);
 static int getIPv66rdBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getIP6to4Built(int eid, webs_t wp, int argc, char_t **argv);
 static void setIPv6(webs_t wp, char_t *path, char_t *query);
-#endif
 static void getMyMAC(webs_t wp, char_t *path, char_t *query);
 static void editRouting(webs_t wp, char_t *path, char_t *query);
 
@@ -120,7 +119,6 @@ void formDefineInternet(void) {
 	websAspDefine(T("getLltdBuilt"), getLltdBuilt);
 	websAspDefine(T("getUpnpBuilt"), getUpnpBuilt);
 	websAspDefine(T("getXupnpdBuilt"), getXupnpdBuilt);
-	websAspDefine(T("getRadvdBuilt"), getRadvdBuilt);
 	websAspDefine(T("getWanIp"), getWanIp);
 	websAspDefine(T("getWanMac"), getWanMac);
 	websAspDefine(T("getWanIfNameWeb"), getWanIfNameWeb);
@@ -141,12 +139,12 @@ void formDefineInternet(void) {
 	websAspDefine(T("getUSBModemBuilt"), getUSBModemBuilt);
 	websFormDefine(T("setLan"), setLan);
 	websFormDefine(T("setWan"), setWan);
-#if defined (CONFIG_IPV6)
+	websAspDefine(T("getRadvdBuilt"), getRadvdBuilt);
+	websAspDefine(T("getDhcpv6Built"), getDhcpv6Built);
 	websAspDefine(T("getIPv6Built"), getIPv6Built);
 	websAspDefine(T("getIPv66rdBuilt"), getIPv66rdBuilt);
 	websAspDefine(T("getIP6to4Built"), getIP6to4Built);
 	websFormDefine(T("setIPv6"), setIPv6);
-#endif
 	websFormDefine(T("getMyMAC"), getMyMAC);
 	websFormDefine(T("editRouting"), editRouting);
 	websAspDefine(T("getTransmissionBuilt"), getTransmissionBuilt);
@@ -918,10 +916,13 @@ static int getUSBBuilt(int eid, webs_t wp, int argc, char_t **argv)
 #endif
 }
 
-#if defined (CONFIG_IPV6)
 static int getIPv6Built(int eid, webs_t wp, int argc, char_t **argv)
 {
+#if defined (CONFIG_IPV6)
 	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
 }
 
 static int getIPv66rdBuilt(int eid, webs_t wp, int argc, char_t **argv)
@@ -941,7 +942,6 @@ static int getIP6to4Built(int eid, webs_t wp, int argc, char_t **argv)
 	return websWrite(wp, T("0"));
 #endif
 }
-#endif
 
 static int getStorageBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
@@ -1197,6 +1197,15 @@ static int getSpotBuilt(int eid, webs_t wp, int argc, char_t **argv)
 static int getRadvdBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_USER_RADVD
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getDhcpv6Built(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_USER_DHCP6_SERVER
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -2377,7 +2386,6 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	}
 }
 
-#if defined (CONFIG_IPV6)
 /* goform/setIPv6 */
 static void setIPv6(webs_t wp, char_t *path, char_t *query)
 {
@@ -2451,7 +2459,6 @@ static void setIPv6(webs_t wp, char_t *path, char_t *query)
 	else
 		websDone(wp, 200);
 }
-#endif
 
 #ifdef CONFIG_USER_CHILLISPOT
 // ChilliSpot variables

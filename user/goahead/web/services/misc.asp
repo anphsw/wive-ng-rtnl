@@ -86,8 +86,11 @@ function initTranslation()
 	_TR("lUpnpE", "inet enable");
 
 	_TR("lRadvd", "lan radvd");
+	_TR("lDhcpv6", "lan dhcpv6");
 	_TR("lRadvdD", "inet disable");
+	_TR("lDhcpv6D", "inet disable");
 	_TR("lRadvdE", "inet enable");
+	_TR("lDhcpv6E", "inet enable");
 
 	_TR("lDnsp", "lan dnsp");
 	_TR("lDnspD", "inet disable");
@@ -106,6 +109,7 @@ function initValue()
 	var upnp = <% getCfgZero(1, "upnpEnabled"); %>;
 	var xupnpd = <% getCfgZero(1, "xupnpd"); %>;
 	var radvd = <% getCfgZero(1, "radvdEnabled"); %>;
+	var dhcpv6 = <% getCfgZero(1, "dhcpv6Enabled"); %>;
 	var dns = <% getCfgZero(1, "dnsPEnabled"); %>;
 	var wan = "<% getCfgZero(1, "wanConnectionMode"); %>";
 	var cdp = "<% getCfgZero(1, "cdpEnabled"); %>";
@@ -119,6 +123,7 @@ function initValue()
 	var upnpb = "<% getUpnpBuilt(); %>";
 	var xupnpdb = "<% getXupnpdBuilt(); %>";
 	var radvdb = "<% getRadvdBuilt(); %>";
+	var dhcpv6b = "<% getDhcpv6Built(); %>";
 	var dnsp = "<% getDnsmasqBuilt(); %>";
 	var snmpdb = "<% getSNMPDBuilt(); %>";
 	var krnl_pppoe = "<% getCfgZero(1, "pppoe_pass"); %>";
@@ -141,6 +146,7 @@ function initValue()
 	form.upnpEnbl.options.selectedIndex = 1*upnp;
 	form.xupnpdEnbl.options.selectedIndex = 1*xupnpd;
 	form.radvdEnbl.options.selectedIndex = 1*radvd;
+	form.dhcpv6Enbl.options.selectedIndex = 1*dhcpv6;
 	form.dnspEnbl.options.selectedIndex = 1*dns;
 	form.cdpEnbl.options.selectedIndex = 1*cdp;
 	form.lltdEnbl.options.selectedIndex = 1*lltd;
@@ -184,6 +190,7 @@ function initValue()
 	displayElement('upnp', upnpb == '1');
 	displayElement('xupnpd', xupnpdb == '1');
 	displayElement('radvd', radvdb == '1');
+	displayElement('dhcpv6', dhcpv6b == '1');
 	displayElement('dnsproxy', dnsp == '1');
 
 	// Set-up NAT fastpath
@@ -298,22 +305,23 @@ function udpxySelect(form)
 function displayServiceHandler(response)
 {
 	var form = document.miscServiceCfg;
-	
+
 	var services = [
 		// turned_on, row_id, daemon_id, url-finish, about
-		[ '<% getCfgGeneral(1, "UDPXYMode"); %>', 'udpxy', 'udpxy', '<% getCfgGeneral(1, "UDPXYPort"); %>/status/', 'udpxy.sourceforge.net/' ],
+		[ '<% getCfgGeneral(1, "UDPXYMode"); %>', 'udpxy', 'udpxy', '<% getCfgGeneral(1, "UDPXYPort"); %>/status/', 'udpxy.sourceforge.net' ],
 		[ '<% getCfgGeneral(1, "xupnpd"); %>', 'xupnpd', 'xupnpd', '4044/', 'xupnpd.org/' ],
 		[ '<% getCfgGeneral(1, "CrondEnable"); %>', 'crond', 'crond', null, 'crontab.org/' ],
 		[ '<% getCfgGeneral(1, "snmpd"); %>', 'snmpd', 'snmpd', null, 'www.net-snmp.org/docs/man/snmpd.html' ],
-		[ '<% getCfgGeneral(1, "igmpEnabled"); %>', 'igmpProxy', 'igmpproxy', null, 'sourceforge.net/projects/igmpproxy/' ],
+		[ '<% getCfgGeneral(1, "igmpEnabled"); %>', 'igmpProxy', 'igmpproxy', null, 'sourceforge.net/projects/igmpproxy' ],
 		[ '<% getCfgGeneral(1, "lltdEnabled"); %>', 'lltd', 'lld2d', null, 'msdn.microsoft.com/en-us/windows/hardware/gg463061.aspx' ],
 		[ '<% getCfgGeneral(1, "upnpEnabled"); %>', 'upnp', 'miniupnpd', null, 'miniupnp.free.fr/' ],
 		[ '<% getCfgGeneral(1, "cdpEnabled"); %>', 'cdp', 'cdp-send', null, 'freecode.com/projects/cdp-tools' ],
 		[ '<% getCfgGeneral(1, "dnsPEnabled"); %>', 'dnsproxy', 'dnsmasq', null, 'thekelleys.org.uk/dnsmasq/doc.html' ],
 		[ '<% getCfgGeneral(1, "parproutedEnabled"); %>', 'parprouted', 'parprouted', null, 'freecode.com/projects/parprouted' ],
-		[ '<% getCfgGeneral(1, "radvdEnabled"); %>', 'radvd', 'radvd', null, 'www.litech.org/radvd/' ]
+		[ '<% getCfgGeneral(1, "radvdEnabled"); %>', 'radvd', 'radvd', null, 'www.litech.org/radvd' ],
+		[ '<% getCfgGeneral(1, "dhcpv6Enabled"); %>', 'dhcpv6', 'dhcp6s', null, 'wide-dhcpv6.sourceforge.net' ]
 	];
-	
+
 	// Create associative array
 	var tmp = response.split(',');
 	var daemons = [];
@@ -578,6 +586,16 @@ function displayServiceStatus()
             <td><select name="radvdEnbl" class="half">
                 <option value="0" id="lRadvdD">Disable</option>
                 <option value="1" id="lRadvdE">Enable</option>
+              </select></td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr id="dhcpv6">
+            <td class="head" id="lDhcpv6">Dynamic IPv6 configuration</td>
+            <td><select name="dhcpv6Enbl" class="half">
+                <option value="0" id="lDhcpv6D">Disable</option>
+                <option value="1" id="lDhcpv6E">Enable</option>
               </select></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>

@@ -33,14 +33,13 @@ calculate_and_set_mtu() {
 }
 
 start() {
-    eval `nvram_buf_get 2860 radvdEnabled IPv6IPAddr IPv6SrvAddr IPv6WANIPAddr IPv6PrefixLen IPv6WANPrefixLen IPv6GWAddr IPv6Dhcpc`
+    eval `nvram_buf_get 2860 radvdEnabled dhcpv6Enabled IPv6IPAddr IPv6SrvAddr IPv6WANIPAddr IPv6PrefixLen IPv6WANPrefixLen IPv6GWAddr IPv6Dhcpc`
     if [ "$IPv6OpMode" != "0" ]; then
 	# check wan ip set
 	if [ "$real_wan_ipaddr" = "" ]; then
 	    $LOG "No ipv4 adress on wan, exit..."
 	    exit 1
 	fi
-	DNSADRESSES="2001:4860:4860::8888 2001:4860:4860::8844"
 
 	# addr del->add change need for notify kernel and regenerage arp table
         if [ "$IPv6OpMode" = "1" ]; then
@@ -146,6 +145,16 @@ start() {
 
 	flush_net_caches
 
+	# read dnsservers reciverd from dhcp
+	if [ -f /etc/resolvipv6.conf ]; then
+	    DNSADRESSES=`echo $(cat /etc/resolvipv6.conf | grep nameserver | grep : |  sed -e 's/nameserver//g')`
+	    $LOG "Use DNS recived from ISP $DNSADRESSES"
+	fi
+	if [ "$DNSADRESSES" = "" ]; then
+	    DNSADRESSES="2001:4860:4860::8888 2001:4860:4860::8844"
+	    $LOG "Use public DNS $DNSADRESSES"
+	fi
+
 	if [ "$radvdEnabled" = "1" ]; then
 	    $LOG "Configure radvd"
     	    printf "
@@ -178,6 +187,11 @@ start() {
             };
     	    " >> /etc/radvd.conf
 
+	    $LOG "Starting radvd"
+	    radvd -C /etc/radvd.conf --debug=0 --logmethod=syslog &
+	fi
+
+	if [ "$dhcpv6Enabled" = "1" ]; then
 	    $LOG "Configure dhcp6s"
     	    printf "
 	    option domain-name-servers $DNSADRESSES;
@@ -192,22 +206,20 @@ start() {
 	    };
     	    " > /etc/dhcp6s.conf
 
-	    $LOG "Starting radvd"
-	    radvd -C /etc/radvd.conf --debug=0 --logmethod=syslog &
-
 	    $LOG "Starting dhcp6s"
 	    dhcp6s -c /etc/dhcp6s.conf -P /var/run/dhcp6s.pid $lan_if &
     	fi
+
 	flush_net_caches
     fi
 }
 
 stop() {
     if [ -f /var/run/radvd.pid ]; then
-	$LOG  "Stop radvd daemon."
+	$LOG  "Stop radvd and dhcpv6 daemons."
 
         # disable ra for all ifaces
-	sysctl -wq net.ipv6.conf.all.accept_ra=0			> /dev/null 2>&1
+	sysctl -wq net.ipv6.conf.all.accept_ra=0		> /dev/null 2>&1
         sysctl -wq net.ipv6.conf.all.forwarding=0		> /dev/null 2>&1
     	sysctl -wq net.ipv6.conf.6rd.forwarding=0		> /dev/null 2>&1
     	sysctl -wq net.ipv6.conf.sit0.forwarding=0		> /dev/null 2>&1
