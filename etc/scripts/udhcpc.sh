@@ -279,9 +279,14 @@ case "$1" in
 	    		echo "nameserver 8.8.4.4" >> $RESOLV_CONF
 		    fi
 		    if [ "$IPv6OpMode" != "0" ]; then
-			$LOG "Add google ipv6 servers (need replace to ISP servers from dhcpv6 in future)"
-			echo "nameserver 2001:4860:4860::8888" >> $RESOLV_CONF
-			echo "nameserver 2001:4860:4860::8844" >> $RESOLV_CONF
+			if [ -f /etc/resolvipv6.conf ]; then
+			    $LOG "Add ISP ipv6 servers for local resolv"
+			    cat /etc/resolvipv6.conf | grep "nameserver" >> $RESOLV_CONF
+			else
+			    $LOG "Add google ipv6 servers for local resolv"
+			    echo "nameserver 2001:4860:4860::8888" >> $RESOLV_CONF
+			    echo "nameserver 2001:4860:4860::8844" >> $RESOLV_CONF
+			fi
 		    fi
 		    # read for all write by root
 		    chmod 644 "$RESOLV_CONF" > /dev/null 2>&1

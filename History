@@ -357,22 +357,23 @@
 15) init.d: enable multicast2unicast in wifi drivers only if igmpproxy enabled.<br>
 16) init.d: move dhcpv6 client start to wan config.<br>
 17) init.d: reconfigure ipv6 after recive params from ISP.<br>
-18) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
-19) goahead: add dhcpv6 server control in misc.<br>
-20) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
-21) kernel: hw_nat: update to 2.51 version.<br>
-22) kernel: spi: add more flash support.<br>
-23) kernel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
-24) kernel: ipv6: Do not warn for informational ICMP messages, regardless of type.<br>
-25) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
-26) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
-27) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
-28) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
-29) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
-30) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
-31) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
-32) kernel: jiffies: fix timeval conversion to jiffies.<br>
-32) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
+18) init.d: use ISP DNS ipv6 servers for local resolv if recived.<br>
+19) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
+20) goahead: add dhcpv6 server control in misc.<br>
+21) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
+22) kernel: hw_nat: update to 2.51 version.<br>
+23) kernel: spi: add more flash support.<br>
+24) kernel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
+25) kernel: ipv6: Do not warn for informational ICMP messages, regardless of type.<br>
+26) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
+27) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
+28) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
+29) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
+30) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+31) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
+32) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
+33) kernel: jiffies: fix timeval conversion to jiffies.<br>
+34) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
 <br>
 <br>
 <br>
