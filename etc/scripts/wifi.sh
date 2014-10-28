@@ -43,14 +43,16 @@ fi
 ########################################MULTICAST param######################################
 if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
     eval `nvram_buf_get 2860 McastPhyMode McastMcs M2UEnabled igmpEnabled`
+    if [ "$M2UEnabled" = "1" ] && [ "$igmpEnabled" = "1" ]; then
+	iwpriv "$1" set IgmpSnEnable=1
+    else
+	iwpriv "$1" set IgmpSnEnable=0
+    fi
     if [ "$McastPhyMode" != "" ]; then
 	iwpriv "$1" set McastPhyMode="$McastPhyMode"
     fi
     if [ "$McastMcs" != "" ]; then
         iwpriv "$1" set McastMcs="$McastMcs"
-    fi
-    if [ "$M2UEnabled" != "" ] && [ "$igmpEnabled" = "1" ]; then
-	iwpriv "$1" set IgmpSnEnable="$M2UEnabled"
     fi
 fi
 ########################################GREEN mode###########################################
