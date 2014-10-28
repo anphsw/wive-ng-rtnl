@@ -3166,14 +3166,15 @@ EXPORT_SYMBOL(register_netdev);
  */
 static void netdev_wait_allrefs(struct net_device *dev)
 {
-	unsigned long rebroadcast_time, warning_time;
-	int refcnt, count=0;
+	static unsigned long rebroadcast_time, warning_time;
+	static int refcnt, count;
 
 	if (!dev)
 	    return;
 
 	rebroadcast_time = warning_time = jiffies;
 	refcnt = atomic_read(&dev->refcnt);
+	count = 0;
 
 	while (refcnt != 0) {
 		if (time_after(jiffies, rebroadcast_time + 1 * HZ)) {
@@ -3199,7 +3200,7 @@ static void netdev_wait_allrefs(struct net_device *dev)
 			rebroadcast_time = jiffies;
 		}
 
-		msleep(50);
+		msleep(30);
 
 		/* reread refcnt and repeat wait or break */
 		refcnt = atomic_read(&dev->refcnt);
@@ -3216,7 +3217,7 @@ static void netdev_wait_allrefs(struct net_device *dev)
 			warning_time = jiffies;
 
 			/* wait count exeed - break and warn of leak */
-			if (count > 1) {
+			if (count > 2) {
 			    refcnt = 0;
 			    atomic_set (&dev->refcnt, 0);
 			    printk(KERN_EMERG "unregister_netdevice %s refcnt leak. need fix. Usage count = %d\n", dev->name, refcnt);

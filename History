@@ -376,6 +376,7 @@
 34) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
 35) kernel: jiffies: fix timeval conversion to jiffies.<br>
 36) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
+37) kernel: small tune refcnt hack.<br>
 <br>
 <br>
 <br>
