@@ -74,9 +74,11 @@ start() {
 	    $LOG "UPNP allow to connect"
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if -p udp --dport 1900 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if -p udp --dport 5350:5351 -j ACCEPT
 	    if [ "$Lan2Enabled" = "1" ]; then
 		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
 		iptables -A servicelimit -i $lan2_if -p udp --dport 1900 -j ACCEPT
+		iptables -A servicelimit -i $lan2_if -p udp --dport 5350:5351 -j ACCEPT
 	    fi
 	fi
 	if [ "$xupnpd" = "1" ]; then
