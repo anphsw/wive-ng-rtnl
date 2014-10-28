@@ -46,8 +46,6 @@ start() {
 	    # this section for native/dualstack mode
 	    if [ "$IPv6Dhcpc" = "1" ]; then
     		$LOG "Native IPv6 support with DHCP/RA uplink"
-		$LOG "Starting dhcp6c"
-		dhcp6c $real_wan_if
 	    fi
         elif [ "$IPv6OpMode" = "2" ]; then
     	    $LOG "Tunel ipv6 in ipv4 configure and up"
@@ -237,9 +235,6 @@ stop() {
 
 	killall -q dhcp6s
 	killall -q -SIGKILL dhcp6s
-
-	killall -q dhcp6c
-	killall -q -SIGKILL dhcp6c
 
 	# cleanup global adresses
 	echo "#!/bin/sh" > /tmp/ip6addrdel
