@@ -14,7 +14,5 @@ if [ -n "$new_domain_name" -o -n "$new_domain_name_servers" ]; then
         for nameserver in $new_domain_name_servers; do
             echo nameserver $nameserver >> $new_resolv_conf
         done
-	$LOG "reconfigure ipv6"
-	service radvd restart
     fi
 fi
