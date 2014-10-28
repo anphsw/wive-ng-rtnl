@@ -2303,7 +2303,9 @@ shutdown:
 		if(SendSSDPGoodbye(snotify, addr_count * 2) < 0)
 #endif
 		{
+#if 0
 			syslog(LOG_ERR, "Failed to broadcast good-bye notifications");
+#endif
 		}
 	}
 	/* try to send pending packets */

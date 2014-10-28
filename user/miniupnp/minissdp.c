@@ -1127,6 +1127,7 @@ SendSSDPbyebye(int s, const struct sockaddr * dest, socklen_t destlen,
 		l = sizeof(bufr) - 1;
 	}
 	n = sendto_or_schedule(s, bufr, l, 0, dest, destlen);
+#if 0
 	if(n < 0)
 	{
 		syslog(LOG_ERR, "sendto(udp_shutdown=%d): %m", s);
@@ -1137,6 +1138,7 @@ SendSSDPbyebye(int s, const struct sockaddr * dest, socklen_t destlen,
 		syslog(LOG_NOTICE, "sendto() sent %d out of %d bytes", n, l);
 		return -1;
 	}
+#endif
 	return 0;
 }
 
