@@ -377,6 +377,7 @@
 35) kernel: jiffies: fix timeval conversion to jiffies.<br>
 36) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
 37) kernel: small tune refcnt hack.<br>
+38) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
 <br>
 <br>
 <br>

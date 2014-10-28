@@ -247,6 +247,12 @@ VOID	APSendPackets(
 
 ========================================================================
 */
+#ifdef IGMP_SNOOP_SUPPORT
+#define MCAST_DROP_BUDGET	(MAX_PACKETS_IN_QUEUE*2)			/* how many pkts skip by snoop if tx full for help free txq */
+static INT IgmpSnoopEnable, IgmpSnoopDropCountLimit, RetryLimitsNeedRestore;	/* need global */
+TX_RTY_CFG_STRUC TxRtyCfg,TxRtyCfgtmp;						/* temp store retry limits */
+#endif
+
 NDIS_STATUS APSendPacket(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket)
@@ -386,7 +392,7 @@ NDIS_STATUS APSendPacket(
 		pMbss = &pAd->ApCfg.MBSSID[apidx];
 
 #ifdef IGMP_SNOOP_SUPPORT
-	if (pAd->ApCfg.IgmpSnoopEnable)
+	if (IgmpSnoopEnable)
 	{
 		UCHAR FromWhichBSSID, checkIgmpPkt = TRUE;
 
@@ -399,8 +405,7 @@ NDIS_STATUS APSendPacket(
 		  
 		if (checkIgmpPkt)
 		{
-			if (IgmpPktInfoQuery(pAd, pSrcBufVA, pPacket, FromWhichBSSID,
-						&InIgmpGroup, &pGroupEntry) != NDIS_STATUS_SUCCESS)
+			if (IgmpPktInfoQuery(pAd, pSrcBufVA, pPacket, FromWhichBSSID, &InIgmpGroup, &pGroupEntry) != NDIS_STATUS_SUCCESS)
 				return NDIS_STATUS_FAILURE;
 		} 
 	}
@@ -559,13 +564,25 @@ NDIS_STATUS APSendPacket(
 #ifdef IGMP_SNOOP_SUPPORT
 		// if it's a mcast packet in igmp gourp.
 		// ucast clone it for all members in the gourp.
-		if (((InIgmpGroup == IGMP_IN_GROUP)
-				&& pGroupEntry
-				&&  (IgmpMemberCnt(&pGroupEntry->MemberList) > 0))
-			|| (InIgmpGroup == IGMP_PKT))
+		if(IgmpSnoopEnable && (((InIgmpGroup == IGMP_IN_GROUP) && pGroupEntry && (IgmpMemberCnt(&pGroupEntry->MemberList) > 0)) || (InIgmpGroup == IGMP_PKT)))
 		{
 			NDIS_STATUS PktCloneResult = IgmpPktClone(pAd, pSrcBufVA, pPacket, InIgmpGroup, pGroupEntry, QueIdx, UserPriority);
 			RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_SUCCESS);
+			if (PktCloneResult == NDIS_STATUS_RESOURCES) {
+			    /* disable multicast to unicast before txq not freed */
+			    //printk("TxSwQueue FULL, temp disable M2U!\n");
+			    IgmpSnoopEnable=0;
+			    IgmpSnoopDropCountLimit=MCAST_DROP_BUDGET;
+			    /* temp set S/L retry to 0 for fast drop packets */
+			    RTMP_IO_READ32(pAd, TX_RTY_CFG, &TxRtyCfg.word);
+			    TxRtyCfgtmp.word = TxRtyCfg.word;
+			    TxRtyCfg.field.LongRtyLimit = 0x0;
+			    TxRtyCfg.field.ShortRtyLimit = 0x0;
+			    RTMP_IO_WRITE32(pAd, TX_RTY_CFG, TxRtyCfg.word);
+			    RetryLimitsNeedRestore=1;
+			    /* do not return STATUS RESOURCE */
+			    return NDIS_STATUS_FAILURE;
+			}
 			return PktCloneResult; /* need to alway return to prevent skb double free. */
 		}
 		else
@@ -614,7 +631,24 @@ NDIS_STATUS APSendPacket(
 #ifdef DOT11_N_SUPPORT
 	RTMP_BASetup(pAd, pMacEntry, UserPriority);
 #endif // DOT11_N_SUPPORT //
-//	pAd->RalinkCounters.OneSecOsTxCount[QueIdx]++; // TODO: for debug only. to be removed
+#ifdef IGMP_SNOOP_SUPPORT
+	if (IgmpSnoopDropCountLimit > 0) {
+	    IgmpSnoopDropCountLimit--;
+	} else {
+	    /* activate/reactivate snooping after some normal ptk recived */
+	    if (IgmpSnoopEnable != pAd->ApCfg.IgmpSnoopEnable)
+		IgmpSnoopEnable = pAd->ApCfg.IgmpSnoopEnable;
+
+	    /* restore S/L retry limits */
+	    if (RetryLimitsNeedRestore) {
+		RTMP_IO_READ32(pAd, TX_RTY_CFG, &TxRtyCfg.word);
+		TxRtyCfg.field.LongRtyLimit = TxRtyCfgtmp.field.LongRtyLimit;
+		TxRtyCfg.field.ShortRtyLimit = TxRtyCfgtmp.field.ShortRtyLimit;
+		RTMP_IO_WRITE32(pAd, TX_RTY_CFG, TxRtyCfg.word);
+		RetryLimitsNeedRestore=0;
+	    }
+	}
+#endif
 	return NDIS_STATUS_SUCCESS;
 }
 
@@ -3500,9 +3534,8 @@ VOID APRxDataFrameAnnounce(
 
 
 #ifdef IGMP_SNOOP_SUPPORT
-		if (pEntry
+		if (pEntry && (IgmpSnoopEnable)
 			&& (IS_ENTRY_CLIENT(pEntry) || IS_ENTRY_WDS(pEntry))
-			&& (pAd->ApCfg.IgmpSnoopEnable) 
 			&& IS_MULTICAST_MAC_ADDR(pRxBlk->pHeader->Addr3))
 		{
 			PUCHAR pDA = pRxBlk->pHeader->Addr3;
