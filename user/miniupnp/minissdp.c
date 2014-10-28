@@ -1,4 +1,4 @@
-/* $Id: minissdp.c,v 1.70 2014/10/21 14:11:39 nanard Exp $ */
+/* $Id: minissdp.c,v 1.72 2014/10/22 11:54:45 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2014 Thomas Bernard
@@ -113,9 +113,6 @@ OpenAndConfSSDPReceiveSocket(int ipv6)
 	socklen_t sockname_len;
 	struct lan_addr_s * lan_addr;
 	int j = 1;
-#ifdef ENABLE_IPV6
-	struct in6_addr in6addr = IN6ADDR_ANY_INIT;
-#endif
 
 	if( (s = socket(ipv6 ? PF_INET6 : PF_INET, SOCK_DGRAM, 0)) < 0)
 	{
@@ -131,7 +128,7 @@ OpenAndConfSSDPReceiveSocket(int ipv6)
 		struct sockaddr_in6 * saddr = (struct sockaddr_in6 *)&sockname;
 		saddr->sin6_family = AF_INET6;
 		saddr->sin6_port = htons(SSDP_PORT);
-		saddr->sin6_addr = in6addr; /* in6addr_any is not available with old uclibc */
+		saddr->sin6_addr = ipv6_bind_addr;
 		sockname_len = sizeof(struct sockaddr_in6);
 	}
 	else
@@ -245,6 +242,10 @@ OpenAndConfSSDPNotifySocket(in_addr_t addr)
 		return -1;
 	}
 
+	/* bind() socket before using sendto() is not mandatory
+	 * (sendto() will implicitly bind the socket when called on
+	 * an unbound socket)
+	 * here it is used to se a specific sending address */
 	memset(&sockname, 0, sizeof(struct sockaddr_in));
     sockname.sin_family = AF_INET;
     sockname.sin_addr.s_addr = addr;	/*inet_addr(addr);*/
@@ -267,6 +268,7 @@ OpenAndConfSSDPNotifySocketIPv6(unsigned int if_index)
 {
 	int s;
 	unsigned int loop = 0;
+	struct sockaddr_in6 sockname;
 
 	s = socket(PF_INET6, SOCK_DGRAM, 0);
 	if(s < 0)
@@ -286,6 +288,23 @@ OpenAndConfSSDPNotifySocketIPv6(unsigned int if_index)
 		close(s);
 		return -1;
 	}
+
+	/* bind() socket before using sendto() is not mandatory
+	 * (sendto() will implicitly bind the socket when called on
+	 * an unbound socket)
+	 * but explicit bind permits to set port/scope_id/etc. */
+	memset(&sockname, 0, sizeof(sockname));
+	sockname.sin6_family = AF_INET6;
+	sockname.sin6_addr = in6addr_any;
+	/*sockname.sin6_port = htons(port);*/
+	/*sockname.sin6_scope_id = if_index;*/
+	if(bind(s, (struct sockaddr *)&sockname, sizeof(sockname)) < 0)
+	{
+		syslog(LOG_ERR, "bind(udp_notify IPv6): %m");
+		close(s);
+		return -1;
+	}
+
 	return s;
 }
 #endif
@@ -488,6 +507,8 @@ static struct {
 	{0, 0, 0}
 };
 
+/* SendSSDPNotify() sends the SSDP NOTIFY to a specific
+ * destination, for a specific UPnP service or device */
 static void
 SendSSDPNotify(int s, const struct sockaddr * dest, socklen_t dest_len,
                const char * dest_str,
@@ -530,41 +551,38 @@ SendSSDPNotify(int s, const struct sockaddr * dest, socklen_t dest_len,
 		upnp_bootid,					/* 01-NLS: */
 		upnp_bootid,					/* BOOTID.UPNP.ORG: */
 		upnp_configid );				/* CONFIGID.UPNP.ORG: */
-	if(l<0)
-	{
+	if(l<0) {
 		syslog(LOG_ERR, "%s: snprintf error", "SendSSDPNotify()");
 		return;
-	}
-	else if((unsigned int)l >= sizeof(bufr))
-	{
+	} else if((unsigned int)l >= sizeof(bufr)) {
 		syslog(LOG_WARNING, "%s: truncated output (%u>=%u)",
 		       "SendSSDPNotify()", (unsigned)l, (unsigned)sizeof(bufr));
 		l = sizeof(bufr) - 1;
 	}
 	n = sendto_or_schedule(s, bufr, l, 0, dest, dest_len);
-	if(n < 0)
-	{
 #if 0
+	if(n < 0) {
 		syslog(LOG_ERR, "sendto(udp_notify=%d, %s): %m", s,
 		       host ? host : "NULL");
-#endif
-	}
-	else if(n != l)
-	{
+	} else if(n != l) {
 		syslog(LOG_NOTICE, "sendto() sent %d out of %d bytes", n, l);
 	}
+#endif
 	/* Due to the unreliable nature of UDP, devices SHOULD send the entire
 	 * set of discovery messages more than once with some delay between
 	 * sets e.g. a few hundred milliseconds. To avoid network congestion
 	 * discovery messages SHOULD NOT be sent more than three times. */
 	n = sendto_schedule(s, bufr, l, 0, dest, dest_len, 250);
-	if(n < 0)
-	{
+#if 0
+	if(n < 0) {
 		syslog(LOG_ERR, "sendto(udp_notify=%d, %s): %m", s,
 		       host ? host : "NULL");
 	}
+#endif
 }
 
+/* SendSSDPNotifies() send SSPD NOTIFY for a specific
+ * LAN (network interface) for all devices / services */
 #ifdef ENABLE_HTTPS
 static void
 SendSSDPNotifies(int s, const char * host, unsigned short http_port,
@@ -578,28 +596,34 @@ SendSSDPNotifies(int s, const char * host, unsigned short http_port,
 {
 #ifdef ENABLE_IPV6
 	struct sockaddr_storage sockname;
-#else
+	static struct { const char * p1, * p2; } const mcast_addrs[] =
+		{ { LL_SSDP_MCAST_ADDR, "[" LL_SSDP_MCAST_ADDR "]" },	/* Link Local */
+		  { SL_SSDP_MCAST_ADDR, "[" SL_SSDP_MCAST_ADDR "]" },	/* Site Local */
+		  { GL_SSDP_MCAST_ADDR, "[" GL_SSDP_MCAST_ADDR "]" },	/* Global */
+		  { NULL, NULL } };
+	int j;
+#else /* ENABLE_IPV6 */
 	struct sockaddr_in sockname;
-#endif
+#endif /* ENABLE_IPV6 */
 	socklen_t sockname_len;
 	const char * dest_str;
-	int i=0;
+	int i;
 	char ver_str[4];
 #ifndef ENABLE_IPV6
 	UNUSED(ipv6);
-#endif
+#endif /* ENABLE_IPV6 */
 
 	memset(&sockname, 0, sizeof(sockname));
 #ifdef ENABLE_IPV6
-	if(ipv6)
-	{
+	/* first iterate destinations for this LAN interface (only 1 for IPv4) */
+	for(j = 0; (mcast_addrs[j].p1 != 0 && ipv6) || j < 1; j++) {
+		if(ipv6) {
 		struct sockaddr_in6 * p = (struct sockaddr_in6 *)&sockname;
 		sockname_len = sizeof(struct sockaddr_in6);
 		p->sin6_family = AF_INET6;
 		p->sin6_port = htons(SSDP_PORT);
-		inet_pton(AF_INET6, LL_SSDP_MCAST_ADDR, &(p->sin6_addr));
-		dest_str = "[" LL_SSDP_MCAST_ADDR "]";
-		/* TODO : also send to SL_SSDP_MCAST_ADDR and GL_SSDP_MCAST_ADDR ? */
+			inet_pton(AF_INET6, mcast_addrs[j].p1, &(p->sin6_addr));
+			dest_str = mcast_addrs[j].p2;
 		/* UPnP Device Architecture 1.1 :
 		 * Devices MUST multicast SSDP messages for each of the UPnP-enabled
 		 * interfaces. The scope of multicast SSDP messages MUST be
@@ -608,10 +632,11 @@ SendSSDPNotifies(int s, const char * host, unsigned short http_port,
 		 * using either global scope FF0E::C or site local scope FF05::C.
 		 * In networks with complex topologies and overlapping sites, use of
 		 * global scope is RECOMMENDED. */
-	}
-	else
-#endif
+		} else {
+#else /* ENABLE_IPV6 */
 	{
+#endif /* ENABLE_IPV6 */
+			/* IPv4 */
 		struct sockaddr_in *p = (struct sockaddr_in *)&sockname;
 		sockname_len = sizeof(struct sockaddr_in);
 		p->sin_family = AF_INET;
@@ -620,8 +645,8 @@ SendSSDPNotifies(int s, const char * host, unsigned short http_port,
 		dest_str = SSDP_MCAST_ADDR;
 	}
 
-	while(known_service_types[i].s)
-	{
+		/* iterate all services / devices */
+		for(i = 0; known_service_types[i].s; i++) {
 		if(i==0)
 			ver_str[0] = '\0';
 		else
@@ -635,9 +660,9 @@ SendSSDPNotifies(int s, const char * host, unsigned short http_port,
 		               known_service_types[i].uuid, "::",
 		               known_service_types[i].s, /* ver_str,	USN: */
 		               lifetime);
+			/* for devices, also send NOTIFY on the uuid */
 		if(0==memcmp(known_service_types[i].s,
-		             "urn:schemas-upnp-org:device", sizeof("urn:schemas-upnp-org:device")-1))
-		{
+			             "urn:schemas-upnp-org:device", sizeof("urn:schemas-upnp-org:device")-1)) {
 			SendSSDPNotify(s, (struct sockaddr *)&sockname, sockname_len, dest_str,
 			               host, http_port,
 #ifdef ENABLE_HTTPS
@@ -647,10 +672,14 @@ SendSSDPNotifies(int s, const char * host, unsigned short http_port,
 			               known_service_types[i].uuid, "", "", /* ver_str,	USN: */
 			               lifetime);
 		}
-		i++;
-	}
+		} /* for(i = 0; known_service_types[i].s; i++) */
+#ifdef ENABLE_IPV6
+	} /* for(j = 0; (mcast_addrs[j].p1 != 0 && ipv6) || j < 1; j++) */
+#endif /* ENABLE_IPV6 */
 }
 
+/* SendSSDPNotifies2() sends SSDP NOTIFY packets on all interfaces
+ * for all destinations, all devices / services */
 void
 SendSSDPNotifies2(int * sockets,
                   unsigned short http_port,
@@ -663,8 +692,7 @@ SendSSDPNotifies2(int * sockets,
 	struct lan_addr_s * lan_addr;
 	for(i=0, lan_addr = lan_addrs.lh_first;
 	    lan_addr != NULL;
-	    lan_addr = lan_addr->list.le_next)
-	{
+	    lan_addr = lan_addr->list.le_next) {
 		SendSSDPNotifies(sockets[i], lan_addr->str, http_port,
 #ifdef ENABLE_HTTPS
 		                 https_port,
@@ -672,8 +700,7 @@ SendSSDPNotifies2(int * sockets,
 		                 lifetime, 0);
 		i++;
 #ifdef ENABLE_IPV6
-		if(sockets[i] >= 0)
-		{
+		if(sockets[i] >= 0) {
 			SendSSDPNotifies(sockets[i], ipv6_addr_for_http_with_brackets, http_port,
 #ifdef ENABLE_HTTPS
 			                 https_port,
@@ -681,7 +708,7 @@ SendSSDPNotifies2(int * sockets,
 			                 lifetime, 1);
 		}
 		i++;
-#endif
+#endif	/* ENABLE_IPV6 */
 	}
 }
 

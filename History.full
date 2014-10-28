@@ -2052,7 +2052,7 @@
 6) openssl up to 0.9.8zc version.<br>
 7) toolchain: move to 4.8.4 gcc svn version (after 4.8.3 release 4.8 tree apply only bugfixes).<br>
 8) apps: port wive-dhcpv6 (need write client logic, server logic work good).<br>
-9) miniupnpd: version up to 1.8.20141022.<br>
+9) miniupnpd: version up to 1.9.<br>
 10) busybox: apply lzop and zcat upstream patchs.<br>
 11) init.d: fix get vendid at new mac generate.<br>
 12) init.d: add check first octet in mac readed from old factory for prevent read from crashed mtd FF.<br>
