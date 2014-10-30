@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # if app not exist
-if [ ! -f /bin/radvd ] || [ ! -d /proc/sys/net/ipv6 ]; then
+if [ ! -d /proc/sys/net/ipv6 ]; then
     exit 0
 fi
 
@@ -61,37 +61,41 @@ start() {
     		ipv6prefix="2a02:2560"										# Your ISP's IPv6-prefix
 		IPv6PrefixLen="32"
 	    fi
-	    $LOG "Tune and up $tun_if interface"
+	    $LOG "Tune and up $six_wan_if interface"
 	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::abca/128 dev $real_wan_if			> /dev/null 2>&1
 	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/128 dev $real_wan_if
-	    ip tunnel add $tun_if mode sit local $real_wan_ipaddr ttl 64
-	    ip tunnel 6rd dev $tun_if 6rd-prefix ${ipv6prefix}::/${IPv6PrefixLen}
-	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::abca/${IPv6PrefixLen} dev $tun_if		> /dev/null 2>&1
-	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/${IPv6PrefixLen} dev $tun_if
-	    ip link set $tun_if up
-	    $LOG "Replace ipv6 dgw to ::${relay6to4} dev $tun_if"
-	    ip -6 route replace ::/0 via ::${relay6to4} dev $tun_if metric 1
-	    $LOG "Set mtu $sitmtu to $tun_if"
-	    sysctl -wq net.ipv6.conf.$tun_if.mtu="$sitmtu"
-	    ip link set mtu $sitmtu dev $tun_if
+	    ip tunnel add $six_wan_if mode sit local $real_wan_ipaddr ttl 64
+	    ip tunnel 6rd dev $six_wan_if 6rd-prefix ${ipv6prefix}::/${IPv6PrefixLen}
+	    ip -6 addr del ${ipv6prefix}:${ipv6subnet}::abca/${IPv6PrefixLen} dev $six_wan_if		> /dev/null 2>&1
+	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/${IPv6PrefixLen} dev $six_wan_if
+	    ip link set $six_wan_if up
+	    $LOG "Replace ipv6 dgw to ::${relay6to4} dev $six_wan_if"
+	    ip -6 route replace ::/0 via ::${relay6to4} dev $six_wan_if metric 1
+	    $LOG "Set mtu $sitmtu to $six_wan_if"
+	    sysctl -wq net.ipv6.conf.$six_wan_if.mtu="$sitmtu"
+	    ip link set mtu $sitmtu dev $six_wan_if
         elif [ "$IPv6OpMode" = "3" ]; then
-    	    $LOG "Tunel ipv6 in ipv4 configure and up"
-	    # calculate and set mtu
-    	    calculate_and_set_mtu
 	    # this section for 6to4 tunnel mode
-	    relay6to4="$IPv6SrvAddr"										# The 6to4 IPv4-gateway
+    	    $LOG "Tunel ipv6 in ipv4 configure and up"
+    	    calculate_and_set_mtu										# Calculate and set mtu
+	    IPv6PrefixLen="64"                                                                                  # Default 6to4 prefix length
 	    ipv6subnet="2000"											# Default 6to4 subnet
     	    ipv6prefix=`echo $real_wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`	# Calculate prefix
-	    $LOG "Up $tun_if interface"
-	    ip -6 link set $tun_if up
-	    $LOG "Set mtu $sitmtu to $tun_if"
-	    sysctl -wq net.ipv6.conf.$tun_if.mtu="$sitmtu"
-	    ip link set mtu $sitmtu dev $tun_if
-	    $LOG "Add adress ${ipv6prefix}::1/16 to $tun_if"
-	    ip -6 addr del ${ipv6prefix}::1/16 dev $tun_if				> /dev/null 2>&1
-	    ip -6 addr add ${ipv6prefix}::1/16 dev $tun_if
-	    $LOG "Add route to ${ipv6subnet}::/3 via ::${relay6to4} dev $tun_if"
-	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tun_if metric 1
+	    if [ "$IPv6SrvAddr" = "" ]; then
+		relay6to4="192.88.99.1"										# Default 6to4 IPv4-gateway
+	    else
+		relay6to4="$IPv6SrvAddr"									# Manual 6to4 IPv4-gateway
+	    fi
+	    $LOG "Up $six_wan_if interface"
+	    ip -6 link set $six_wan_if up
+	    $LOG "Set mtu $sitmtu to $six_wan_if"
+	    sysctl -wq net.ipv6.conf.$six_wan_if.mtu="$sitmtu"
+	    ip link set mtu $sitmtu dev $six_wan_if
+	    $LOG "Add adress ${ipv6prefix}::1/16 to $six_wan_if"
+	    ip -6 addr del ${ipv6prefix}::1/16 dev $six_wan_if				> /dev/null 2>&1
+	    ip -6 addr add ${ipv6prefix}::1/16 dev $six_wan_if
+	    $LOG "Add route to ${ipv6subnet}::/3 via ::${relay6to4} dev $six_wan_if"
+	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $six_wan_if metric 1
 	fi
 
 	$LOG "Enable ipv6 forward"
@@ -105,6 +109,9 @@ start() {
 	    if [ "$IPv6Dhcpc" = "1" ]; then
 		$LOG "Always accept router advertisements for autoconfigure from wan $real_wan_if."
 		sysctl -wq net.ipv6.conf.$real_wan_if.accept_ra=2
+
+		$LOG "Replace Ipv6 DGW to $real_wan_if"
+		ip -6 route replace default dev "$real_wan_if" metric 0
 	    else
     		$LOG "Native IPv6 support static configured"
 		sysctl -wq net.ipv6.conf.$real_wan_if.accept_ra=0
@@ -117,35 +124,35 @@ start() {
 		ip -6 addr del ${IPv6IPAddr}/${IPv6PrefixLen} dev $lan_if	> /dev/null 2>&1
 		ip -6 addr add ${IPv6IPAddr}/${IPv6PrefixLen} $lan_if
 
-		$LOG "Replace Ipv6 DGW to $IPv6GWAddr"
+		$LOG "Replace Ipv6 DGW to $real_wan_if via $IPv6GWAddr"
 		ip -6 route replace default dev "$real_wan_if" via "$IPv6WANIPAddr" metric 0
-
-		# fix me... need write logic for auto configure
-		radvdEnabled="0"
 	    fi
+	    # fix me... need write logic for auto configure
+	    radvdEnabled="0"
+	    dhcpv6Enabled="0"
 	else
 	    $LOG "Used tunneled ipv6 mode, disable forward from real wan interfaces(security need)."
     	    sysctl -wq net.ipv6.conf.$real_wan_if.forwarding=0
     	    sysctl -wq net.ipv6.conf.$wan_if.forwarding=0
-    	    sysctl -wq net.ipv6.conf.$tun_if.forwarding=1
-	    if [ "$IPv6OpMode" = "3" ]; then
-		$LOG "6to4 mode not need ipv6 adress and route at wan ifaces - drop it."
+    	    sysctl -wq net.ipv6.conf.$six_wan_if.forwarding=1
+	    if [ "$IPv6OpMode" = "2" ] || [ "$IPv6OpMode" = "3" ]; then
+		$LOG "Tunneled ipv6 acess mode not need ipv6 adress and route at wan ifaces - drop it."
 		ip -6 route flush dev $wan_if					> /dev/null 2>&1
 		ip -6 route flush dev $real_wan_if				> /dev/null 2>&1
 		ip -6 addr flush dev $wan_if					> /dev/null 2>&1
 		ip -6 addr flush dev $real_wan_if				> /dev/null 2>&1
 	    fi
-	    IPv6PrefixLen="64"
 	    SUBNET="${ipv6prefix}:${ipv6subnet}"
+	    PREFIX="${SUBNET}::1/${IPv6PrefixLen}"
 	    $LOG "Set ${SUBNET}::1/${IPv6PrefixLen} to $lan_if"
-	    ip -6 addr del ${SUBNET}::1/${IPv6PrefixLen} dev $lan_if	> /dev/null 2>&1
-	    ip -6 addr add ${SUBNET}::1/${IPv6PrefixLen} dev $lan_if
+	    ip -6 addr del ${PREFIX} dev $lan_if	> /dev/null 2>&1
+	    ip -6 addr add ${PREFIX} dev $lan_if
 	fi
 
 	flush_net_caches
 
 	# check parametrs
-	if [ "$SUBNET" = "" ] || [ "$IPv6PrefixLen" = "" ]; then
+	if [ "$SUBNET" = "" ] || [ "$PREFIX" = "" ] || [ "$DNSADRESSES" = "" ]; then
 	    $LOG "Configuration is not correct, need check config in setwork settings => IPv6, radvd and dhcpv6 server not started."
 	    exit 0
 	fi
@@ -170,7 +177,7 @@ start() {
                 MaxRtrAdvInterval 10;
                 AdvDefaultPreference high;
 		AdvOtherConfigFlag on;
-                prefix ${SUBNET}::1/${IPv6PrefixLen}
+                prefix ${PREFIX}
                 {
                         AdvOnLink off;
                         AdvAutonomous on;
