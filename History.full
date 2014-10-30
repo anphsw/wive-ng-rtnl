@@ -2067,19 +2067,22 @@
 21) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
 22) goahead: add dhcpv6 server control in misc.<br>
 23) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
-24) kernel: hw_nat: update to 2.51 version.<br>
-25) kernel: spi: add more flash support.<br>
-26) kernel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
-27) kernel: ipv6: Do not warn for informational ICMP messages, regardless of type.<br>
-28) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
-29) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
-30) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
-31) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
-32) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
-33) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
-34) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
-35) kernel: jiffies: fix timeval conversion to jiffies.<br>
-36) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
+25) goahead: remove double restart ripd/zebra.<br>
+26) kernel: hw_nat: update to 2.51 version.<br>
+27) kernel: spi: add more flash support.<br>
+28) kernel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
+29) kernel: ipv6: Do not warn for informational ICMP messages, regardless of type.<br>
+30) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
+31) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
+32) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
+33) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
+34) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+35) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
+36) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
+37) kernel: jiffies: fix timeval conversion to jiffies.<br>
+38) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
+39) kernel: small tune refcnt hack.<br>
+40) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
 <br>
 <br>
 <br>

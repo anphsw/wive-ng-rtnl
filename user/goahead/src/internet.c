@@ -1654,23 +1654,6 @@ void staticRoutingInit(void)
 	rebuildVPNRoutes(rrs);
 }
 
-#ifdef CONFIG_USER_ZEBRA
-void dynamicRoutingInit(void)
-{
-	zebraRestart();
-	ripdRestart();
-}
-#endif
-
-void RoutingInit(void)
-{
-	staticRoutingInit();
-#ifdef CONFIG_USER_ZEBRA
-	dynamicRoutingInit();
-#endif
-
-}
-
 static int getNums(char *value, char delimit)
 {
     char *pos = value;
@@ -2071,10 +2054,6 @@ void initInternet(void)
 #endif
 #if defined(CONFIG_RT2860V2_AP_WSC) || defined(CONFIG_RT2860V2_STA_WSC)
 	WPSRestart();
-#endif
-#ifdef CONFIG_USER_ZEBRA
-	//Dynamic Routing and QoS in STA mode need set after connect to STA
-	dynamicRoutingInit();
 #endif
 }
 
