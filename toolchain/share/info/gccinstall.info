@@ -2543,6 +2543,19 @@ hosts or targets.  Not all supported hosts and targets are listed here,
 only the ones that require host-specific or target-specific information
 have to.
 
+aarch64*-*-*
+============
+
+To enable a workaround for the Cortex-A53 erratum number 835769 by
+default (for all CPUs regardless of -mcpu option given) at configure
+time use the '--enable-fix-cortex-a53-835769' option.  This will enable
+the fix by default and can be explicitly disabled during during
+compilation by passing the '-mno-fix-cortex-a53-835769' option.
+Conversely, '--disable-fix-cortex-a53-835769' will disable the
+workaround by default.  The workaround is disabled by default if neither
+of '--enable-fix-cortex-a53-835769' or '--disable-fix-cortex-a53-835769'
+is given at configure time.
+
 alpha*-*-*
 ==========
 
@@ -4453,9 +4466,9 @@ Node: Testing95478
 Node: Final install103340
 Node: Binaries108651
 Node: Specific110115
-Node: Old161264
-Node: Configurations164397
-Node: GNU Free Documentation License167935
-Node: Concept Index193063
+Node: Old161865
+Node: Configurations164998
+Node: GNU Free Documentation License168536
+Node: Concept Index193664
 
 End Tag Table
