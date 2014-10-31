@@ -115,7 +115,7 @@ static inline void server_print(void)
 }
 
 /* naive function to check whether char *s is an ip address */
-static int is_ip_address(const char *s)
+static int is_ip_address(char *s)
 {
 	while (*s) {
 		if ((isdigit(*s)) || (*s == '.')) {
