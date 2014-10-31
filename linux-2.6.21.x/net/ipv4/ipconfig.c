@@ -423,7 +423,7 @@ ic_rarp_recv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 	struct arphdr *rarp;
 	unsigned char *rarp_ptr;
 	__be32 sip, tip;
-	unsigned char *sha, *tha;		/* s for "source", t for "target" */
+	unsigned char *tha;		/* t for "target" */
 	struct ic_device *d;
 
 	if ((skb = skb_share_check(skb, GFP_ATOMIC)) == NULL)
@@ -471,7 +471,6 @@ ic_rarp_recv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 		goto drop_unlock;	/* should never happen */
 
 	/* Extract variable-width fields */
-	sha = rarp_ptr;
 	rarp_ptr += dev->addr_len;
 	memcpy(&sip, rarp_ptr, 4);
 	rarp_ptr += 4;

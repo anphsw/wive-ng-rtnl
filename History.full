@@ -2070,19 +2070,20 @@
 25) goahead: remove double restart ripd/zebra.<br>
 26) kernel: hw_nat: update to 2.51 version.<br>
 27) kernel: spi: add more flash support.<br>
-28) kernel: ipv6: Fix tcp_v6_send_response(): it didn't set skb transport header.<br>
-29) kernel: ipv6: Do not warn for informational ICMP messages, regardless of type.<br>
-30) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
-31) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
-32) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
-33) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
-34) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
-35) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
-36) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
-37) kernel: jiffies: fix timeval conversion to jiffies.<br>
-38) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
-39) kernel: small tune refcnt hack.<br>
-40) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
+28) kernel: ipv6: fix tcp_v6_send_response(): it didn't set skb transport header.<br>
+29) kernel: ipv6: go not warn for informational ICMP messages, regardless of type.<br>
+30) kernel: ipv6: reimplement add LL routes.<br>
+31) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
+32) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
+33) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
+34) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
+35) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+36) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
+37) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
+38) kernel: jiffies: fix timeval conversion to jiffies.<br>
+39) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
+40) kernel: small tune refcnt hack.<br>
+41) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
 <br>
 <br>
 <br>
