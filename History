@@ -350,19 +350,20 @@
 8) apps: port wive-dhcpv6 (need write client logic, server logic work good).<br>
 9) miniupnpd: version up to 1.9.<br>
 10) busybox: apply lzop and zcat upstream patchs.<br>
-11) init.d: fix get vendid at new mac generate.<br>
-12) init.d: add check first octet in mac readed from old factory for prevent read from crashed mtd FF.<br>
-13) init.d: rewrite logic for ipv6 suppor (need write logic for more modes support).<br>
-14) init.d: radvd,dhcpv6: read dns server from uplink if recived.<br>
-15) init.d: enable multicast2unicast in wifi drivers only if igmpproxy enabled.<br>
-16) init.d: move dhcpv6 client start to wan config.<br>
-17) init.d: reconfigure ipv6 after recive params from ISP.<br>
-18) init.d: use ISP DNS ipv6 servers for local resolv if recived.<br>
-19) init.d: ipv6: need check ipv4 adress on wan only in tunneling modes.<br>
-20) init.d: fix pcp/nat-pmp control port accept from lan.<br>
-21) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
-22) goahead: add dhcpv6 server control in misc.<br>
-23) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
+11) pppd: cap MTU to the user configured value.<br>
+12) init.d: fix get vendid at new mac generate.<br>
+13) init.d: add check first octet in mac readed from old factory for prevent read from crashed mtd FF.<br>
+14) init.d: rewrite logic for ipv6 suppor (need write logic for more modes support).<br>
+15) init.d: radvd,dhcpv6: read dns server from uplink if recived.<br>
+16) init.d: enable multicast2unicast in wifi drivers only if igmpproxy enabled.<br>
+17) init.d: move dhcpv6 client start to wan config.<br>
+18) init.d: reconfigure ipv6 after recive params from ISP.<br>
+19) init.d: use ISP DNS ipv6 servers for local resolv if recived.<br>
+20) init.d: ipv6: need check ipv4 adress on wan only in tunneling modes.<br>
+21) init.d: fix pcp/nat-pmp control port accept from lan.<br>
+22) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
+23) goahead: add dhcpv6 server control in misc.<br>
+24) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
 25) goahead: remove double restart ripd/zebra.<br>
 26) kernel: hw_nat: update to 2.51 version.<br>
 27) kernel: spi: add more flash support.<br>
