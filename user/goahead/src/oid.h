@@ -130,14 +130,8 @@
 #define RT_OID_802_11_WSC_QUERY_PROFILE				0x0750
 #define RT_OID_WSC_UUID                             0x0753
 
-// mesh extension OID
-#define OID_802_11_MESH_LINK_STATUS             0x0654
-#define OID_802_11_MESH_LIST                    0x0655
-
-
-
 // Ralink defined OIDs
-// Dennis Lee move to platform specific 
+// Dennis Lee move to platform specific
 
 #define RT_OID_802_11_BSSID                   (OID_GET_SET_TOGGLE | OID_802_11_BSSID)
 #define RT_OID_802_11_SSID                    (OID_GET_SET_TOGGLE | OID_802_11_SSID)

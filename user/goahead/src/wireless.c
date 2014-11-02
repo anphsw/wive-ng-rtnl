@@ -60,11 +60,6 @@ static int dumpBSSKeys(int eid, webs_t wp, int argc, char_t **argv);
 static void AntennaDiversity(webs_t wp, char_t *path, char_t *query);
 static void getAntenna(webs_t wp, char_t *path, char_t *query);
 #endif
-#ifdef CONFIG_RT2860V2_AP_MESH
-static void wirelessMesh(webs_t wp, char_t *path, char_t *query);
-static void meshManualLink(webs_t wp, char_t *path, char_t *query);
-static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv);
-#endif
 static int getVideoTurbineBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getIdsEnableBuilt(int eid, webs_t wp, int argc, char_t **argv);
 
@@ -200,9 +195,6 @@ void formDefineWireless(void)
 	websAspDefine(T("is5gh_only"), is5gh_only);
 	websAspDefine(T("isWPSConfiguredASP"), isWPSConfiguredASP);
 	websAspDefine(T("isAntennaDiversityBuilt"), isAntennaDiversityBuilt);
-#ifdef CONFIG_RT2860V2_AP_MESH
-	websAspDefine(T("ShowMeshState"), ShowMeshState);
-#endif
 #if defined(CONFIG_RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY) || defined(CONFIG_RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY)
 	websFormDefine(T("AntennaDiversity"), AntennaDiversity);
 	websFormDefine(T("getAntenna"), getAntenna);
@@ -215,10 +207,6 @@ void formDefineWireless(void)
 	websFormDefine(T("wirelessGetSecurity"), wirelessGetSecurity);
 	websFormDefine(T("APSecurity"), APSecurity);
 	websFormDefine(T("APDeleteAccessPolicyList"), APDeleteAccessPolicyList);
-#ifdef CONFIG_RT2860V2_AP_MESH
-	websFormDefine(T("wirelessMesh"), wirelessMesh);
-	websFormDefine(T("meshManualLink"), meshManualLink);
-#endif
 }
 
 static int listCountryCodes(int eid, webs_t wp, int argc, char_t **argv)
@@ -1812,171 +1800,6 @@ static void APDeleteAccessPolicyList(webs_t wp, char_t *path, char_t *query)
 {
 	DeleteAccessPolicyList(RT2860_NVRAM, wp, path, query);
 }
-
-#ifdef CONFIG_RT2860V2_AP_MESH
-/* goform/wirelessMesh */
-static void wirelessMesh(webs_t wp, char_t *path, char_t *query)
-{
-	char_t	*meshenable, *mid, *hostname;
-	char_t	*autolink;
-	char_t	*mode, *encrypt_type, *wepkey, *wep_select, *wpakey;
-	char defaultkey[2];
-
-	//fetch from web input
-	meshenable = websGetVar(wp, T("MeshEnable"), T("")); 
-	mid = websGetVar(wp, T("MeshID"), T("")); 
-	hostname = websGetVar(wp, T("HostName"), T("")); 
-	autolink = websGetVar(wp, T("AutoLinkEnable"), T(""));
-	mode = websGetVar(wp, T("security_mode"), T(""));
-	strcpy(defaultkey, "");
-
-	if (0 == strcmp(mode, "OPEN")) {
-		encrypt_type = websGetVar(wp, T("open_encrypt_type"), T(""));
-		if (0 == strcmp(encrypt_type, "WEP"))
-			strcpy(defaultkey, "1");
-	} else if (0 == strcmp(mode, "WPANONE"))
-		encrypt_type = websGetVar(wp, T("wpa_cipher"), T(""));
-
-	wepkey = websGetVar(wp, T("wep_key"), T(""));
-	wep_select = websGetVar(wp, T("wep_select"), T(""));
-	wpakey = websGetVar(wp, T("passphrase"), T(""));
-
-	// store to flash
-	nvram_init(RT2860_NVRAM);
-	nvram_bufset(RT2860_NVRAM, "MeshEnabled", meshenable);
-	nvram_bufset(RT2860_NVRAM, "MeshId", mid);
-	nvram_bufset(RT2860_NVRAM, "MeshHostName", hostname);
-	nvram_bufset(RT2860_NVRAM, "MeshAutoLink", autolink);
-	nvram_bufset(RT2860_NVRAM, "MeshAuthMode", mode);
-	nvram_bufset(RT2860_NVRAM, "MeshEncrypType", encrypt_type);
-	nvram_bufset(RT2860_NVRAM, "MeshDefaultkey", defaultkey);
-	nvram_bufset(RT2860_NVRAM, "MeshWEPKEY", wepkey);
-	nvram_bufset(RT2860_NVRAM, "MeshWEPKEYType", wep_select);
-	nvram_bufset(RT2860_NVRAM, "MeshWPAKEY", wpakey);
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
-
-	// debug print
-	websHeader(wp);
-	websWrite(wp, T("MeshEnable: %s<br>\n"), meshenable);
-	websWrite(wp, T("MeshID: %s<br>\n"), mid);
-	websWrite(wp, T("HostName: %s<br>\n"), hostname);
-	websWrite(wp, T("AutoLinkEnable: %s<br>\n"), autolink);
-	websWrite(wp, T("security_mode: %s<br>\n"), mode);
-	websWrite(wp, T("encrypt_type: %s<br>\n"), encrypt_type);
-	websWrite(wp, T("defaultkey: %s<br>\n"), defaultkey);
-	websWrite(wp, T("wep_key: %s<br>\n"), wepkey);
-	websWrite(wp, T("wep_select: %s<br>\n"), wep_select);
-	websWrite(wp, T("passphrase: %s<br>\n"), wpakey);
-	websFooter(wp);
-	websDone(wp, 200);
-
-	// restart wireless network
-	doSystem("internet.sh wifionly");
-}
-
-/* goform/meshManualLink */
-static void meshManualLink(webs_t wp, char_t *path, char_t *query)
-{
-	char_t *action, *mpmac;
-
-	// fetch from web input
-	action = websGetVar(wp, T("link_action"), T(""));
-	mpmac = websGetVar(wp, T("mpmac"), T(""));
-
-	// link action
-	if (0 == strcmp(action, "add"))
-		doSystem("iwpriv mesh0 set MeshAddLink=%s", mpmac);
-	if (0 == strcmp(action, "del"))
-		doSystem("iwpriv mesh0 set MeshDelLink=%s", mpmac);
-
-	websRedirect(wp, "wireless/mesh.asp");
-}
-
-typedef struct _MESH_NEIGHBOR_ENTRY_INFO {
-	char		Rssi;
-	unsigned char	HostName[64 + 1];
-	unsigned char	MacAddr[6];
-	unsigned char	MeshId[32 + 1];
-	unsigned char	Channel;
-	unsigned char	Status;
-	unsigned char	MeshEncrypType;
-} MESH_NEIGHBOR_ENTRY_INFO;
-
-typedef struct _MESH_NEIGHBOR_INFO {
-	MESH_NEIGHBOR_ENTRY_INFO	Entry[64];
-	unsigned char				num;
-} MESH_NEIGHBOR_INFO;
-
-/* goform/ShowMeshState */
-static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int socket_id, ret, i;
-	struct iwreq wrq;
-	MESH_NEIGHBOR_INFO *neighbor;
-
-	if (NULL == (neighbor = (MESH_NEIGHBOR_INFO *) malloc(sizeof(MESH_NEIGHBOR_INFO))))
-	{
-		fprintf(stderr, "can't allocat memory in MESH_NEIGHBOR_INFO !\n");
-		return -1;
-	}
-	memset(neighbor, 0, sizeof(MESH_NEIGHBOR_INFO));
-
-	if ((socket_id = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-	{
-		free(neighbor);
-		fprintf(stderr, "ShowMeshState: open socket error !\n");
-		websError(wp, 500, "ioctl sockey failed !");
-		return -1;
-	}
-
-	strcpy(wrq.ifr_name, "mesh0");
-	wrq.u.data.length = sizeof(MESH_NEIGHBOR_INFO);
-	wrq.u.data.pointer = (caddr_t) neighbor;
-	wrq.u.data.flags = OID_802_11_MESH_LIST;
-	if ((ret = ioctl(socket_id, RT_PRIV_IOCTL, &wrq)) < 0)
-	{
-		free(neighbor);
-		fprintf(stderr, "ShowMeshState: ioctl -> OID_802_11_MESH_LIST error !\n");
-		websError(wp, 500, "ioctl -> OID_802_11_MESH_LIST failed!");
-		close(socket_id);
-		return -1;
-	}
-
-	for (i=0; i<neighbor->num; i++)
-	{
-		websWrite(wp, T("<tr align=\"center\">"));
-		if (1 == neighbor->Entry[i].Status)
-			websWrite(wp, T("<td>%s</td>"), "<img src=\"/graphics/handshake.gif\">");
-		else
-			websWrite(wp, T("<td>%s</td>"), "<br />");
-		websWrite(wp, T("<td>%02X:%02X:%02X:%02X:%02X:%02X</td>"), 
-					  neighbor->Entry[i].MacAddr[0],
-					  neighbor->Entry[i].MacAddr[1],
-					  neighbor->Entry[i].MacAddr[2],
-					  neighbor->Entry[i].MacAddr[3],
-					  neighbor->Entry[i].MacAddr[4],
-					  neighbor->Entry[i].MacAddr[5]);
-		websWrite(wp, T("<td>%d</td>"), neighbor->Entry[i].Rssi);
-		websWrite(wp, T("<td>%s</td>"), neighbor->Entry[i].MeshId);
-		websWrite(wp, T("<td>%s</td>"), neighbor->Entry[i].HostName);
-		websWrite(wp, T("<td>%d</td>"), neighbor->Entry[i].Channel);
-		if (neighbor->Entry[i].MeshEncrypType == 1)
-			websWrite(wp, T("<td>%s</td>"), "OPEN-WEP");
-		else if (neighbor->Entry[i].MeshEncrypType == 2)
-			websWrite(wp, T("<td>%s</td>"), "WPANONE-TKIP");
-		else if (neighbor->Entry[i].MeshEncrypType == 3)
-			websWrite(wp, T("<td>%s</td>"), "WPANONE-AES");
-		else
-			websWrite(wp, T("<td>%s</td>"), "OPEN-NONE");
-		websWrite(wp, T("</tr>"));
-	}
-	free(neighbor);
-	close(socket_id);
-
-	return 0;
-}
-#endif
 
 static int is3t3r(int eid, webs_t wp, int argc, char_t **argv)
 {

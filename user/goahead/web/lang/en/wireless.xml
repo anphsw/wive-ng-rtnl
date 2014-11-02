@@ -251,16 +251,4 @@
   <message msgid="stawps wep key index" msgstr="WEP Key Index" />
   <message msgid="stawps key" msgstr="Key" />
   <message msgid="stawps submit" msgstr=" Submit " />
-  
-  <message msgid="mesh title" msgstr="Mesh Network" />
-  <message msgid="mesh introduction" msgstr="A Mesh network is an IEEE 802 LAN comprised of IEEE 802.11 links and control elements to forward frames among network members." />
-  <message msgid="mesh capacity" msgstr="Mesh Capacity" />
-  <message msgid="mesh settings" msgstr="Mesh Settings" />
-  <message msgid="mesh mid" msgstr="Mesh ID (MID)" />
-  <message msgid="mesh hostname" msgstr="Host Name" />
-  <message msgid="mesh autolink" msgstr="Auto Link" />
-  <message msgid="mesh manual" msgstr="Manual Mesh Link" />
-  <message msgid="mesh mpmac" msgstr="Mesh Point MAC Address" />
-  <message msgid="mesh info" msgstr="Mesh Network Infomation" />
-  <message msgid="mesh nbrmacaddr" msgstr="Neighbor MAC Address" />
 </po>

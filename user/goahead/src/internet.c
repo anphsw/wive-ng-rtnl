@@ -33,7 +33,6 @@ typedef struct vpn_status_t
 	long          color;
 } vpn_status_t;
 
-static int getMeshBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getWDSBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getWSCBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getSTABuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -125,7 +124,6 @@ void formDefineInternet(void) {
 	websAspDefine(T("getWanNetmask"), getWanNetmask);
 	websAspDefine(T("getWanGateway"), getWanGateway);
 	websAspDefine(T("getRoutingTable"), getRoutingTable);
-	websAspDefine(T("getMeshBuilt"), getMeshBuilt);
 	websAspDefine(T("getWDSBuilt"), getWDSBuilt);
 	websAspDefine(T("getWSCBuilt"), getWSCBuilt);
 	websAspDefine(T("getSTABuilt"), getSTABuilt);
@@ -856,15 +854,6 @@ static int getVPNBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #if defined(CONFIG_NF_CONNTRACK_PPTP) || defined(CONFIG_NF_CONNTRACK_PPTP_MODULE) || \
     defined(CONFIG_IP_NF_PPTP) || defined(CONFIG_IP_NF_PPTP_MODULE)
-	return websWrite(wp, T("1"));
-#else
-	return websWrite(wp, T("0"));
-#endif
-}
-
-static int getMeshBuilt(int eid, webs_t wp, int argc, char_t **argv)
-{
-#if defined(CONFIG_RT2860V2_AP_MESH) || defined(CONFIG_RT2860V2_STA_MESH)
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
