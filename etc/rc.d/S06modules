@@ -133,9 +133,6 @@ wlan_down_all() {
     if [ "$second_wlan_apcli" != "" ]; then
 	delif_from_br $seond_wlan_apcli
     fi
-    if [ "$first_wlan_mesh" != "" ] || [ "$first_wlan_mesh" != "" ]; then
-	delif_from_br $first_wlan_mesh
-    fi
     # second down multiple vifs
     if [ "$first_wlan_wds" != "" ]; then
 	for i in `seq 0 3`; do

@@ -12,17 +12,6 @@ MODE="$1"
 
 LOG="logger -t reconfig"
 
-addMesh() {
-    # if kernel build without MESH support - exit
-    if [ "$first_wlan_mesh" != "" ]; then
-        meshenabled=`nvram_get 2860 MeshEnabled`
-	if [ "$meshenabled" = "1" ]; then
-	    $LOG "Readd $first_wlan_mesh in br0"
-	    readdif_to_br $first_wlan_mesh
-	fi
-    fi
-}
-
 addWds() {
     # if kernel build without WDS support - exit
     wds_en=`nvram_get 2860 WdsEnable`
@@ -76,7 +65,6 @@ bridge_config() {
 	if [ "$second_wlan_wds" != "" ]; then
 	    addWds $second_wlan_wds
 	fi
-        addMesh
 }
 
 gate_config() {
@@ -103,7 +91,6 @@ gate_config() {
 	if [ "$second_wlan_wds" != "" ]; then
 	    addWds $second_wlan_wds
 	fi
-	addMesh
 }
 
 apcli_config() {
@@ -164,7 +151,6 @@ spot_config() {
 	if [ "$second_wlan_wds" != "" ]; then
 	    addWds $second_wlan_wds
 	fi
-	addMesh
 }
 
 ethcv_config() {

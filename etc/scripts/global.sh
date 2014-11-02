@@ -51,9 +51,6 @@ getFirstWlanIfName() {
 	if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
 	    first_wlan_wds="wds"			# this is mask name vifs for first wds wlan module
 	fi
-	if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
-	    first_wlan_mesh="mesh0"			# this is name vif for first mesh wlan module
-	fi
     fi
 }
 
