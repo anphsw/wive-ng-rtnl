@@ -944,15 +944,12 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-
-	outputTimerForReload(wp, 50000);
-
-	sleep(2);	/* wait for websDone() to finish tcp http session(close socket) */
-
 #ifdef CONFIG_USER_802_1X
 	if (need_commit)
 		updateFlash8021x(RT2860_NVRAM);
 #endif
+	outputTimerForReload(wp, 50000);
+	sleep(2);	/* wait for websDone() to finish tcp http session(close socket) */
 	reboot_now();
 }
 

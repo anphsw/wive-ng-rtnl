@@ -478,7 +478,7 @@ static void OOB(webs_t wp, char_t *path, char_t *query)
 	doSystem("iwpriv ra0 set EncrypType=NONE");
 	doSystem("iwpriv ra0 set SSID=%s", nvram_get(RT2860_NVRAM, "SSID1"));
 
-#ifdef CONFIG_USER_802_1X 
+#ifdef CONFIG_USER_802_1X
 	restart8021XDaemon(RT2860_NVRAM);
 #endif
 	WPSRestart();
@@ -679,7 +679,7 @@ static void WPSAPTimerHandler(int signo)
 			nvram_commit(RT2860_NVRAM);
 			nvram_close(RT2860_NVRAM);
 
-#ifdef CONFIG_USER_802_1X 
+#ifdef CONFIG_USER_802_1X
 			restart8021XDaemon(RT2860_NVRAM);
 #endif
 			WPSRestart();
