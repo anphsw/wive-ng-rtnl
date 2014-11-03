@@ -442,7 +442,6 @@ function displayServiceStatus()
                 <option value="1">Enable</option>
               </select></td>
           </tr>
-
           <!-- Remote management -->
           <tr>
             <td class="title" colspan="5">Remote management</td>
@@ -478,24 +477,6 @@ function displayServiceStatus()
                 <option value="1">Enable</option>
               </select></td>
           </tr>
-          <!-- Pass Through -->
-          <tr>
-            <td class="title" colspan="5">Pass Through</td>
-          </tr>
-          <tr>
-            <td class="head">PPPOE pass through</td>
-            <td colspan="4"><select name="krnlPppoePass" class="half">
-                <option value="0">Disable</option>
-                <option value="1">Enable</option>
-              </select></td>
-          </tr>
-          <tr>
-            <td class="head">IPv6 pass through</td>
-            <td colspan="4"><select name="krnlIpv6Pass" class="half">
-                <option value="0">Disable</option>
-                <option value="1">Enable</option>
-              </select></td>
-          </tr>
           <!-- Services -->
           <tr>
             <td class="title">Services</td>
@@ -504,21 +485,21 @@ function displayServiceStatus()
             <td class="title" style="width: 56px;">Status</td>
             <td class="title" style="width: 80px;">Configure</td>
           </tr>
-          <tr id="parprouted">
-            <td class="head" id="lArppt">ARP Proxy</td>
-            <td><select name="arpPT" class="half">
-                <option value="0" id="lArpptD">Disable</option>
-                <option value="1" id="lArpptE">Enable</option>
+          <tr id="dnsproxy">
+            <td class="head" id="lDnsp">DNS cached proxy</td>
+            <td><select name="dnspEnbl" class="half">
+                <option value="0">Disable</option>
+                <option value="1">Enable</option>
               </select></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
           </tr>
-          <tr id="cdp">
-            <td class="head" id="lCdp">CDP daemon</td>
-            <td><select name="cdpEnbl" class="half">
-                <option value="0" id="lCdpD">Disable</option>
-                <option value="1" id="lCdpE">Enable</option>
+          <tr id="upnp">
+            <td class="head" id="lUpnp">UPNP support</td>
+            <td><select name="upnpEnbl" class="half">
+                <option value="0" id="lUpnpD">Disable</option>
+                <option value="1" id="lUpnpE">Enable</option>
               </select></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
@@ -544,42 +525,33 @@ function displayServiceStatus()
             <td>&nbsp;</td>
             <td>&nbsp;</td>
           </tr>
-          <tr id="igmpProxy">
-            <td class="head" id="lIgmpp">IGMP proxy</td>
-            <td><select name="igmpEnbl" class="half" onChange="igmpSelect(this.form);">
-                <option value="0" id="lIgmppD">Disable</option>
-                <option value="1" id="lIgmppE">Enable</option>
+          <tr id="parprouted">
+            <td class="head" id="lArppt">ARP Proxy</td>
+            <td><select name="arpPT" class="half">
+                <option value="0" id="lArpptD">Disable</option>
+                <option value="1" id="lArpptE">Enable</option>
               </select></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
           </tr>
-          <tr id="igmpSnoop">
-            <td class="head" id="lIgmpp">LAN IGMP snooping</td>
-            <td colspan="4"><select name="igmpSnoop" class="half">
-                <option value="">Auto</option>
-                <option value="n">Disable</option>
-              </select></td>
-          </tr>
-          <tr id="upnp">
-            <td class="head" id="lUpnp">UPNP support</td>
-            <td><select name="upnpEnbl" class="half">
-                <option value="0" id="lUpnpD">Disable</option>
-                <option value="1" id="lUpnpE">Enable</option>
+          <tr id="cdp">
+            <td class="head" id="lCdp">CDP daemon</td>
+            <td><select name="cdpEnbl" class="half">
+                <option value="0" id="lCdpD">Disable</option>
+                <option value="1" id="lCdpE">Enable</option>
               </select></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
           </tr>
-          <tr id="xupnpd">
-            <td class="head">UPNP media server (XUPNPD)</td>
-            <td><select name="xupnpdEnbl" class="half">
-                <option value="0">Disable</option>
-                <option value="1">Enable</option>
-              </select></td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
+          <!-- IPv6 -->
+          <tr>
+            <td class="title">Services IPv6</td>
+            <td class="title">Value</td>
+            <td class="title" style="width: 88px;">Details</td>
+            <td class="title" style="width: 56px;">Status</td>
+            <td class="title" style="width: 80px;">Configure</td>
           </tr>
           <tr id="radvd">
             <td class="head" id="lRadvd">Router Advertisement</td>
@@ -601,15 +573,30 @@ function displayServiceStatus()
             <td>&nbsp;</td>
             <td>&nbsp;</td>
           </tr>
-          <tr id="dnsproxy">
-            <td class="head" id="lDnsp">DNS cached proxy</td>
-            <td><select name="dnspEnbl" class="half">
-                <option value="0">Disable</option>
-                <option value="1">Enable</option>
+          <!-- IPTV -->
+          <tr>
+            <td class="title">Services IPTV</td>
+            <td class="title">Value</td>
+            <td class="title" style="width: 88px;">Details</td>
+            <td class="title" style="width: 56px;">Status</td>
+            <td class="title" style="width: 80px;">Configure</td>
+          </tr>
+          <tr id="igmpProxy">
+            <td class="head" id="lIgmpp">IGMP proxy</td>
+            <td><select name="igmpEnbl" class="half" onChange="igmpSelect(this.form);">
+                <option value="0" id="lIgmppD">Disable</option>
+                <option value="1" id="lIgmppE">Enable</option>
               </select></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
+          </tr>
+          <tr id="igmpSnoop">
+            <td class="head" id="lIgmpp">LAN IGMP snooping</td>
+            <td colspan="4"><select name="igmpSnoop" class="half">
+                <option value="">Auto</option>
+                <option value="n">Disable</option>
+              </select></td>
           </tr>
           <tr id="udpxy">
             <td class="head">Multicast to http proxy (UDPXY)</td>
@@ -626,6 +613,38 @@ function displayServiceStatus()
             <td class="head">UDPXY port</td>
             <td colspan="4"><input name="udpxyPort" class="half"></td>
           </tr>
+          <tr id="xupnpd">
+            <td class="head">UPNP media server (XUPNPD)</td>
+            <td><select name="xupnpdEnbl" class="half">
+                <option value="0">Disable</option>
+                <option value="1">Enable</option>
+              </select></td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+          <!-- Pass Through -->
+          <tr>
+            <td class="title" colspan="5">Pass Through</td>
+          </tr>
+          <tr>
+            <td class="head">PPPOE pass through</td>
+            <td colspan="4"><select name="krnlPppoePass" class="half">
+                <option value="0">Disable</option>
+                <option value="1">Enable</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head">IPv6 pass through</td>
+            <td colspan="4"><select name="krnlIpv6Pass" class="half">
+                <option value="0">Disable</option>
+                <option value="1">Enable</option>
+              </select></td>
+          </tr>
+          <!-- Watchers -->
+          <tr>
+            <td class="title" colspan="5">Watchers</td>
+          </tr>
           <tr id="crond">
             <td class="head">Cron daemon</td>
             <td><select name="CrondEnable" class="half">
@@ -635,10 +654,6 @@ function displayServiceStatus()
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-          </tr>
-          <!-- Watchers -->
-          <tr>
-            <td class="title" colspan="5">Watchers</td>
           </tr>
           <tr>
             <td class="head">Watchdog service</td>
@@ -668,14 +683,14 @@ function displayServiceStatus()
             <td class="title" colspan="5">Others</td>
           </tr>
           <tr>
-            <td class="head">WAN reinit on DHCP lease fail</td>
+            <td class="head">Reinit WAN if DHCP lease fail</td>
             <td colspan="4"><select name="dhcpSwReset" class="half">
                 <option value="0">Disable</option>
                 <option value="1">Enable</option>
               </select></td>
           </tr>
           <tr>
-            <td class="head">DHCP renew lease at WAN port status change</td>
+            <td class="head">DHCP renew lease at WAN UP</td>
             <td colspan="4"><select name="ForceRenewDHCP" class="half">
                 <option value="0">Disable</option>
                 <option value="1">Enable</option>
