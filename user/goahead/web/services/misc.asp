@@ -545,6 +545,16 @@ function displayServiceStatus()
             <td>&nbsp;</td>
             <td>&nbsp;</td>
           </tr>
+          <tr id="crond">
+            <td class="head">Cron daemon</td>
+            <td><select name="CrondEnable" class="half">
+                <option value="0">Disable</option>
+                <option value="1">Enable</option>
+              </select></td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
           <!-- IPv6 -->
           <tr>
             <td class="title">Services IPv6</td>
@@ -644,16 +654,6 @@ function displayServiceStatus()
           <!-- Watchers -->
           <tr>
             <td class="title" colspan="5">Watchers</td>
-          </tr>
-          <tr id="crond">
-            <td class="head">Cron daemon</td>
-            <td><select name="CrondEnable" class="half">
-                <option value="0">Disable</option>
-                <option value="1">Enable</option>
-              </select></td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
           </tr>
           <tr>
             <td class="head">Watchdog service</td>
