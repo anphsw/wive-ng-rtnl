@@ -47,12 +47,12 @@ if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
 	iwpriv "$1" set IgmpSnEnable=1
     else
 	iwpriv "$1" set IgmpSnEnable=0
-    fi
-    if [ "$McastPhyMode" != "" ]; then
-	iwpriv "$1" set McastPhyMode="$McastPhyMode"
-    fi
-    if [ "$McastMcs" != "" ]; then
-        iwpriv "$1" set McastMcs="$McastMcs"
+	if [ "$McastPhyMode" != "" ]; then
+	    iwpriv "$1" set McastPhyMode="$McastPhyMode"
+	fi
+	if [ "$McastMcs" != "" ]; then
+    	    iwpriv "$1" set McastMcs="$McastMcs"
+	fi
     fi
 fi
 ########################################GREEN mode###########################################
