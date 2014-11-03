@@ -599,7 +599,7 @@ function displayServiceStatus()
               </select></td>
           </tr>
           <tr id="udpxy">
-            <td class="head">Multicast to http proxy (UDPXY)</td>
+            <td class="head">Multicast to http proxy (udpxy)</td>
             <td><select name="udpxyMode" class="half" onChange="udpxySelect(this.form);">
                 <option value="0">Disable</option>
                 <option value="1">LAN</option>
@@ -614,7 +614,7 @@ function displayServiceStatus()
             <td colspan="4"><input name="udpxyPort" class="half"></td>
           </tr>
           <tr id="xupnpd">
-            <td class="head">UPNP media server (XUPNPD)</td>
+            <td class="head">UPNP media server (xupnpd)</td>
             <td><select name="xupnpdEnbl" class="half">
                 <option value="0">Disable</option>
                 <option value="1">Enable</option>
