@@ -186,6 +186,12 @@ echo "==================START-L2TP-CLIENT======================="
 	vpnLCPInterval=30
     fi
 
+    if [ "$IPv6OpMode" = "1" ]; then
+        SIXEN="+ipv6"
+    else
+	SIXEN=""
+    fi
+
     printf "[global]
     access control = yes
     rand source = dev
@@ -206,6 +212,7 @@ echo "==================START-L2TP-CLIENT======================="
 
     printf "
     $vpnDebug
+    $SIXEN
     $PAP
     $CHAP
     $vpnMTU
