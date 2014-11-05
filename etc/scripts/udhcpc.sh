@@ -118,7 +118,7 @@ case "$1" in
 	fi
 
 	# if dgw iface changed need fullrenew procedure
-	DGW_IF_CHANGED=`ip -4 route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
+	DGW_IF_CHANGED=`ip -4 route show default | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g''`
 	if [ "$DGW_IF_CHANGED" =! "" ]; then
 	    FULL_RENEW=1
 	fi
@@ -266,7 +266,7 @@ case "$1" in
 			# parce dnsservers
 			for i in $dns ; do
 	    		    echo nameserver $i >> $RESOLV_CONF
-			    ROUTE_NS=`ip -4 route get "$i" | grep dev | cut -f -3 -d " "`
+			    ROUTE_NS=`ip -4 -o route get "$i" | cut -f -3 -d " "`
 			    if [ "$ROUTE_NS" != "" ] && [ "$i" != "$first_dgw" ]; then
 				$LOG "Add static route to DNS $ROUTE_NS dev $interface"
 				REPLACE="ip route replace $ROUTE_NS dev $interface"

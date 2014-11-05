@@ -391,14 +391,13 @@ start() {
 #########################################ACCEPT_ESTABLISHED################################
     iptables -A FORWARD $STATE_EST -j ACCEPT
 ############################################ENDRULES#######################################
-    $LOG "Configure netfilter OK."
 }
 
 startv6() {
     if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6OpMode" != "0" ]; then
 	get_param
 
-        $LOG "Add netfiler rules for ipv6"
+        $LOG "V6: Add netfiler rules for ipv6"
         # default rules
         ip6tables -A INPUT -i lo -j ACCEPT
         ip6tables -A INPUT $STATE_EST -j ACCEPT
@@ -410,26 +409,40 @@ startv6() {
         ip6tables -A INPUT -i $lan_if -j ACCEPT
         ip6tables -A FORWARD -i $lan_if -j ACCEPT
 
+	# allow dhcpv6 servers packets client/server
+	ip6tables -A INPUT -i $lan_if -p udp -m udp --dport 547 -j ACCEPT
+	ip6tables -A INPUT -i $real_wan_if -p udp -m udp --dport 546 -j ACCEPT
+
+	# allow multicast for all
+	ip6tables -A INPUT -d ff00::/8 -j ACCEPT
+
+	# miniupnpd use for ipv6 pinhole support
+	if [ "$upnpEnabled" = "1" ] && [ "$ROUTE_MODE" = "on" ]; then
+	    $LOG "V6: Add base upnp rules"
+	    ip6tables -t filter -N MINIUPNPD
+	    ip6tables -t filter -A FORWARD -i $six_wan_if ! -o $six_wan_if -j MINIUPNPD
+	    $LOG "V6: UPNP allow to connect"
+	    ip6tables -A INPUT -i $lan_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
+	    ip6tables -A INPUT -i $lan_if -p udp --dport 1900 -j ACCEPT
+	    ip6tables -A INPUT -i $lan_if -p udp --dport 5350:5351 -j ACCEPT
+	fi
+
+	if [ "$LOCAL_PRT" != "" ]; then
+	    $LOG "V6: allow local port range $LOCAL_PRT from LAN, need for some local service"
+	    ip6tables -A INPUT -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+	fi
+
         if [ "$WANPingFilter" = "0" ] && [ "$ROUTE_MODE" = "on" ]; then
-	    $LOG "Filter all ipv6 icmp echo requests for router and clients."
+	    $LOG "V6: Filter all ipv6 icmp echo requests for router and clients."
     	    ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -j DROP
     	    ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -j DROP
 	else
-	    $LOG "Allow ratelimited icmp echo requests to router and clients."
+	    $LOG "V6: Allow ratelimited icmp echo requests to router and clients."
 	    ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -m limit --limit 10/s -j ACCEPT
 	    ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -j DROP
 	    ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -m limit --limit 10/s -j ACCEPT
 	    ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -j DROP
 	fi
-
-	# allow dhcpv6 servers packets
-	ip6tables -A INPUT -i $lan_if -p udp -m udp --dport 547 -j ACCEPT
-
-	# allow dhcpv6 client packets
-	ip6tables -A INPUT -i $real_wan_if -p udp -m udp --dport 546 -j ACCEPT
-
-	# allow multicast for all
-	ip6tables -A INPUT -d ff00::/8 -j ACCEPT
 
 	# allow all others icmp messages (mtu probing and others) to router and clients
 	ip6tables -A INPUT -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
@@ -437,7 +450,6 @@ startv6() {
 #########################################ACCEPT_ESTABLISHED################################
 	ip6tables -A FORWARD $STATE_EST -j ACCEPT
 ############################################ENDRULES#######################################
-	$LOG "Configure netfilter for ipv6 OK."
     fi
 }
 
@@ -516,7 +528,7 @@ clamp_mss() {
 	fi
 	# for vpn if dev exists
 	if [ -d /proc/sys/net/ipv4/conf/$real_wan_if ] && [ "$real_wan_if" != "$wan_if" ]; then
-	    cur_mtu=`ip link show $real_wan_if | grep mtu | awk {' print $5 '}`
+	    cur_mtu=`ip -4 -o link show dev $real_wan_if | awk {' print $5 '}`
 	    if [ "$cur_mtu" != "" ]; then
 		let "hole_mtu=$cur_mtu-40"
 	    else

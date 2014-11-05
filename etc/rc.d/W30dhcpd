@@ -57,7 +57,7 @@ start() {
 	    else
 		if [ -f /etc/resolv.conf ]; then
 		    # parse resolv.conf file
-		    servers=`grep nameserver < /etc/resolv.conf | uniq | tail -q -n2 | awk {' print $2 '}`
+		    servers=`grep nameserver < /etc/resolv.conf | grep -v "::" | uniq | tail -q -n2 | awk {' print $2 '}`
 		    dhcpPriDns=""
 		    dhcpSecDns=""
 		    count=0
@@ -114,7 +114,7 @@ start() {
 
     # if dnsmasq disabled need reset LAN ports for clients renew params
     if [ "$dnsPEnabled" = "0" -a "$wan_static_dns" != "on" ] || [ "$dhcpEnabled" = "2" ]; then
-	    if [ "$CONFIG_RT_3052_ESW" != "" ]; then
+	    if [ "$CONFIG_RAETH_ESW" != "" ]; then
 		$LOG "Reinit LAN ports."
 		config-vlan.sh 2 RRRRR > /dev/null 2>&1
 	    fi

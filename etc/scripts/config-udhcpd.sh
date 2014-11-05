@@ -70,8 +70,7 @@ config () {
       ;;
     *) return;;
   esac
-  cat $fbak > $fname
-  rm -f $fbak
+  mv -f $fbak > $fname
   return
 }
 
