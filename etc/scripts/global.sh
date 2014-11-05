@@ -143,7 +143,8 @@ getWanIfName() {
     fi
     # services wan name
     if [ "$vpnEnabled" = "on" -a  "$vpnDGW" = "1" ] || [ "$MODEMENABLED" = "1" ]; then
-	get_ppp_wan_if=`ls /proc/sys/net/ipv4/conf/ | grep ppp | tail -q -n1`
+	# first ppp iface is client
+	get_ppp_wan_if=`ip -4 -o link show | grep ppp | awk {' print $2 '} | cut -f -1 -d :`
 	if [ "$get_ppp_wan_if" != "" ]; then
     	    real_wan_if="$get_ppp_wan_if"
 	else
