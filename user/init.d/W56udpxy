@@ -18,8 +18,8 @@ start() {
     get_param
     if [ "$UDPXYMode" != "0" ] && [ "$UDPXYPort" != "" ]; then
       ( # send to background
+
 	# check ip adress set at wan
-	wan_is_not_null=`ip -4 -o link show $wan_if up | grep -c ""` > /dev/null 2>&1
 	if [ "$wan_is_not_null" = "0" ]; then
     	    $LOG "Wait 15 sec before start..."
 	    sleep 15

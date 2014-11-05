@@ -20,8 +20,8 @@ start() {
   # if igmpproxy enable and mode not full bridge
     if [ "$igmpEnabled" = "1" ] && [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
       ( # send to background
+
 	# check ip adress set at wan
-	wan_is_not_null=`ip -o -4 addr show $wan_if scope global | wc -l`
 	if [ "$wan_is_not_null" = "0" ]; then
     	    $LOG "Wait 15 sec before start..."
 	    sleep 15

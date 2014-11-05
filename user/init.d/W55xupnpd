@@ -20,12 +20,13 @@ start() {
 	    mkdir -p /tmp/xupnpd-feeds
 	    ln -sf /tmp/xupnpd-feeds /etc/xupnpd/xupnpd-feeds
 	fi
+
 	# check ip adress set at wan
-	wan_is_not_null=`ip -4 -o link show $wan_if up | grep -c ""` > /dev/null 2>&1
 	if [ "$wan_is_not_null" = "0" ]; then
-    	    $LOG "Wait 10 sec before start..."
-	    sleep 10
+    	    $LOG "Wait 15 sec before start..."
+	    sleep 15
 	fi
+
         $LOG "Start"
 	export XUPNPDROOTDIR=/etc/xupnpd
 	nice -n -9 xupnpd &

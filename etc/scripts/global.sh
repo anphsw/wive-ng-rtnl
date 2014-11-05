@@ -167,15 +167,20 @@ getTunIfName() {
 getWanIpaddr() {
     # always return physical wan ip
     if [ "$wanConnectionMode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
-	wan_ipaddr=`ip -4 addr show dev $wan_if | awk '/inet / {print $2}' | cut -f1 -d"/"` > /dev/null 2>&1
+	wan_ipaddr=`ip -o -4 addr show dev $wan_if scope global | awk ' {print $4}' | cut -f1 -d"/"` > /dev/null 2>&1
     fi
 
     # return vpn or physical wan ip
-    real_wan_ipaddr=`ip -4 addr show dev $real_wan_if | awk '/inet / {print $2}' | cut -f1 -d"/"` > /dev/null 2>&1
+    real_wan_ipaddr=`ip -o -4 addr show dev $real_wan_if scope global | awk ' {print $4}' | cut -f1 -d"/"` > /dev/null 2>&1
     if [ "$real_wan_ipaddr" = "" ]; then
 	real_wan_ipaddr="$wan_ipaddr"
     fi
 
+}
+
+getWanReady() {
+    wan_is_not_null=`ip -o -4 addr show $wan_if scope global | wc -l`
+    realwan_is_not_null=`ip -o -4 addr show $real_wan_if scope global | wc -l`
 }
 
 # reconnect to AP
@@ -246,3 +251,4 @@ getWanIfName
 getVpnIfName
 getTunIfName
 getWanIpaddr
+getWanReady
