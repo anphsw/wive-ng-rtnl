@@ -55,7 +55,7 @@ get_vpn_ip() {
 	    count="$(($count+1))"
 	done
     else
-		SERVER="$vpnServer"
+	    SERVER="$vpnServer"
     fi
 
     $LOG "Server adress is $SERVER"
@@ -65,23 +65,8 @@ get_vpn_ip() {
     echo "$SERVER" > /tmp/vpnip
 }
 
-load_modules() {
-    if [ ! -d /sys/module/pppol2tp ]; then
-	mod="ppp_generic pppox pppol2tp"
-	for module in $mod
-	do
-    	    modprobe -q $module
-	done
-    fi
-}
-
-echo "==================START-L2TP-CLIENT======================="
-    get_param
-    check_param
-    get_vpn_ip
-    reachable=0
-
-    $LOG "Set route to vpn server."
+set_routest_to_server() {
+    $LOG "Set routes to vpn servers."
     if [ "$wanConnectionMode" != "STATIC" ]; then
 	if [ -f /tmp/default.gw ]; then
 	    newdgw=`cat /tmp/default.gw`
@@ -99,10 +84,34 @@ echo "==================START-L2TP-CLIENT======================="
 	dgw_net=`ipcalc "$newdgw" -sn | cut -f 2- -d =`
 	srv_net=`ipcalc "$SERVER" -sn | cut -f 2- -d =`
 	if [ "$dgw_net" != "" ] && [ "$srv_net" != "" ] && [ "$dgw_net" != "$srv_net" ]; then
+	    $LOG "Add static routes for all VPN servers ip adresses by ip"
+	    ipget "$vpnServer" | while read srvip; do
+		$LOG "Add route to $srvip via $newdgw"
+		ip -4 route replace $srvip via $newdgw
+	    done
 	    $LOG "Add route to $SERVER via $newdgw"
 	    ip -4 route replace $SERVER via $newdgw
 	fi
     fi
+}
+
+load_modules() {
+    if [ ! -d /sys/module/pppol2tp ]; then
+	mod="ppp_generic pppox pppol2tp"
+	for module in $mod
+	do
+    	    modprobe -q $module
+	done
+    fi
+}
+
+echo "==================START-L2TP-CLIENT======================="
+    get_param
+    check_param
+    get_vpn_ip
+    set_routest_to_server
+
+    reachable=0
 
     if [ "$vpnTestReachable" = "1" ]; then
 	while [ $reachable -eq 0 ]; do
