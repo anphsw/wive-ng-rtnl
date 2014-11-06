@@ -155,6 +155,11 @@ getWanIfName() {
     else
         real_wan_if="$wan_if"
     fi
+    # correct vpn_if for some services start
+    # this workaround for preconfig igmprpoxy and vpnhelper
+    if [ "$vpn_if" = "" ]; then
+	vpn_if="vpn_def_if"
+    fi
 }
 
 getTunIfName() {
