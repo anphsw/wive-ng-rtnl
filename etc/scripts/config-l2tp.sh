@@ -86,11 +86,11 @@ set_routest_to_server() {
 	if [ "$dgw_net" != "" ] && [ "$srv_net" != "" ] && [ "$dgw_net" != "$srv_net" ]; then
 	    $LOG "Add static routes for all VPN servers ip adresses by ip"
 	    ipget "$vpnServer" | while read srvip; do
-		$LOG "Add route to $srvip via $newdgw"
-		ip -4 route replace $srvip via $newdgw
+		$LOG "Add route to $srvip via $newdgw dev $wan_if"
+		ip -4 route replace $srvip via $newdgw dev $wan_if
 	    done
-	    $LOG "Add route to $SERVER via $newdgw"
-	    ip -4 route replace $SERVER via $newdgw
+	    $LOG "Add route to $SERVER via $newdgw dev $wan_if"
+	    ip -4 route replace $SERVER via $newdgw dev $wan_if
 	fi
     fi
 }

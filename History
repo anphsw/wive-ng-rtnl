@@ -365,27 +365,28 @@
 23) init.d: fix pcp/nat-pmp control port accept from lan.<br>
 24) init.d: add static routes for all resolved vpn server adresses.<br>
 25) init.d: remove web_wait logic, not more need and unused some time.<br>
-26) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
-27) goahead: add dhcpv6 server control in misc.<br>
-28) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
-29) goahead: remove double restart ripd/zebra.<br>
-30) goahead: remove dead mesh support.<br>
-31) kernel: hw_nat: update to 2.51 version.<br>
-32) kernel: spi: add more flash support.<br>
-33) kernel: ipv6: fix tcp_v6_send_response(): it didn't set skb transport header.<br>
-34) kernel: ipv6: go not warn for informational ICMP messages, regardless of type.<br>
-35) kernel: ipv6: reimplement add LL routes.<br>
-36) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
-37) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
-38) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
-39) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
-40) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
-41) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
-42) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
-43) kernel: jiffies: fix timeval conversion to jiffies.<br>
-44) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
-45) kernel: small tune refcnt hack.<br>
-46) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
+26) init.d: vpnhelper: direct set iface name in static routes to vpn servers.<br>
+27) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
+28) goahead: add dhcpv6 server control in misc.<br>
+29) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
+30) goahead: remove double restart ripd/zebra.<br>
+31) goahead: remove dead mesh support.<br>
+32) kernel: hw_nat: update to 2.51 version.<br>
+33) kernel: spi: add more flash support.<br>
+34) kernel: ipv6: fix tcp_v6_send_response(): it didn't set skb transport header.<br>
+35) kernel: ipv6: go not warn for informational ICMP messages, regardless of type.<br>
+36) kernel: ipv6: reimplement add LL routes.<br>
+37) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
+38) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
+39) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
+40) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
+41) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+42) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
+43) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
+44) kernel: jiffies: fix timeval conversion to jiffies.<br>
+45) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
+46) kernel: small tune refcnt hack.<br>
+47) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
 <br>
 <br>
 <br>
