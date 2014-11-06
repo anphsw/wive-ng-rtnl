@@ -251,8 +251,8 @@ readdif_to_br() {
 getFirstWlanIfName
 getSecWlanIfName
 getLanIfName
-getWanIfName
 getVpnIfName
+getWanIfName
 getTunIfName
 getWanIpaddr
 getWanReady
