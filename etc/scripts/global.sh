@@ -15,7 +15,6 @@ wan_if="eth2.2"
 real_wan_if="eth2.2"
 lan_if="br0"
 lan2_if="br0:9"
-vpn_if="ppp0"
 vpn_def_if="ppp0"
 
 # phys names
