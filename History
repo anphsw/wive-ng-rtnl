@@ -387,6 +387,7 @@
 45) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
 46) kernel: small tune refcnt hack.<br>
 47) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
+48) kernel: ipv4: do not cache routing failures due to disabled forwarding.<br>
 <br>
 <br>
 <br>
