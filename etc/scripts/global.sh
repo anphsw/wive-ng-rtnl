@@ -182,8 +182,8 @@ getWanIpaddr() {
 }
 
 getWanReady() {
-    wan_is_not_null=`ip -o -4 addr show $wan_if scope global | wc -l`
-    realwan_is_not_null=`ip -o -4 addr show $real_wan_if scope global | wc -l`
+    wan_is_not_null=`ip -o -4 addr show $wan_if scope global | wc -l` > /dev/null 2>&1
+    realwan_is_not_null=`ip -o -4 addr show $real_wan_if scope global | wc -l` > /dev/null 2>&1
 }
 
 # reconnect to AP
