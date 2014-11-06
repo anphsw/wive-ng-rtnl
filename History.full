@@ -2055,39 +2055,40 @@
 9) apps: port wive-dhcpv6 (need write client logic, server logic work good).<br>
 10) miniupnpd: version up to 1.9.<br>
 11) busybox: apply lzop and zcat upstream patchs.<br>
-12) pppd: cap MTU to the user configured value.<br>
-13) init.d: fix get vendid at new mac generate.<br>
-14) init.d: add check first octet in mac readed from old factory for prevent read from crashed mtd FF.<br>
-15) init.d: rewrite logic for ipv6 suppor (need write logic for more modes support).<br>
-16) init.d: radvd,dhcpv6: read dns server from uplink if recived.<br>
-17) init.d: enable multicast2unicast in wifi drivers only if igmpproxy enabled.<br>
-18) init.d: move dhcpv6 client start to wan config.<br>
-19) init.d: reconfigure ipv6 after recive params from ISP.<br>
-20) init.d: use ISP DNS ipv6 servers for local resolv if recived.<br>
-21) init.d: ipv6: need check ipv4 adress on wan only in tunneling modes.<br>
-22) init.d: fix pcp/nat-pmp control port accept from lan.<br>
-23) init.d: add static routes for all resolved vpn server adresses.<br>
-24) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
-25) goahead: add dhcpv6 server control in misc.<br>
-26) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
-27) goahead: remove double restart ripd/zebra.<br>
-28) goahead: remove dead mesh support.<br>
-29) kernel: hw_nat: update to 2.51 version.<br>
-30) kernel: spi: add more flash support.<br>
-31) kernel: ipv6: fix tcp_v6_send_response(): it didn't set skb transport header.<br>
-32) kernel: ipv6: go not warn for informational ICMP messages, regardless of type.<br>
-33) kernel: ipv6: reimplement add LL routes.<br>
-34) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
-35) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
-36) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
-37) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
-38) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
-39) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
-40) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
-41) kernel: jiffies: fix timeval conversion to jiffies.<br>
-42) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
-43) kernel: small tune refcnt hack.<br>
-44) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
+12) busybox: udhcpc: allow unicast RENEW for lease time from 60s, allow first unicast RENEW on force renew performed (fix short leases under ISP with DHCP snooping).<br>
+13) pppd: cap MTU to the user configured value.<br>
+14) init.d: fix get vendid at new mac generate.<br>
+15) init.d: add check first octet in mac readed from old factory for prevent read from crashed mtd FF.<br>
+16) init.d: rewrite logic for ipv6 suppor (need write logic for more modes support).<br>
+17) init.d: radvd,dhcpv6: read dns server from uplink if recived.<br>
+18) init.d: enable multicast2unicast in wifi drivers only if igmpproxy enabled.<br>
+19) init.d: move dhcpv6 client start to wan config.<br>
+20) init.d: reconfigure ipv6 after recive params from ISP.<br>
+21) init.d: use ISP DNS ipv6 servers for local resolv if recived.<br>
+22) init.d: ipv6: need check ipv4 adress on wan only in tunneling modes.<br>
+23) init.d: fix pcp/nat-pmp control port accept from lan.<br>
+24) init.d: add static routes for all resolved vpn server adresses.<br>
+25) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
+26) goahead: add dhcpv6 server control in misc.<br>
+27) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
+28) goahead: remove double restart ripd/zebra.<br>
+29) goahead: remove dead mesh support.<br>
+30) kernel: hw_nat: update to 2.51 version.<br>
+31) kernel: spi: add more flash support.<br>
+32) kernel: ipv6: fix tcp_v6_send_response(): it didn't set skb transport header.<br>
+33) kernel: ipv6: go not warn for informational ICMP messages, regardless of type.<br>
+34) kernel: ipv6: reimplement add LL routes.<br>
+35) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
+36) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
+37) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
+38) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
+39) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+40) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
+41) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
+42) kernel: jiffies: fix timeval conversion to jiffies.<br>
+43) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
+44) kernel: small tune refcnt hack.<br>
+45) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
 <br>
 <br>
 <br>
