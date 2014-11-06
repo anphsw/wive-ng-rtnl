@@ -158,7 +158,7 @@ getWanIfName() {
     # correct vpn_if for some services start
     # this workaround for preconfig igmprpoxy and vpnhelper
     if [ "$vpn_if" = "" ]; then
-	vpn_if="vpn_def_if"
+	vpn_if="$vpn_def_if"
     fi
 }
 
