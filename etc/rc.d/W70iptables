@@ -1,9 +1,5 @@
 #!/bin/sh
 
-#wait to start web and run from goahead code
-. /etc/scripts/web_wait.sh
-web_wait
-
 # prevent double startiptables configure in one time
 while [ -e /tmp/iptables_runing ]; do
     # Sleep until file does exists/is created

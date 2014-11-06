@@ -5,10 +5,6 @@ if [ ! -f /bin/tc ]; then
     exit 0
 fi
 
-# wait to start web and run from goahead code
-. /etc/scripts/web_wait.sh
-web_wait
-
 # include functions and env
 . /etc/scripts/global.sh
 

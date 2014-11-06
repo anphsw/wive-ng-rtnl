@@ -5,9 +5,6 @@ LOG="logger -t ntp"
 start() {
     # generate new timezone file
     TZ_generate
-    # wait to start web and run from goahead code
-    . /etc/scripts/web_wait.sh
-    web_wait
     # start time sync daemon
     ntp_start
 }
@@ -41,7 +38,7 @@ ntp_start() {
     eval `nvram_buf_get 2860 NTPEnabled NTPServerIP`
     if [ "$NTPEnabled" = "on" ] && [ "$NTPServerIP" != "" ]; then
 	$LOG "Starting NTPD"
-	ntpd -d -p "$NTPServerIP" &
+	ntpd -d -p "$NTPServerIP" > /dev/null 2>&1 &
     fi
 }
 

@@ -5,10 +5,6 @@ if [ ! -f /bin/transmission-daemon ] || [ ! -d /proc/bus/usb ]; then
     exit 0
 fi
 
-# wait to start web and run from goahead code
-. /etc/scripts/web_wait.sh
-web_wait
-
 #include global config
 . /etc/scripts/global.sh
 
