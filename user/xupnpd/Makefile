@@ -14,8 +14,8 @@ install:
 	#OK
 
 romfs:
-	$(ROMFSINST) -S init.d/W55xupnpd /etc/rc.d/W55xupnpd
-	$(ROMFSINST) -s /etc/rc.d/W55xupnpd /etc/init.d/xupnpd
+	$(ROMFSINST) -S init.d/W75xupnpd /etc/rc.d/W75xupnpd
+	$(ROMFSINST) -s /etc/rc.d/W75xupnpd /etc/init.d/xupnpd
 	cp -fv src/xupnpd $(ROMFSDIR)/bin/xupnpd
 	rm -rf $(ROMFSDIR)/etc/xupnpd
 	mkdir -p $(ROMFSDIR)/etc/xupnpd

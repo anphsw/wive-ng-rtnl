@@ -27,7 +27,9 @@ upmpm_net="239.0.0.0/8"
 txqueuelen="1000"
 
 # first get operation mode and wan mode  dns mode and relay mode vpn mode and type
-eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_dns \
+eval `nvram_buf_get 2860 HostName OperationMode \
+	wanConnectionMode wan_ipaddr wan_netmask wan_gateway wan_static_dns wan_manual_mtu \
+	lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask \
 	WLAN_MAC_ADDR WLAN2_MAC_ADDR WAN_MAC_ADDR LAN_MAC_ADDR \
 	dnsPEnabled UDPXYMode UDPXYPort igmpEnabled \
 	vpnEnabled vpnPurePPPOE vpnType vpnDGW \
@@ -173,12 +175,19 @@ getTunIfName() {
 }
 
 getWanIpaddr() {
-    # always return physical wan ip
-    if [ "$wanConnectionMode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
+    # in non static mode always get parametrs direct from if
+    if [ "$wanConnectionMode" != "STATIC" ]; then
+	wan_ipaddr=""
+	wan_netmask=""
+	wan_gateway=""
+    fi
+
+    # get from if and return physical wan ip
+    if [ "$wan_ipaddr" = "" ]; then
 	wan_ipaddr=`ip -o -4 addr show dev $wan_if scope global | awk ' {print $4}' | cut -f1 -d"/"` > /dev/null 2>&1
     fi
 
-    # return vpn or physical wan ip
+    # get from if and return vpn or physical wan ip
     real_wan_ipaddr=`ip -o -4 addr show dev $real_wan_if scope global | awk ' {print $4}' | cut -f1 -d"/"` > /dev/null 2>&1
     if [ "$real_wan_ipaddr" = "" ]; then
 	real_wan_ipaddr="$wan_ipaddr"

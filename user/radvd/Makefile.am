@@ -180,7 +180,7 @@ dist-hook:
 scanner.c: gram.h
 
 romfs:
-	$(ROMFSINST) -S init.d/W25radvd /etc/rc.d/W25radvd
-	$(ROMFSINST) -s /etc/rc.d/W25radvd /etc/init.d/radvd
+	$(ROMFSINST) -S init.d/W20radvd /etc/rc.d/W20radvd
+	$(ROMFSINST) -s /etc/rc.d/W20radvd /etc/init.d/radvd
 	$(ROMFSINST) /bin/radvd
 	$(ROMFSINST) radvd.conf /etc/radvd.conf

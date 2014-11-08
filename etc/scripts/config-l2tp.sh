@@ -13,8 +13,7 @@ service vpnhelper killall_vpn
 LOG="logger -t vpnhelper-l2tp"
 
 get_param() {
-    eval `nvram_buf_get 2860 vpnServer vpnUser vpnPassword vpnMTU vpnMPPE vpnPeerDNS vpnDebug vpnAuthProtocol vpnEnableLCP \
-	    vpnLCPFailure vpnLCPInterval vpnTestReachable wan_gateway`
+    eval `nvram_buf_get 2860 vpnServer vpnUser vpnPassword vpnMTU vpnMPPE vpnPeerDNS vpnDebug vpnAuthProtocol vpnEnableLCP vpnLCPFailure vpnLCPInterval vpnTestReachable`
 
     ppp="/etc/ppp"
     var="/var/run/xl2tpd"

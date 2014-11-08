@@ -42,8 +42,8 @@ dist-hook:
 	rm -rf `find $(distdir)/qt -name .svn`
 
 romfs: install
-	$(ROMFSINST) -S init.d/W75transmission /etc/rc.d/W75transmission
-	$(ROMFSINST) -s /etc/rc.d/W75transmission /etc/init.d/transmission
+	$(ROMFSINST) -S init.d/W95transmission /etc/rc.d/W95transmission
+	$(ROMFSINST) -s /etc/rc.d/W95transmission /etc/init.d/transmission
 	$(ROMFSINST) -S filesystem/bin/transmission-daemon /bin/transmission-daemon
 	cp -rfva filesystem/share/transmission* $(ROMFSDIR)/share/transmission/
 

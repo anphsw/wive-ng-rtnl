@@ -60,7 +60,7 @@ gen_hosts() {
 }
 
 get_param() {
-    eval `nvram_buf_get 2860 dnsPEnabled HostName lan_ipaddr DDNS DDNSAccount DMZEnable DMZIPAddress`
+    eval `nvram_buf_get 2860 dnsPEnabled DDNS DDNSAccount DMZEnable DMZIPAddress`
     cname="/etc/dnsmasq.conf"
     fname="/etc/resolv.conf"
     hname="/etc/hosts"

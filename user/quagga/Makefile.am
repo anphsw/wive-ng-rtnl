@@ -27,10 +27,10 @@ endif
 ACLOCAL_AMFLAGS = -I m4
 
 romfs: install
-	$(ROMFSINST) -S init.d/W46ripd /etc/rc.d/W46ripd
-	$(ROMFSINST) -s /etc/rc.d/W46ripd /etc/init.d/ripd
-	$(ROMFSINST) -S init.d/W47zebra /etc/rc.d/W47zebra
-	$(ROMFSINST) -s /etc/rc.d/W47zebra /etc/init.d/zebra
+	$(ROMFSINST) -S init.d/W65ripd /etc/rc.d/W65ripd
+	$(ROMFSINST) -s /etc/rc.d/W65ripd /etc/init.d/ripd
+	$(ROMFSINST) -S init.d/W60zebra /etc/rc.d/W60zebra
+	$(ROMFSINST) -s /etc/rc.d/W60zebra /etc/init.d/zebra
 	$(ROMFSINST) -S filesystem/sbin/zebra /bin/zebra
 	$(ROMFSINST) -S filesystem/sbin/ripd /bin/ripd
 	cp -rfva filesystem/lib/*.so* $(ROMFSDIR)/lib/

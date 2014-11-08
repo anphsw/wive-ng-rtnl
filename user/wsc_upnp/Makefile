@@ -58,8 +58,8 @@ cleanall: clean
 	rm -f *.so
 
 romfs:
-	$(ROMFSINST) -S init.d/W41wscd /etc/rc.d/W41wscd
-	$(ROMFSINST) -s /etc/rc.d/W41wscd /etc/init.d/wscd
+	$(ROMFSINST) -S init.d/W92wscd /etc/rc.d/W92wscd
+	$(ROMFSINST) -s /etc/rc.d/W92wscd /etc/init.d/wscd
 	$(ROMFSINST) -S wscd /bin/wscd
 	$(ROMFSINST) -S xml/WFADeviceDesc.xml /xml/WFADeviceDesc.xml
 	$(ROMFSINST) -S xml/WFAWLANConfigSCPD.xml /xml/WFAWLANConfigSCPD.xml

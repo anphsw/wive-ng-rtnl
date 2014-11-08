@@ -7,8 +7,6 @@ LOG="logger -t lan"
 
 start() {
   $LOG "Start LAN network interfaces."
-    get_param
-
     # flush ip from interfaces
     addr_flush
 
@@ -64,10 +62,6 @@ addr_flush() {
     ip -4 addr flush dev "$lan_if" > /dev/null 2>&1
     ip -4 addr flush dev "$lan2_if" > /dev/null 2>&1
     ip -4 addr flush dev "$phys_lan_if" > /dev/null 2>&1
-}
-
-get_param() {
-    eval `nvram_buf_get 2860 lan_ipaddr lan_netmask lan2_ipaddr lan2_netmask Lan2Enabled`
 }
 
 stop() {

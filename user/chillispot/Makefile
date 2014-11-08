@@ -13,8 +13,8 @@ all:
 		 make && make DESTDIR=`pwd`/../staging install)
 
 romfs:
-	$(ROMFSINST) -S init.d/W48chillispot /etc/rc.d/W48chillispot
-	$(ROMFSINST) -s /etc/rc.d/W48chillispot /etc/init.d/chillispot
+	$(ROMFSINST) -S init.d/W98chillispot /etc/rc.d/W98chillispot
+	$(ROMFSINST) -s /etc/rc.d/W98chillispot /etc/init.d/chillispot
 	$(ROMFSINST) -S staging/usr/sbin/chilli /bin/chilli
 
 clean:

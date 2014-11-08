@@ -23,7 +23,7 @@ ROUTELIST_DGW=""
 ROUTELIST_FGW=""
 
 # Get MTU config and VPN DGW mode
-eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW vpnPeerDNS dhcpSwReset HostName lan_ipaddr lan_netmask`
+eval `nvram_buf_get 2860 vpnDGW vpnPeerDNS dhcpSwReset`
 
 # Renew flags
 FULL_RENEW=1

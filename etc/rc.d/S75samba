@@ -82,7 +82,7 @@ fi
 
 
 get_param() {
-    eval `nvram_buf_get 2860 WorkGroup SmbNetBIOS SmbString SmbOsLevel SmbTimeserver NTPEnabled NTPServerIP Login lan_ipaddr lan_netmask l2tp_srv_enabled`
+    eval `nvram_buf_get 2860 WorkGroup SmbNetBIOS SmbString SmbOsLevel SmbTimeserver NTPEnabled NTPServerIP Login l2tp_srv_enabled`
     CONFIG="/etc/smb.conf"
     TEMPLATE="/etc/smb.conf.template"
 

@@ -14,7 +14,7 @@ PPP_FIREWALL="/tmp/ppp_firewall_${PPP_IFACE}"
 
 LOG="logger -t pppd"
 
-eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask vpnPeerDNS chilli_net`
+eval `nvram_buf_get 2860 vpnPeerDNS chilli_net`
 
     $LOG "Disable forwarding for $PPP_IFACE interface"
     sysctl -wq net.ipv4.conf.$PPP_IFACE.forwarding=0
