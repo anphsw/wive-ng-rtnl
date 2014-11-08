@@ -222,8 +222,8 @@ wifi_reconnect() {
 wait_connect() {
     if [ "$OperationMode" = "2" ]; then
 	# Get connection status
-	connected=`iwpriv $first_wlan_root_if connStatus | grep Connected -c`
-	if [ "$connected" = "0" ] || [ ! -f /tmp/sta_connected ]; then
+	connected=`iwpriv $first_wlan_root_if connStatus | grep "Connected" -c`
+	if [ "$connected" = "0" ]; then
 	    exit 1
 	fi
     elif [ "$OperationMode" = "3" ] && [ "$ApCliBridgeOnly" != "1" ]; then

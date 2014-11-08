@@ -236,7 +236,7 @@ services_restart.sh all
 # in dhcp client mode restart from dhcp script
 # in static/zeroconf or pure pppoe mode need restart anyway
 if [ "$vpnEnabled" = "on" -a "$vpnType" = "0" -a "$vpnPurePPPOE" = "1" ] || [ "$wanConnectionMode" != "DHCP" ]; then
-    (service vpnhelper stop && sleep 2 && service vpnhelper start) &
+    service vpnhelper restart
 fi
 
 # this is hook for exec user script after physycal connection configured

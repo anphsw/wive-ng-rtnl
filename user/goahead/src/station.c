@@ -1871,11 +1871,8 @@ void initStaConnection(void)
 
 	close(s);
 	sync();
-
-	//set flag for daemons is connected
-	doSystem("touch /tmp/sta_connected");
 	//Configure wan and get param from dhcp and restart all service. Not use wifi only mode
-	doSystem("(sleep 2 && internet.sh connect_sta) &");
+	doSystem("internet.sh connect_sta &");
 }
 
 static int getActiveProfileStatus(int eid, webs_t wp, int argc, char_t **argv)

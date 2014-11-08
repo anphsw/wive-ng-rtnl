@@ -110,11 +110,11 @@ static void usbmodem(webs_t wp, char_t *path, char_t *query)
 		}
 	else if (0 == strcmp(submit, "connect"))
 		{
-			doSystem("service modemhelper start &");
+			doSystem("service modemhelper start");
 		}
 	else if (0 == strcmp(submit, "disconnect"))
 		{
-			doSystem("service modemhelper stop &");
+			doSystem("service modemhelper stop");
 		}
 
 submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
