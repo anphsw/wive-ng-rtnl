@@ -3666,12 +3666,6 @@ VOID RTMPIoctlGetSiteSurvey(
 #endif /* CONFIG_STA_SUPPORT */
 
 	TotalLen = sizeof(CHAR)*((MAX_LEN_OF_BSS_TABLE)*max_len) + 100;
-
-	if (wrq->u.data.length == 0)
-		BufLen = IW_SCAN_MAX_DATA;
-	else
-		BufLen = wrq->u.data.length;
-
 	os_alloc_mem(NULL, (PUCHAR *)&msg, TotalLen);
 
 	if (msg == NULL)
