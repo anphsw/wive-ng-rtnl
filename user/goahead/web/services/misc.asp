@@ -348,7 +348,7 @@ function displayServiceHandler(response)
 				tds[3].innerHTML = '<span style="color: #808080"><b>off</b></span>';
 			else
 				tds[3].innerHTML = (daemons[service[2]] == 1) ?
-					'<span style="color: #3da42c"><b>running</b></span>' :
+					'<span style="color: #3da42c"><b>work</b></span>' :
 					'<span style="color: #808000"><b>starting</b></span>';
 
 			// Fill-up configure
