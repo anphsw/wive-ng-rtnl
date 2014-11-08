@@ -94,7 +94,7 @@ fullreset() {
     killall -q -SIGKILL goahead
     wifi_unload.sh
     rm -f /tmp/nvram_checked
-    rm -f /var/run/goahead.pid
+    rm -f /tmp/bootgood
     burnrf
     nvramreset
     echo "Generate new MACS."

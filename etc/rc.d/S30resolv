@@ -4,7 +4,7 @@ LOG="logger -t resolv"
 
 start() {
 get_param
-if [ ! -f /var/run/goahead.pid ] || [ "$wan_static_dns" = "on" ]; then
+if [ ! -f /tmp/bootgood ] || [ "$wan_static_dns" = "on" ]; then
     # drop current
     rm -f $fname
     touch $fname

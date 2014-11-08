@@ -17,7 +17,7 @@ start() {
     fi
 
     # if goahead started
-    if [  -f /var/run/goahead.pid ]; then
+    if [  -f /tmp/bootgood ]; then
 	# clear conntrack and routes tables/caches
 	flush_net_caches
 
@@ -70,7 +70,7 @@ start() {
 	fi
 	$LOG "Tune wifi modules after load..."
 	retune_wifi
-	
+
 	# not load this modules after goahead start
 	# load conntrack helpers modules
 	load_nat_helpers
@@ -178,23 +178,21 @@ get_param() {
 }
 
 stop() {
-    if [ -f /var/run/goahead.pid ]; then
-	$LOG "link wifi down first"
-	wlan_down_all
-	if [ -d /sys/module/hw_nat ]; then
-	    $LOG "Unload hw_nat and wireless modules."
-	    mod="hw_nat rt2860v2_ap rt2860v2_sta rt3090_ap"
-	else
-	    $LOG "Unload wireless modules."
-	    mod="rt2860v2_ap rt2860v2_sta rt3090_ap"
-	fi
-	for module in $mod
-	do
-	    if [ -d /sys/module/$module ]; then
-		rmmod $module > /dev/null 2>&1
-	    fi
-	done
+    $LOG "link wifi down first"
+    wlan_down_all
+    if [ -d /sys/module/hw_nat ]; then
+        $LOG "Unload hw_nat and wireless modules."
+        mod="hw_nat rt2860v2_ap rt2860v2_sta rt3090_ap"
+    else
+        $LOG "Unload wireless modules."
+        mod="rt2860v2_ap rt2860v2_sta rt3090_ap"
     fi
+    for module in $mod
+    do
+	if [ -d /sys/module/$module ]; then
+	    rmmod $module > /dev/null 2>&1
+	fi
+    done
 }
 
 case "$1" in

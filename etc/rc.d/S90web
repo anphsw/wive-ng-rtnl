@@ -4,6 +4,9 @@ LOG="logger -t goahead"
 
 start() {
  $LOG "Start goahead"
+    #set bootcomplite flag
+    touch /tmp/bootgood
+
     #blink wps/sec led at boot time before goahead start
     if [ -f /bin/gpio ]; then
 	boot_leds_blink=`nvram_get 2860 boot_leds_blink`

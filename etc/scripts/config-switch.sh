@@ -56,7 +56,7 @@ start_sw_config() {
     ##########################################################################
     # Configure double vlan tag support in kernel. Only one per start
     ##########################################################################
-    if [ ! -f /var/run/goahead.pid ]; then
+    if [ ! -f /tmp/bootgood ]; then
 	if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
 	    if [ "$vlan_double_tag" = "1" ] || [ "$offloadMode" = "2" ] || [ "$offloadMode" = "3" ]; then
 		if [ "$offloadMode" = "2" ] || [ "$offloadMode" = "3" ]; then
@@ -78,7 +78,7 @@ start_sw_config() {
 # call this function only if VLAN as WAN need
 ##########################################################################
 configs_system_vlans() {
-    if [ ! -f /var/run/goahead.pid ]; then
+    if [ ! -f /tmp/bootgood ]; then
 	##########################################################################
 	# Configure vlans in kernel. Only one per start
 	##########################################################################
@@ -206,7 +206,7 @@ start_sw_config
 ##############################################################################
 if [ "$CONFIG_RT_3052_ESW" != "" ] && [ "$SWITCH_MODE" != "" ]; then
     configs_system_vlans
-    if [ ! -f /var/run/goahead.pid ] && [ "$CONFIG_RALINK_RT3052" != "" ]; then
+    if [ ! -f /tmp/bootgood ] && [ "$CONFIG_RALINK_RT3052" != "" ]; then
 	######################################################################
 	# workaroud for dir-300NRU and some ithers devices
 	# with not correct configured from uboot

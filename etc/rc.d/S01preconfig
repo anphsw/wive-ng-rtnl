@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # only clean load start this
-if [ -f /tmp/is_preconfigured ] || [ -f /var/run/goahead.pid ]; then
+if [ -f /tmp/is_preconfigured ]; then
     exit 0
 fi
 
