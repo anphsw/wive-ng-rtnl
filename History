@@ -385,13 +385,14 @@
 43) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
 44) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
 45) kernel: ralink wifi: update eeprom in drivers by fabric.<br>
-46) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
-47) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
-48) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
-49) kernel: jiffies: fix timeval conversion to jiffies.<br>
-50) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
-51) kernel: small tune refcnt hack.<br>
-52) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
+46) kernel: ralink wifi: add lost mtk patches.<br>
+47) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+48) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
+49) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
+50) kernel: jiffies: fix timeval conversion to jiffies.<br>
+51) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
+52) kernel: small tune refcnt hack.<br>
+53) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
 <br>
 <br>
 <br>
