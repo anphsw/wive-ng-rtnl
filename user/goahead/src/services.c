@@ -247,7 +247,7 @@ void dhcpStoreAliases(const char *dhcp_config)
 		sync();
 
 		// Call rwfs to store data
-		system("fs save &");
+		system("fs save");
 	}
 	else
 		printf("Failed to open file %s\n", _PATH_DHCP_ALIAS_FILE);
