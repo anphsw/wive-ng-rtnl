@@ -174,8 +174,6 @@ if [ "$MODE" != "connect_sta" ]; then
     fi
     $LOG "Reload wireless modules..."
     service modules restart
-    $LOG "Tune wifi modules..."
-    service modules retune_wifi
     if [ "$MODE" != "wifionly" ]; then
 	$LOG "Reconfigure lan..."
 	service lan restart
