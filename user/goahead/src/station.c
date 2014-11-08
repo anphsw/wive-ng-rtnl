@@ -1872,7 +1872,7 @@ void initStaConnection(void)
 	close(s);
 	sync();
 	//Configure wan and get param from dhcp and restart all service. Not use wifi only mode
-	doSystem("internet.sh connect_sta &");
+	doSystem("internet.sh connect_sta");
 }
 
 static int getActiveProfileStatus(int eid, webs_t wp, int argc, char_t **argv)
