@@ -1,7 +1,7 @@
 VERSION = 2
 PATCHLEVEL = 6
 SUBLEVEL = 21
-EXTRAVERSION = .59
+EXTRAVERSION = .60
 NAME = Nocturnal Monster Puppy
 
 #########################################################################################################
