@@ -3212,15 +3212,15 @@ static void netdev_wait_allrefs(struct net_device *dev)
 		/*
 		 *This is not clean hack. May be resource leak cardmap ppp module not touch refcnt and not need check this
 		*/
-		if (time_after(jiffies, warning_time + 10 * HZ)) {
+		if (time_after(jiffies, warning_time + 1 * HZ)) {
 
 			warning_time = jiffies;
 
 			/* wait count exeed - break and warn of leak */
-			if (count > 2) {
+			if (count > 10) {
+			    printk(KERN_EMERG "unregister_netdevice %s refcnt leak. need fix. Usage count = %d\n", dev->name, refcnt);
 			    refcnt = 0;
 			    atomic_set (&dev->refcnt, 0);
-			    printk(KERN_EMERG "unregister_netdevice %s refcnt leak. need fix. Usage count = %d\n", dev->name, refcnt);
 			    break;
 			}
 
