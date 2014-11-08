@@ -70,11 +70,6 @@ if [ "$AutoChannelSelect" = "1" ]; then
     iwpriv "$1" set SiteSurvey=1
     # second select channel
     iwpriv "$1" set AutoChannelSel=1
-else
-    if [ "$1" != "rai0" ]; then
-	# set channel manual
-	iwpriv "$1" set Channel="$Channel"
-    fi
 fi
 ###########################################ALWAYS END########################################
 # rescan coexist mode
