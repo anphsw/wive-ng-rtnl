@@ -125,6 +125,12 @@ apcli_config() {
 	if [ "$second_wlan_mbss" != "" ]; then
 	    addMBSSID $second_wlan_mbss
 	fi
+	# delete ra0 from bridge and down if only apcli-bridge
+	eval `nvram_buf_get 2860 ApCliClientOnly`
+	if  [ "$ApCliClientOnly" = "1" ] && [ "$OperationMode" = "0" -o "$OperationMode" = "3" ]; then
+    	    echo "APCLI Only client mode enable, shutdown $first_wlan_root_if interface."
+    	    delif_from_br $first_wlan_root_if
+	fi
 }
 
 spot_config() {
@@ -168,6 +174,8 @@ if [ "$MODE" != "connect_sta" ]; then
     fi
     $LOG "Reload wireless modules..."
     service modules restart
+    $LOG "Tune wifi modules..."
+    service modules retune_wifi
     if [ "$MODE" != "wifionly" ]; then
 	$LOG "Reconfigure lan..."
 	service lan restart
@@ -214,12 +222,6 @@ if [ "$OperationMode" = "0" -o "$OperationMode" = "3" ] && [ "$MODE" != "connect
     if [ "$CONFIG_RT_3052_ESW" != "" ] && [ "$CONFIG_RALINK_RT3052" != "" ]; then
 	$LOG "Reconfigure switch..."
 	/etc/scripts/config-switch.sh
-    fi
-    # disable AP interface if client only configured
-    eval `nvram_buf_get 2860 ApCliClientOnly`
-    if [ "$ApCliClientOnly" = "1" ]; then
-	echo "APCLI Only client mode enable shutdown $first_wlan_root_if..."
-	delif_from_br $first_wlan_root_if
     fi
 fi
 
