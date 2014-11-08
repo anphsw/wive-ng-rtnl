@@ -116,8 +116,8 @@ echo "==================START-PPTP-CLIENT======================="
     	    if [ "$?" -eq 0 ]; then
         	reachable=1
     	    else
-    		$LOG "Server unreachable wait 30 sec."
-        	sleep 30
+    		$LOG "Server unreachable wait 15 sec."
+        	sleep 15
 		get_vpn_ip
         	reachable=0
     	    fi
