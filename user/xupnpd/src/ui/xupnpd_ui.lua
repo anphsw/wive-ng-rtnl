@@ -531,10 +531,8 @@ function ui_api_call(args)
 end
 
 function ui_restart()
-    if core.restart(cfg.pid_file,"/bin/xupnpd") then http.send('<h3>Attempt to restart...</h3>') else http.send('<h3>Unable to restart.</h3>') end
-
+    http.send('<h3>Use save and reboot from left menu for save parametrs to nvram!</h3>')
     http.send('<br/><form method=get action="/ui"><input class="btn btn-primary" type=submit value=OK></form>')
-
     http.send('<script>setTimeout("document.forms[0].submit()",3000)</script>')
 end
 
