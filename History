@@ -349,7 +349,7 @@
 7) openssl up to 0.9.8zc version.<br>
 8) toolchain: move to 4.8.4 gcc svn version (after 4.8.3 release 4.8 tree apply only bugfixes).<br>
 9) apps: port wive-dhcpv6 (need write client logic, server logic work good).<br>
-10) miniupnpd: version up to 1.9.<br>
+10) miniupnpd: up to version 1.9.20141108.<br>
 11) busybox: apply lzop and zcat upstream patchs.<br>
 12) busybox: udhcpc: allow unicast RENEW for lease time from 60s, allow first unicast RENEW on force renew performed (fix short leases under ISP with DHCP snooping).<br>
 13) pppd: cap MTU to the user configured value.<br>
