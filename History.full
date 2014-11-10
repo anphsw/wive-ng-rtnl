@@ -2079,7 +2079,7 @@
 33) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
 34) goahead: remove double restart ripd/zebra.<br>
 35) goahead: remove dead mesh support.<br>
-36) goahead: fix print error messages at update fw/restore settings/load rwfs.<br>.
+36) goahead: fix print error messages at update fw/restore settings/load rwfs.<br>
 37) kernel: hw_nat: update to 2.51 version.<br>
 38) kernel: spi: add more flash support.<br>
 39) kernel: ipv6: fix tcp_v6_send_response(): it didn't set skb transport header.<br>
