@@ -377,19 +377,12 @@ int main (int argc, char *argv[])
 	{
 		system("echo \"1234567890\" > /dev/mtdblock5");
 		html_success(18*(IMAGE1_SIZE/0x100000) + 55);
-	}
-	else
+	} else
 		html_success(18*(IMAGE1_SIZE/0x100000) + 45);
-
-	// Output success message
-	fflush(stdout);
-	fclose(stdout);
 
 	// flash write
 	if (mtd_write_firmware(filename, (int)file_begin, (file_end - file_begin)) == -1)
-	{
 		return -1;
-	}
 
 	sleep (3);
 	reboot(RB_AUTOBOOT);

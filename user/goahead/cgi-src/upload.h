@@ -184,6 +184,9 @@ void html_success(int timeout)
 		"</body></html>\n\n",
 		timeout
 	);
+	// Output success message
+	fflush(stdout);
+	fclose(stdout);
 }
 
 void html_error(const char *s)
@@ -198,6 +201,9 @@ void html_error(const char *s)
 		"</body></html>\n\n",
 		s, s
 	);
+	// Output error message
+	fflush(stdout);
+	fclose(stdout);
 }
 
 //------------------------------------------------------------------------------

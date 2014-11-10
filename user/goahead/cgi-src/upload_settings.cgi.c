@@ -129,10 +129,7 @@ int main (int argc, char *argv[])
 	file_end -= 2;		// back 2 chars.(\r\n);
 
 	// settings update base timeout
-	html_success(50);
-
-	fflush(stdout);
-	fclose(stdout);
+	html_success(60);
 
 	import(filename, file_begin, file_end - file_begin);
 
