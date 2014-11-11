@@ -6,6 +6,8 @@
  *	$Id: internet.h,v 1.8 2008-03-17 07:47:16 yy Exp $
  */
 
+#define ETH_SIG	"eth"
+#define BR_SIG	"br"
 #if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_RT_3052_ESW)				/* internal ralink esw */
 #define WAN_DEF "eth2.2"
 #elif !defined(CONFIG_RAETH_GMAC2) && defined(CONFIG_MAC_TO_MAC_MODE)			/* vetisse or rtl8367m one phy */

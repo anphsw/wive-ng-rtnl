@@ -333,6 +333,42 @@ static int getIfNetmask(char *ifname, char *if_net)
 }
 
 /*
+ * description: return LAN interface name
+ */
+char* getLanIfName(void)
+{
+	char *mode = nvram_get(RT2860_NVRAM, "OperationMode");
+	static char *if_name = "br0";
+	FILE *fp;
+	char lan_if[16]; /* max 16 char in lan if name */
+
+	/* try read fron file exported from init.d */
+	fp = fopen("/tmp/lan_if_name", "r");
+	if (fp) {
+	    /* get first lan_if in file */
+	    while (fgets(lan_if, sizeof(lan_if), fp) != NULL) {
+		if ((strstr(lan_if, ETH_SIG) != NULL) || (strstr(lan_if, BR_SIG) != NULL)) {
+		    fclose(fp);
+		    return strip_space(lan_if);
+		}
+	    }
+	    fclose(fp);
+	}
+
+	/* set default */
+	if (NULL == mode)
+		return if_name;
+
+	/* in ethernet converter mode lan_if = eth2 */
+	if (!strncmp(mode, "2", 2))
+	    if_name = "eth2";
+	else
+	    if_name = "br0";
+
+	return if_name;
+}
+
+/*
  * description: return WAN interface name depend by opmode
  */
 char* getWanIfName(void)
@@ -340,7 +376,23 @@ char* getWanIfName(void)
 	char *mode = nvram_get(RT2860_NVRAM, "OperationMode");
 	char *apc_cli_mode = nvram_get(RT2860_NVRAM, "ApCliBridgeOnly");
 	static char *if_name = WAN_DEF;
+	FILE *fp;
+	char wan_if[16]; /* max 16 char in wan if name */
 
+	/* try read fron file exported from init.d */
+	fp = fopen("/tmp/wan_if_name", "r");
+	if (fp) {
+	    /* get first wan_if in file */
+	    while (fgets(wan_if, sizeof(wan_if), fp) != NULL) {
+		if ((strstr(wan_if, ETH_SIG) != NULL) || (strstr(wan_if, BR_SIG) != NULL)) {
+		    fclose(fp);
+		    return strip_space(wan_if);
+		}
+	    }
+	    fclose(fp);
+	}
+
+	/* set default */
 	if (mode == NULL)
 		return WAN_DEF;
 
@@ -366,22 +418,22 @@ char* getWanIfName(void)
  */
 static char* getPPPIfName(void)
 {
-    FILE *fp;
-    char ppp_if[16]; /* max 16 char in vpn if name */
+        FILE *fp;
+	char ppp_if[16]; /* max 16 char in vpn if name */
 
-    fp = fopen("/tmp/vpn_if_name", "r");
-    if (fp) {
-	/* get first ppp_if in file */
-	while (fgets(ppp_if, sizeof(ppp_if), fp) != NULL) {
-	    if (strstr(ppp_if, VPN_SIG) != NULL) {
-		fclose(fp);
-		return strip_space(ppp_if);
+	fp = fopen("/tmp/vpn_if_name", "r");
+	if (fp) {
+	    /* get first ppp_if in file */
+	    while (fgets(ppp_if, sizeof(ppp_if), fp) != NULL) {
+		if (strstr(ppp_if, VPN_SIG) != NULL) {
+		    fclose(fp);
+		    return strip_space(ppp_if);
+		}
 	    }
+	    fclose(fp);
 	}
-	fclose(fp);
-    }
 
-    return VPN_DEF;
+	return VPN_DEF;
 }
 
 /*
@@ -389,31 +441,10 @@ static char* getPPPIfName(void)
  */
 char* getWanIfNamePPP(void)
 {
-    if (vpn_mode_enabled() == 1)
-        return getPPPIfName();
-    else
-	return getWanIfName();
-}
-
-
-/*
- * description: return LAN interface name
- */
-char* getLanIfName(void)
-{
-	char *mode = nvram_get(RT2860_NVRAM, "OperationMode");
-	static char *if_name = "br0";
-
-	if (NULL == mode)
-		return if_name;
-
-	/* in ethernet converter mode lan_if = eth2 */
-	if (!strncmp(mode, "2", 2))
-	    if_name = "eth2";
+	if (vpn_mode_enabled() == 1)
+    	    return getPPPIfName();
 	else
-	    if_name = "br0";
-
-	return if_name;
+	    return getWanIfName();
 }
 
 /*
@@ -421,41 +452,14 @@ char* getLanIfName(void)
  */
 char *getLanWanNamebyIf(char *ifname)
 {
-	char *mode = nvram_get(RT2860_NVRAM, "OperationMode");
-
-	if (NULL == mode)
-		return "Unknown";
-
-	/* VPN in all mode return VPN if vpn enabled */
+	if(!strcmp(ifname, getLanIfName()))
+		return "LAN";
+	if(!strcmp(ifname, getWanIfName()))
+		return "WAN";
 	if (vpn_mode_enabled() == 1 && strstr(ifname, getPPPIfName()) != NULL)
 		return "VPN";
 
-	if (!strcmp(mode, "0")) { /* bridge mode */
-		if(!strcmp(ifname, "br0"))
-			return "LAN";
-		return ifname;
-	}
-
-	if (!strcmp(mode, "1") || !strcmp(mode, "4")) {	/* gateway mode or chillispot */
-		if(!strcmp(ifname, "br0"))
-			return "LAN";
-		if(!strcmp(ifname, getWanIfName()))
-			return "WAN";
-		return ifname;
-	}else if (!strncmp(mode, "2", 2)) {	/* ethernet convertor */
-		if(!strcmp("eth2", ifname))
-			return "LAN";
-		if(!strcmp("ra0", ifname))
-			return "WAN";
-		return ifname;
-	}else if (!strncmp(mode, "3", 2)) {	/* apcli mode */
-		if(!strcmp("br0", ifname))
-			return "LAN";
-		if(!strcmp("apcli0", ifname))
-			return "WAN";
-		return ifname;
-	}
-	return ifname;
+	return "LAN";
 }
 
 const parameter_fetch_t vpn_args[] =
