@@ -44,7 +44,6 @@
 void formDefineInternet(void);
 void initInternet(void);
 char* getLanIfName(void);
-char* getLanWanNamebyIf(char *ifname);
 char* getWanIfName(void);
 int getIfIp(char *ifname, char *if_addr);
 int getIfMac(char *ifname, char *if_hw);

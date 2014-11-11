@@ -173,19 +173,6 @@ void formDefineInternet(void) {
 }
 
 /*
- * description: return 1 if vpn enables or 0 if disabled
- */
-int vpn_mode_enabled(void)
-{
-    char *cm = nvram_get(RT2860_NVRAM, "vpnEnabled");
-
-    if (!strncmp(cm, "on", 3))
-        return 1;
-    else
-	return 0;
-}
-
-/*
  * arguments: ifname  - interface name
  * description: test the existence of interface through /proc/net/dev
  * return: -1 = fopen error, 1 = not found, 0 = found
@@ -437,9 +424,22 @@ static char* getPPPIfName(void)
 }
 
 /*
+ * description: return 1 if vpn enables or 0 if disabled
+ */
+static int vpn_mode_enabled(void)
+{
+	char *cm = nvram_get(RT2860_NVRAM, "vpnEnabled");
+
+        if (!strncmp(cm, "on", 3))
+	    return 1;
+        else
+	    return 0;
+}
+
+/*
  * description: get the value "WAN" or "LAN" the interface is belong to.
  */
-char *getLanWanNamebyIf(char *ifname)
+static char *getLanWanNamebyIf(char *ifname)
 {
 	if(!strcmp(ifname, getLanIfName()))
 		return "LAN";
