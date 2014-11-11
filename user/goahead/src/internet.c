@@ -1195,25 +1195,23 @@ static int getDhcpv6Built(int eid, webs_t wp, int argc, char_t **argv)
 }
 
 /*
- * description: return uplink interface name VPN or PhysWAN
- */
-static char* getWanIfNamePPP(void)
-{
-	if (vpn_mode_enabled() == 1)
-    	    return getPPPIfName();
-	else
-	    return getWanIfName();
-}
-
-/*
  * description: write real_wan ip address accordingly
  */
 static int getIntIp(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char if_addr[16];
 
-	if (getIfIp(getWanIfNamePPP(), if_addr) == -1) {
+	if (vpn_mode_enabled() == 1) {
+	    /* if vpn enabled get ip from vpnif else from wan if */
+	    if (getIfIp(getPPPIfName(), if_addr) == -1) {
+		if (getIfIp(getWanIfName(), if_addr) == -1)
+		    return websWrite(wp, T(""));
+	    }
+	} else {
+	    /* if vpn disabled always get ip from wanif */
+	    if (getIfIp(getWanIfName(), if_addr) == -1) {
 		return websWrite(wp, T(""));
+	    }
 	}
 	return websWrite(wp, T("%s"), if_addr);
 }
