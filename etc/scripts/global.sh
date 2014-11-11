@@ -95,7 +95,7 @@ getLanIfName() {
 	lan_if="br0"
 	lan2_if="br0:9"
     fi
-    echo "$lan_if" > /tmp/lan_if_name
+    echo -n "$lan_if" > /tmp/lan_if_name
 }
 
 # VPN interface name -> $vpn_if
@@ -167,7 +167,7 @@ getWanIfName() {
     if [ "$vpn_if" = "" ]; then
 	vpn_if="$vpn_def_if"
     fi
-    echo "$wan_if" > /tmp/wan_if_name
+    echo -n "$wan_if" > /tmp/wan_if_name
 }
 
 getTunIfName() {
