@@ -95,6 +95,7 @@ getLanIfName() {
 	lan_if="br0"
 	lan2_if="br0:9"
     fi
+    # export for goahead
     echo -n "$lan_if" > /tmp/lan_if_name
 }
 
@@ -167,6 +168,7 @@ getWanIfName() {
     if [ "$vpn_if" = "" ]; then
 	vpn_if="$vpn_def_if"
     fi
+    # export for goahead
     echo -n "$wan_if" > /tmp/wan_if_name
 }
 

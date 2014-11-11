@@ -13,7 +13,7 @@ LOG="logger -t pppd"
 
 eval `nvram_buf_get 2860 vpnNAT vpnDGW vpnPeerDNS use_snat PortForwardEnable upnpEnabled parproutedEnabled chilli_net`
 
-    #export vpn_if_name
+    #export for goahead and vpnhelper
     echo -n "$PPP_IFACE" > /tmp/vpn_if_name
 
     #if wan ip not get
