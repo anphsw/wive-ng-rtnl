@@ -370,7 +370,7 @@ int getIfStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 	int skip_line = 2;
 	char *interface, *type, *field, *semiColon = NULL;
 	char buf[1024], result[32];
-	
+
 	FILE *fp = fopen(PROC_IF_STATISTIC, "r");
 	if(!fp)
 	{
@@ -443,7 +443,7 @@ int getWANRxByteASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char_t buf[32];
 	long long data = getIfStatistic(getWanIfName(), RXBYTE);
-	scale(buf, data);	
+	scale(buf, data);
 	websWrite(wp, T("%s"), buf);
 	return 0;
 }
@@ -452,7 +452,7 @@ int getWANRxPacketASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char_t buf[32];
 	long long data = getIfStatistic(getWanIfName(), RXPACKET);
-	snprintf(buf, 32, "%lld", data);	
+	snprintf(buf, 32, "%lld", data);
 	websWrite(wp, T("%s"), buf);
 	return 0;
 }

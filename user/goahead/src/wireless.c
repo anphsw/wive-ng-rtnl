@@ -441,7 +441,7 @@ static int getWlanCurrentMac(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char if_hw[18] = {0};
 
-	if (-1 == getIfMac("ra0", if_hw))
+	if (getIfMac("ra0", if_hw) == -1)
 		return websWrite(wp, T(" "));
 	return websWrite(wp, T("%s"), if_hw);
 }

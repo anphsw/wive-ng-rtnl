@@ -106,7 +106,7 @@ function initTranslation()
 	_TR("statusSysInfo", "status system information");
 	_TR("statusSDKVersion", "status sdk version");
 	_TR("statusSysDateTime", "status system date time");
-    _TR("statusSysUpTime", "status system up time");
+	_TR("statusSysUpTime", "status system up time");
 	_TR("statusSysPlatform", "status system platform");
 
 	_TR("statusInternetConfig", "status internet config");

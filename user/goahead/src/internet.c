@@ -71,7 +71,6 @@ static int getLanIfNameWeb(int eid, webs_t wp, int argc, char_t **argv);
 static int getLanNetmask(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanIp(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanMac(int eid, webs_t wp, int argc, char_t **argv);
-static int getWanIfNameWeb(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanNetmask(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanGateway(int eid, webs_t wp, int argc, char_t **argv);
 static int getRoutingTable(int eid, webs_t wp, int argc, char_t **argv);
@@ -120,7 +119,6 @@ void formDefineInternet(void) {
 	websAspDefine(T("getXupnpdBuilt"), getXupnpdBuilt);
 	websAspDefine(T("getWanIp"), getWanIp);
 	websAspDefine(T("getWanMac"), getWanMac);
-	websAspDefine(T("getWanIfNameWeb"), getWanIfNameWeb);
 	websAspDefine(T("getWanNetmask"), getWanNetmask);
 	websAspDefine(T("getWanGateway"), getWanGateway);
 	websAspDefine(T("getRoutingTable"), getRoutingTable);
@@ -177,9 +175,9 @@ void formDefineInternet(void) {
  */
 int vpn_mode_enabled(void)
 {
-    char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
+    char *cm = nvram_get(RT2860_NVRAM, "vpnEnabled");
 
-    if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5))
+    if (!strncmp(cm, "on", 3))
         return 1;
     else
 	return 0;
@@ -1069,7 +1067,7 @@ static int getLanIp(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char if_addr[16];
 
-	if (-1 == getIfIp(getLanIfName(), if_addr)) {
+	if (getIfIp(getLanIfName(), if_addr) == -1) {
 		//websError(wp, 500, T("getLanIp: calling getIfIp error\n"));
 		return websWrite(wp, T(""));
 	}
@@ -1083,7 +1081,7 @@ static int getLanMac(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char if_mac[18];
 
-	if (-1 == getIfMac(getLanIfName(), if_mac)) {
+	if (getIfMac(getLanIfName(), if_mac) == -1) {
 		//websError(wp, 500, T("getLanIp: calling getIfMac error\n"));
 		return websWrite(wp, T(""));
 	}
@@ -1116,7 +1114,7 @@ static int getLanNetmask(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char if_net[16];
 
-	if (-1 == getIfNetmask(getLanIfName(), if_net)) {
+	if (getIfNetmask(getLanIfName(), if_net) == -1) {
 		//websError(wp, 500, T("getLanNetmask: calling getIfNetmask error\n"));
 		return websWrite(wp, T(""));
 	}
@@ -1212,8 +1210,7 @@ static int getWanIp(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char if_addr[16];
 
-	if (-1 == getIfIp(getWanIfNamePPP(), if_addr)) {
-		//websError(wp, 500, T("getWanIp: calling getIfIp error\n"));
+	if (getIfIp(getWanIfNamePPP(), if_addr) == -1) {
 		return websWrite(wp, T(""));
 	}
 	return websWrite(wp, T("%s"), if_addr);
@@ -1226,30 +1223,10 @@ static int getWanMac(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char if_mac[18];
 
-	if (-1 == getIfMac(getWanIfName(), if_mac)) {
-		//websError(wp, 500, T("getLanIp: calling getIfMac error\n"));
+	if (getIfMac(getWanIfName(), if_mac) == -1) {
 		return websWrite(wp, T(""));
 	}
 	return websWrite(wp, T("%s"), if_mac);
-}
-
-/*
- * arguments: type - 0 = return WAN interface name (default)
- *                   1 = write WAN interface name
- * description: return or write WAN interface name accordingly
- */
-static int getWanIfNameWeb(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int type;
-	char *name = getWanIfName();
-
-	if (ejArgs(argc, argv, T("%d"), &type) == 1) {
-		if (1 == type) {
-			return websWrite(wp, T("%s"), name);
-		}
-	}
-	ejSetResult(eid, name);
-	return 0;
 }
 
 /*
@@ -1258,16 +1235,8 @@ static int getWanIfNameWeb(int eid, webs_t wp, int argc, char_t **argv)
 static int getWanNetmask(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char if_net[16];
-	char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
 
-	if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5)) {
-		//fetch ip from vpn if
-		if (-1 == getIfNetmask(getPPPIfName(), if_net)) {
-			return websWrite(wp, T(""));
-		}
-	}
-	else if (-1 == getIfNetmask(getWanIfName(), if_net)) {
-		//websError(wp, 500, T("getWanNetmask: calling getIfNetmask error\n"));
+	if (getIfNetmask(getWanIfName(), if_net) == -1) {
 		return websWrite(wp, T(""));
 	}
 	return websWrite(wp, T("%s"), if_net);
@@ -2199,7 +2168,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		gw = websGetVar(wp, T("staticGateway"), T(""));
 
 		nvram_set(RT2860_NVRAM, "wanConnectionMode", ctype);
-		if (-1 == inet_addr(ip))
+		if (inet_addr(ip) == -1)
 		{
 			websError(wp, 200, "invalid IP Address");
 			return;
@@ -2222,7 +2191,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 			}
 		}
 
-		if (-1 == inet_addr(nm))
+		if (inet_addr(nm) == -1)
 		{
 			websError(wp, 200, "invalid Subnet Mask");
 			return;
