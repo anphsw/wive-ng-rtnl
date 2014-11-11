@@ -104,8 +104,9 @@
   <message msgid="status system platform" msgstr="System Platform" />
   <message msgid="status operate mode" msgstr="Operation Mode" />
   <message msgid="status internet config" msgstr="Internet Configurations" />
-  <message msgid="status connect type" msgstr="Connected Type" />
-  <message msgid="status wan ipaddr" msgstr="WAN IP Address" />
+  <message msgid="status connect type" msgstr="WAN connection type" />
+  <message msgid="status int ipaddr" msgstr="VPN/Internet IP Address" />
+  <message msgid="status wan ipaddr" msgstr="Physical WAN IP Address" />
   <message msgid="status subnet mask" msgstr="Subnet Mask" />
   <message msgid="status default gateway" msgstr="Default Gateway" />
   <message msgid="status primary dns" msgstr="Primary Domain Name Server" />

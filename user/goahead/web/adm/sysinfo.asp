@@ -33,7 +33,12 @@
     <td><% getCfgGeneral(1, "wanConnectionMode"); %></td>
   </tr>
   <tr>
-    <td class="head" id="statusWANIPAddr">WAN IP Address</td>
+    <td class="head" id="statusINTIPAddr">Internet/VPN IP Address</td>
+    <td><% getIntIp(); %>
+      &nbsp;</td>
+  </tr>
+  <tr>
+    <td class="head" id="statusWANIPAddr">Physical WAN IP Address</td>
     <td><% getWanIp(); %>
       &nbsp;</td>
   </tr>

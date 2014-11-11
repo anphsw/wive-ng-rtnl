@@ -605,7 +605,7 @@ static void iptablesIPPortFilterBuildScript(void)
 		default_policy = "0";
 
 	// get wan name
-	strncpy(wan_name, getWanIfNamePPP(), sizeof(wan_name)-1);
+	strncpy(wan_name, getWanIfName(), sizeof(wan_name)-1);
 
 	//Generate portforward script file
 	FILE *fd = fopen(_PATH_MACIP_FILE, "w");
@@ -792,7 +792,7 @@ static void iptablesPortForwardBuildScript(void)
 	int nat_loopback_on = checkNatLoopback(rule);
 
 	// get wan name
-	strncpy(wan_name, getWanIfNamePPP(), sizeof(wan_name)-1);
+	strncpy(wan_name, getWanIfName(), sizeof(wan_name)-1);
 
 	// Generate portforward script file
 	FILE *fd = fopen(_PATH_PFW_FILE, "w");
@@ -808,7 +808,7 @@ static void iptablesPortForwardBuildScript(void)
 
 	// Additional rules if port forwarding enabled
 	if (nat_loopback_on)
-		fprintf(fd, 
+		fprintf(fd,
 			"iptables -t nat -N %s\n"
 			"iptables -t nat -A POSTROUTING -j %s\n\n",
 			PORT_FORWARD_POST_CHAIN, PORT_FORWARD_POST_CHAIN);
@@ -825,14 +825,14 @@ static void iptablesPortForwardBuildScript(void)
 
 	// Print header for VPN
 	fputs("#!/bin/sh\n\n", fd_vpn);
-	fprintf(fd_vpn, 
+	fprintf(fd_vpn,
 		"iptables -t nat -N %s\n"
 		"iptables -t nat -A PREROUTING -j %s\n\n",
 		PORT_FORWARD_PRE_CHAIN_VPN, PORT_FORWARD_PRE_CHAIN_VPN);
 
 	// Additional rules if port forwarding enabled
 	if (nat_loopback_on)
-		fprintf(fd_vpn, 
+		fprintf(fd_vpn,
 			"iptables -t nat -N %s\n"
 			"iptables -t nat -A POSTROUTING -j %s\n\n",
 			PORT_FORWARD_POST_CHAIN_VPN, PORT_FORWARD_POST_CHAIN_VPN);

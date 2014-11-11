@@ -69,6 +69,7 @@ static int getLanIp(int eid, webs_t wp, int argc, char_t **argv);
 static int getLanMac(int eid, webs_t wp, int argc, char_t **argv);
 static int getLanIfNameWeb(int eid, webs_t wp, int argc, char_t **argv);
 static int getLanNetmask(int eid, webs_t wp, int argc, char_t **argv);
+static int getIntIp(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanIp(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanMac(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanNetmask(int eid, webs_t wp, int argc, char_t **argv);
@@ -117,6 +118,7 @@ void formDefineInternet(void) {
 	websAspDefine(T("getLltdBuilt"), getLltdBuilt);
 	websAspDefine(T("getUpnpBuilt"), getUpnpBuilt);
 	websAspDefine(T("getXupnpdBuilt"), getXupnpdBuilt);
+	websAspDefine(T("getIntIp"), getIntIp);
 	websAspDefine(T("getWanIp"), getWanIp);
 	websAspDefine(T("getWanMac"), getWanMac);
 	websAspDefine(T("getWanNetmask"), getWanNetmask);
@@ -432,17 +434,6 @@ static char* getPPPIfName(void)
 	}
 
 	return VPN_DEF;
-}
-
-/*
- * description: return uplink interface name VPN or PhysWAN
- */
-char* getWanIfNamePPP(void)
-{
-	if (vpn_mode_enabled() == 1)
-    	    return getPPPIfName();
-	else
-	    return getWanIfName();
 }
 
 /*
@@ -1204,13 +1195,37 @@ static int getDhcpv6Built(int eid, webs_t wp, int argc, char_t **argv)
 }
 
 /*
+ * description: return uplink interface name VPN or PhysWAN
+ */
+static char* getWanIfNamePPP(void)
+{
+	if (vpn_mode_enabled() == 1)
+    	    return getPPPIfName();
+	else
+	    return getWanIfName();
+}
+
+/*
+ * description: write real_wan ip address accordingly
+ */
+static int getIntIp(int eid, webs_t wp, int argc, char_t **argv)
+{
+	char if_addr[16];
+
+	if (getIfIp(getWanIfNamePPP(), if_addr) == -1) {
+		return websWrite(wp, T(""));
+	}
+	return websWrite(wp, T("%s"), if_addr);
+}
+
+/*
  * description: write WAN ip address accordingly
  */
 static int getWanIp(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char if_addr[16];
 
-	if (getIfIp(getWanIfNamePPP(), if_addr) == -1) {
+	if (getIfIp(getWanIfName(), if_addr) == -1) {
 		return websWrite(wp, T(""));
 	}
 	return websWrite(wp, T("%s"), if_addr);

@@ -111,6 +111,7 @@ function initTranslation()
 
 	_TR("statusInternetConfig", "status internet config");
 	_TR("statusConnectedType", "status connect type");
+	_TR("statusINTIPAddr", "status int ipaddr");
 	_TR("statusWANIPAddr", "status wan ipaddr");
 	_TR("statusSubnetMask", "status subnet mask");
 	_TR("statusDefaultGW", "status default gateway");
