@@ -2074,33 +2074,34 @@
 28) init.d: always tune wifi after ifacse up.<br>
 29) init.d: tune parametrs for apcli to.<br>
 30) init.d: do not use goahead.pid as boot complete flag, use /tmp/goodboot instead (more independed from goahead logic).<br>
-31) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
-32) goahead: add dhcpv6 server control in misc.<br>
-33) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
-34) goahead: remove double restart ripd/zebra.<br>
-35) goahead: remove dead mesh support.<br>
-36) goahead: fix print error messages at update fw/restore settings/load rwfs.<br>
-37) goahead: read lan/wan ifnames from /tmp/*an_if_name exported by init.d in global script.<br>
-38) goahead: fix get mode vpn.<br>
-39) goahead: add show real ip adress vpn/wan in status page.<br>
-40) kernel: hw_nat: update to 2.51 version.<br>
-41) kernel: spi: add more flash support.<br>
-42) kernel: ipv6: fix tcp_v6_send_response(): it didn't set skb transport header.<br>
-43) kernel: ipv6: go not warn for informational ICMP messages, regardless of type.<br>
-44) kernel: ipv6: reimplement add LL routes.<br>
-45) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
-46) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
-47) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
-48) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
-49) kernel: ralink wifi: update eeprom in drivers by fabric.<br>
-50) kernel: ralink wifi: add lost mtk patches.<br>
-51) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
-52) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
-53) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
-54) kernel: jiffies: fix timeval conversion to jiffies.<br>
-55) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
-56) kernel: small tune refcnt hack.<br>
-57) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
+31) init.d: in ap/apcli bridge mode enable Multicast2Unicast independed Igmpproxy enabled.<br>
+32) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
+33) goahead: add dhcpv6 server control in misc.<br>
+34) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
+35) goahead: remove double restart ripd/zebra.<br>
+36) goahead: remove dead mesh support.<br>
+37) goahead: fix print error messages at update fw/restore settings/load rwfs.<br>
+38) goahead: read lan/wan ifnames from /tmp/*an_if_name exported by init.d in global script.<br>
+39) goahead: fix get mode vpn.<br>
+40) goahead: add show real ip adress vpn/wan in status page.<br>
+41) kernel: hw_nat: update to 2.51 version.<br>
+42) kernel: spi: add more flash support.<br>
+43) kernel: ipv6: fix tcp_v6_send_response(): it didn't set skb transport header.<br>
+44) kernel: ipv6: go not warn for informational ICMP messages, regardless of type.<br>
+45) kernel: ipv6: reimplement add LL routes.<br>
+46) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
+47) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
+48) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
+49) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
+50) kernel: ralink wifi: update eeprom in drivers by fabric.<br>
+51) kernel: ralink wifi: add lost mtk patches.<br>
+52) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+53) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
+54) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
+55) kernel: jiffies: fix timeval conversion to jiffies.<br>
+56) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
+57) kernel: small tune refcnt hack.<br>
+58) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
 <br>
 <br>
 <br>
