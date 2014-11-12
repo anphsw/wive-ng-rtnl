@@ -25,7 +25,8 @@ gen_hosts() {
     echo "$HostName" > /etc/hostname
     hostname -F /etc/hostname
 
-    echo "127.0.0.1	localhost $HostName.lo"		> /etc/hosts
+    echo "127.0.0.1	localhost"			> /etc/hosts
+    echo "127.0.0.1	localhost $HostName.lo"		>> /etc/hosts
     echo "$lan_ipaddr	$HostName.lo"			>> /etc/hosts
     echo "$lan_ipaddr	gateway.lo"			>> /etc/hosts
 
