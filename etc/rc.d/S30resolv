@@ -47,7 +47,7 @@ fi
 }
 
 get_param() {
-    eval `nvram_buf_get 2860 wan_static_dns wan_primary_dns wan_secondary_dns dnsPEnabled IPv6OpMode`
+    eval `nvram_buf_get 2860 wan_static_dns wan_primary_dns wan_secondary_dns dnsPEnabled IPv6OpMode HostName`
     fname="/etc/resolv.conf"
 
     #if no file create
