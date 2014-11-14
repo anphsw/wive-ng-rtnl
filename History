@@ -398,6 +398,7 @@
 56) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
 57) kernel: small tune refcnt hack.<br>
 58) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
+59) kernel: ipv4: fix nexthop attlen check in fib_nh_match.<br>
 <br>
 <br>
 <br>
