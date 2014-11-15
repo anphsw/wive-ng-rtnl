@@ -400,8 +400,9 @@
 58) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
 59) kernel: small tune refcnt hack.<br>
 60) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
-61) kernel: ipv4: fix nexthop attlen check in fib_nh_match.<br>
-62) kernel: hw_nat: spin_(un)lock must be Bottom Halve (prevent deadlock).<br>
+61) kernel: wifi drivers: decrease life check packets max count and decrease life time for more speed cleanup died clients.<br>
+62) kernel: ipv4: fix nexthop attlen check in fib_nh_match.<br>
+63) kernel: hw_nat: spin_(un)lock must be Bottom Halve (prevent deadlock).<br>
 <br>
 <br>
 <br>
