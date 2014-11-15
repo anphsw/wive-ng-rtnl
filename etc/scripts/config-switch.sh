@@ -281,7 +281,7 @@ if [ "$CONFIG_RT_3052_ESW" != "" ] && [ "$SWITCH_MODE" != "" ]; then
     # Configure touch dhcp from driver in kernel.
     ##########################################################################
     if [ "$CONFIG_RAETH_DHCP_TOUCH" != "" ]; then
-        if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ] || [ "$ApCliBridgeOnly" = "1" ]; then
+	if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ] || [ "$OperationMode" = "3" ]; then
 	    # disable dhcp renew from driver
 	    sysctl -wq net.ipv4.send_sigusr_dhcpc=9
 	else
