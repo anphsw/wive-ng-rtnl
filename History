@@ -399,6 +399,7 @@
 57) kernel: small tune refcnt hack.<br>
 58) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
 59) kernel: ipv4: fix nexthop attlen check in fib_nh_match.<br>
+60) kernel: hw_nat: spin_(un)lock must be Bottom Halve (prevent deadlock).<br>
 <br>
 <br>
 <br>
