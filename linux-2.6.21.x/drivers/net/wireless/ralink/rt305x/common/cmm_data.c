@@ -1343,6 +1343,7 @@ VOID RTMPDeQueuePacket(
 						pEntry = RemoveHeadQueue(pQueue);
 						RTMPFreeNdisPacket(pAd, pPacket);
 						DEQUEUE_UNLOCK(&pAd->irq_lock, bIntContext, IrqFlags);
+						Count++;
 						continue;
 					}
 					else
@@ -1372,6 +1373,7 @@ VOID RTMPDeQueuePacket(
 						pEntry = RemoveHeadQueue(pQueue);
 						RTMPFreeNdisPacket(pAd, pPacket);
 						DEQUEUE_UNLOCK(&pAd->irq_lock, bIntContext, IrqFlags);
+						Count++;
 						continue;
 					}
 					else

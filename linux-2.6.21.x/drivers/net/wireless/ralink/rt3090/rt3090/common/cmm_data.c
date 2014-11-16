@@ -1253,6 +1253,7 @@ VOID RTMPDeQueuePacket(
 						pEntry = RemoveHeadQueue(pQueue);
 						RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
 						DEQUEUE_UNLOCK(&pAd->irq_lock, bIntContext, IrqFlags);
+						Count++;
 						continue;
 					}
 					else
@@ -1286,8 +1287,9 @@ VOID RTMPDeQueuePacket(
 					if(RTMP_TIME_BEFORE(Now32, pMacEntry->TimeStamp_toTxRing + ENTRY_RETRY_INTERVAL))
 					{
 						pEntry = RemoveHeadQueue(pQueue);
-					RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
+						RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
 						DEQUEUE_UNLOCK(&pAd->irq_lock, bIntContext, IrqFlags);
+						Count++;
 						continue;
 					}
 					else
