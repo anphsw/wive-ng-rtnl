@@ -2100,17 +2100,18 @@
 54) kernel: ralink wifi: add lost mtk patches.<br>
 55) kernel: ralink wifi: implement txring fast free hack for all drivers.<br>
 56) kernel: ralink wifi: decrease life check packets max count, decrease life time and check entry interval for more speed cleanup died clients.<br>
-57) kernel: ralink wifi: add lost increment retry count in jam traffic detect path.<br>
-58) kernel: ralink wifi: v2.5: decrease BASize for 2T2R Atheros clients (improve throughput and fix packets lost on some clients).<br>
-59) kernel: ralink wifi: v2.5: set MpduDensity = 7 for Atheros clients (improve throughput and fix packets lost on some clients).<br>
-60) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
-61) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
-62) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
-63) kernel: jiffies: fix timeval conversion to jiffies.<br>
-64) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
-65) kernel: small tune refcnt hack.<br>
-66) kernel: ipv4: fix nexthop attlen check in fib_nh_match.<br>
-67) kernel: hw_nat: spin_(un)lock must be Bottom Halve (prevent deadlock).<br>
+57) kernel: ralink wifi: decrease tx ring size (set 64 instead of 128).<br>
+58) kernel: ralink wifi: add lost increment retry count in jam traffic detect path.<br>
+59) kernel: ralink wifi: v2.5: decrease BASize for 2T2R Atheros clients (improve throughput and fix packets lost on some clients).<br>
+60) kernel: ralink wifi: v2.5: set MpduDensity = 7 for Atheros clients (improve throughput and fix packets lost on some clients).<br>
+61) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+62) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
+63) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
+64) kernel: jiffies: fix timeval conversion to jiffies.<br>
+65) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
+66) kernel: small tune refcnt hack.<br>
+67) kernel: ipv4: fix nexthop attlen check in fib_nh_match.<br>
+68) kernel: hw_nat: spin_(un)lock must be Bottom Halve (prevent deadlock).<br>
 <br>
 <br>
 <br>
