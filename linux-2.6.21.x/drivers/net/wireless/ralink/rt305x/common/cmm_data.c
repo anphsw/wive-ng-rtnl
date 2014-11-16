@@ -2608,8 +2608,8 @@ MAC_TABLE_ENTRY *MacTableInsertEntry(
 			pEntry->ContinueTxFailCnt = 0;
 #ifdef WDS_SUPPORT
 			pEntry->LockEntryTx = FALSE;
-			pEntry->TimeStamp_toTxRing = 0;
 #endif // WDS_SUPPORT //
+			pEntry->TimeStamp_toTxRing = 0;
 			InitializeQueueHeader(&pEntry->PsQueue);
 
 
