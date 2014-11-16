@@ -2099,7 +2099,7 @@
 53) kernel: ralink wifi: update eeprom in drivers by fabric.<br>
 54) kernel: ralink wifi: add lost mtk patches.<br>
 55) kernel: ralink wifi: implement txring fast free hack for all drivers.<br>
-56) kernel: ralink wifi: decrease life check packets max count and decrease life time for more speed cleanup died clients.<br>
+56) kernel: ralink wifi: decrease life check packets max count, decrease life time and check entry interval for more speed cleanup died clients.<br>
 57) kernel: ralink wifi: add lock increment retry count in jam traffic detect path.<br>
 58) kernel: ralink wifi: v2.5: decrease BASize for 2T2R Atheros clients (improve throughput and fix packets lost on some clients).<br>
 59) kernel: ralink wifi: v2.5: set MpduDensity = 7 for Atheros clients (improve throughput and fix packets lost on some clients).<br>
