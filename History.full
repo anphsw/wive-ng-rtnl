@@ -2076,37 +2076,38 @@
 30) init.d: do not use goahead.pid as boot complete flag, use /tmp/goodboot instead (more independed from goahead logic).<br>
 31) init.d: in ap/apcli bridge mode enable Multicast2Unicast independed Igmpproxy enabled.<br>
 32) init.d: optimize and small fix switch and offload configure.<br>
-33) goahead: fix swith from/to apcli with apcli bridge only modes.<br>
-34) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
-35) goahead: add dhcpv6 server control in misc.<br>
-36) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
-37) goahead: remove double restart ripd/zebra.<br>
-38) goahead: remove dead mesh support.<br>
-39) goahead: fix print error messages at update fw/restore settings/load rwfs.<br>
-40) goahead: read lan/wan ifnames from /tmp/*an_if_name exported by init.d in global script.<br>
-41) goahead: fix get mode vpn.<br>
-42) goahead: add show real ip adress vpn/wan in status page.<br>
-43) kernel: hw_nat: update to 2.51 version.<br>
-44) kernel: spi: add more flash support.<br>
-45) kernel: ipv6: fix tcp_v6_send_response(): it didn't set skb transport header.<br>
-46) kernel: ipv6: go not warn for informational ICMP messages, regardless of type.<br>
-47) kernel: ipv6: reimplement add LL routes.<br>
-48) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
-49) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
-50) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
-51) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
-52) kernel: ralink wifi: update eeprom in drivers by fabric.<br>
-53) kernel: ralink wifi: add lost mtk patches.<br>
-54) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
-55) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
-56) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
-57) kernel: jiffies: fix timeval conversion to jiffies.<br>
-58) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
-59) kernel: small tune refcnt hack.<br>
-60) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
-61) kernel: wifi drivers: decrease life check packets max count and decrease life time for more speed cleanup died clients.<br>
-62) kernel: ipv4: fix nexthop attlen check in fib_nh_match.<br>
-63) kernel: hw_nat: spin_(un)lock must be Bottom Halve (prevent deadlock).<br>
+33) init.d: add shortname for LAN (need to lldpd daemon for hostname resolutions).<br>
+34) goahead: fix swith from/to apcli with apcli bridge only modes.<br>
+35) goahead: add base webUI for ipv6 configure (need write logic for more modes support).<br>
+36) goahead: add dhcpv6 server control in misc.<br>
+37) goahead: fix add portforward rules (syntax compat with new iptables fix, actual for MT tree).<br>
+38) goahead: remove double restart ripd/zebra.<br>
+39) goahead: remove dead mesh support.<br>
+40) goahead: fix print error messages at update fw/restore settings/load rwfs.<br>
+41) goahead: read lan/wan ifnames from /tmp/*an_if_name exported by init.d in global script.<br>
+42) goahead: fix get mode vpn.<br>
+43) goahead: add show real ip adress vpn/wan in status page.<br>
+44) kernel: hw_nat: update to 2.51 version.<br>
+45) kernel: spi: add more flash support.<br>
+46) kernel: ipv6: fix tcp_v6_send_response(): it didn't set skb transport header.<br>
+47) kernel: ipv6: go not warn for informational ICMP messages, regardless of type.<br>
+48) kernel: ipv6: reimplement add LL routes.<br>
+49) kernel: ralink_spi: de-assert CS before change SPIENMODE to HW control.<br>
+50) kernel: ralink_wifi: allways init auto fallback for all chips.<br>
+51) kernel: ralink wifi: prevent skb double free in igmp_snoop processiong.<br>
+52) kernel: ralink wifi: rx/tx optimization (remove stupid wrappers in time critical code).<br>
+53) kernel: ralink wifi: update eeprom in drivers by fabric.<br>
+54) kernel: ralink wifi: add lost mtk patches.<br>
+55) kernel: l2tp: fix race while getting PMTU on PPP pseudo-wire.<br>
+56) kernel: hw_nat: show destination port on PpeHitBindForceToCpuHandler failed.<br>
+57) kernel: net: optimise inet_proto_csum_replace4() and inet_proto_csum_replace4.<br>
+58) kernel: jiffies: fix timeval conversion to jiffies.<br>
+59) kernel: mips: O32/32-bit: Fix bug which can cause incorrect system call restarts.<br>
+60) kernel: small tune refcnt hack.<br>
+61) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
+62) kernel: wifi drivers: decrease life check packets max count and decrease life time for more speed cleanup died clients.<br>
+63) kernel: ipv4: fix nexthop attlen check in fib_nh_match.<br>
+64) kernel: hw_nat: spin_(un)lock must be Bottom Halve (prevent deadlock).<br>
 <br>
 <br>
 <br>
