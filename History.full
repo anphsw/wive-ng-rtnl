@@ -2106,8 +2106,9 @@
 60) kernel: small tune refcnt hack.<br>
 61) kernel: wifi drivers: implement txring fast free hack for all drivers.<br>
 62) kernel: wifi drivers: decrease life check packets max count and decrease life time for more speed cleanup died clients.<br>
-63) kernel: ipv4: fix nexthop attlen check in fib_nh_match.<br>
-64) kernel: hw_nat: spin_(un)lock must be Bottom Halve (prevent deadlock).<br>
+63) kernel: wifi drivers 2.5: decrease BASize for 2T2R Atheros client (improve throughput and fix packets lost).<br>
+64) kernel: ipv4: fix nexthop attlen check in fib_nh_match.<br>
+65) kernel: hw_nat: spin_(un)lock must be Bottom Halve (prevent deadlock).<br>
 <br>
 <br>
 <br>

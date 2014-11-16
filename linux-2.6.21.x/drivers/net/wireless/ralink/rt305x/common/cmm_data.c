@@ -1834,10 +1834,22 @@ VOID RTMPWriteTxWI_Data(
 
 	if((pTxBlk->TxFrameType == TX_AMPDU_FRAME) && (pMacEntry))
 	{
-		UCHAR		RABAOriIdx = 0;	//The RA's BA Originator table index.
-					
-		RABAOriIdx = pTxBlk->pMacEntry->BAOriWcidArray[pTxBlk->UserPriority];
-		BASize = pAd->BATable.BAOriEntry[RABAOriIdx].BAWinSize;
+		/*
+ 		 * Under HT20, 2x2 chipset, OPEN, and with some atero chipsets
+ 		 * reduce BASize to 7 to add one bulk A-MPDU during one TXOP
+ 		 * to improve throughput
+ 		 */
+		if ((pAd->CommonCfg.BBPCurrentBW == BW_20) && (pAd->Antenna.field.TxPath == 2)
+			&& (pMacEntry->bIAmBadAtheros) && (pMacEntry->WepStatus == Ndis802_11EncryptionDisabled))
+		{
+			BASize = 7;
+		}
+		else 
+		{
+			UCHAR RABAOriIdx = 0; /*The RA's BA Originator table index.*/
+			RABAOriIdx = pTxBlk->pMacEntry->BAOriWcidArray[pTxBlk->UserPriority];
+			BASize = pAd->BATable.BAOriEntry[RABAOriIdx].BAWinSize;
+		}
 	}
 
 #ifdef RTMP_RBUS_SUPPORT
