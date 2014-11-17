@@ -17,9 +17,10 @@
 #define FASTNAT_ESTABLISHED(ctinfo)	(ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)
 
 /*
- * cb fastforward flag  hwnat use 10+6 offset - fastroute 10+6+2
+ * cb fastforward flag
+ * offcet do not be replaced in any code (as hw_nat, strongly check this, now find max cb offset in wifi drivers = 41)
  */
-#define NF_FAST_ROUTE		17
+#define NF_FAST_ROUTE		42
 
 /*
  * conntrack fastforward flags

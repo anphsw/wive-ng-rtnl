@@ -408,6 +408,7 @@
 66) kernel: small tune refcnt hack.<br>
 67) kernel: ipv4: fix nexthop attlen check in fib_nh_match.<br>
 68) kernel: hw_nat: spin_(un)lock must be Bottom Halve (prevent deadlock).<br>
+69) kernel: fastroute: increase CB offcet (found used offset 41 in wifi drivers).<br>
 <br>
 <br>
 <br>
