@@ -3176,7 +3176,6 @@ VOID RTMPIoctlGetMacTableStaInfo(
 	IN RTMP_IOCTL_INPUT_STRUCT *wrq)
 {
 	INT i;
-/*	RT_802_11_MAC_TABLE MacTab;*/
 	RT_802_11_MAC_TABLE *pMacTab = NULL;
 	PRT_802_11_MAC_ENTRY pDst;
 	MAC_TABLE_ENTRY *pEntry;
@@ -3255,7 +3254,6 @@ VOID RTMPIoctlGetMacTable(
 	IN RTMP_IOCTL_INPUT_STRUCT *wrq)
 {
 	INT i;
-/*	RT_802_11_MAC_TABLE MacTab;*/
 	RT_802_11_MAC_TABLE *pMacTab = NULL;
 	RT_802_11_MAC_ENTRY *pDst;
 	MAC_TABLE_ENTRY *pEntry;
@@ -3270,7 +3268,6 @@ VOID RTMPIoctlGetMacTable(
 	}
 
 	NdisZeroMemory(pMacTab, sizeof(RT_802_11_MAC_TABLE));
-	pMacTab->Num = 0;
 	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
 	{
 		pEntry = &(pAd->MacTab.Content[i]);
@@ -3324,8 +3321,6 @@ VOID RTMPIoctlGetMacTable(
 		DBGPRINT(RT_DEBUG_TRACE, ("%s: copy_to_user() fail\n", __FUNCTION__));
 	}
 
-
-/*	msg = kmalloc(sizeof(CHAR)*(MAX_LEN_OF_MAC_TABLE*MAC_LINE_LEN), MEM_ALLOC_FLAG);*/
 	os_alloc_mem(NULL, (UCHAR **)&msg, sizeof(CHAR)*(MAX_LEN_OF_MAC_TABLE*MAC_LINE_LEN));
 	if (msg == NULL)
 	{
@@ -3363,7 +3358,6 @@ VOID RTMPIoctlGetMacTable(
 	/* for compatible with old API just do the printk to console*/
 
 	DBGPRINT(RT_DEBUG_TRACE, ("%s", msg));
-/*	kfree(msg);*/
 	os_free_mem(NULL, msg);
 
 LabelOK:

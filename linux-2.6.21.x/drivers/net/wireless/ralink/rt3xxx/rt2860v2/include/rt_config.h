@@ -34,6 +34,7 @@
 /* #define WDS_VLAN_SUPPORT */
 #include <asm/rt2880/rt_mmap.h>
 
+#include <asm/rt2880/rt_mmap.h>
 #include "rtmp_comm.h"
 /*#include "rtmp_type.h" */
 /*#include "rtmp_os.h" */

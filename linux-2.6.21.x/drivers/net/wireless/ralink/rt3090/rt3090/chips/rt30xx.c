@@ -538,7 +538,7 @@ VOID RT30xxReverseRFSleepModeSetup(
 		RFValue |= 0x01;
 		RT30xxWriteRFRegister(pAd, RF_R01, RFValue);
 
-		/* VCO_IC, RF R7 register Bit 5 to 1 (VCO bias current control, 10: mid)*/
+		/* VCO_IC, RF R7 register Bit 5 to 1 (VCO bias current control, 10: medium) */
 		RT30xxReadRFRegister(pAd, RF_R07, &RFValue);
 		RFValue |= 0x20;
 		RT30xxWriteRFRegister(pAd, RF_R07, RFValue);
