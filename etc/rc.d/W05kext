@@ -113,6 +113,8 @@ offload() {
     else
 	$LOG "NAT Offload mode not supported in this device mode (bridge/apclibridge/etc), hw_nat and all fastpaths disabled."
 	sysctl -wq net.nf_conntrack_fastnat=0
+	sysctl -wq net.nf_conntrack_fastroute=0
+	sysctl -wq net.netfilter.nf_conntrack_skip_established=0
 	if [ -d /sys/module/hw_nat ]; then
 	    rmmod hw_nat > /dev/null 2>&1
 	fi
