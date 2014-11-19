@@ -418,8 +418,11 @@ VOID RTMPFreeNdisPacket(
 	IN PRTMP_ADAPTER pAd,
 	IN PNDIS_PACKET  pPacket)
 {
-	dev_kfree_skb_any(RTPKT_TO_OSPKT(pPacket));
-	MEM_DBG_PKT_FREE_INC(pAd);
+	struct sk_buff *pSkbPkt = RTPKT_TO_OSPKT(pPacket);
+	if (pSkbPkt) {
+	    dev_kfree_skb_any(pSkbPkt);
+	    MEM_DBG_PKT_FREE_INC(pPacket);
+	}
 }
 
 
