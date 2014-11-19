@@ -243,7 +243,7 @@ VOID	APSendPackets(
 ========================================================================
 */
 #ifdef IGMP_SNOOP_SUPPORT
-#define MCAST_DROP_BUDGET 7000					/* how many pkts send this short limits if tx full for help free txq 7k pkts per 1500b ~ 10Mb */
+#define MCAST_DROP_BUDGET 512					/* how many pkts send this short limits if tx full for help free txq */
 static INT IgmpSnoopDropCountLimit, RetryLimitsNeedRestore;	/* need global */
 TX_RTY_CFG_STRUC TxRtyCfg, TxRtyCfgtmp;				/* temp store retry limits */
 #endif
@@ -574,7 +574,7 @@ NDIS_STATUS APSendPacket(
 		{
 			NDIS_STATUS PktCloneResult = IgmpPktClone(pAd, pSrcBufVA, pPacket, InIgmpGroup, pGroupEntry, QueIdx, UserPriority);
 			RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_SUCCESS);
-			if (PktCloneResult == NDIS_STATUS_RESOURCES) {
+			if (PktCloneResult == NDIS_STATUS_FAILURE) {
 			    /* printk("TxSwQueue FULL, temp decrease TxRetry limits\n"); */
 			    /* temp set S/L retry to 0 for fast drop packets */
 			    RTMP_IO_READ32(pAd, TX_RTY_CFG, &TxRtyCfg.word);
@@ -588,8 +588,6 @@ NDIS_STATUS APSendPacket(
 			    IgmpSnoopDropCountLimit=MCAST_DROP_BUDGET;
 			    /* Increase send error counter */
 			    pMacEntry->ContinueTxFailCnt++;
-			    /* do not return STATUS RESOURCE */
-			    PktCloneResult = NDIS_STATUS_FAILURE;
 			}
 			return PktCloneResult; /* need to always return to prevent skb double free. */
 		}
