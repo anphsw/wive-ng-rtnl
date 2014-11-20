@@ -2116,6 +2116,7 @@
 70) kernel: hw_nat: spin_(un)lock must be Bottom Halve (prevent deadlock).<br>
 71) kernel: fastroute: increase CB offcet (found used offset 41 in wifi drivers).<br>
 72) kernel: kernel: fix misuses of f_count() in ppp.<br>
+73) kernel: bridge: disable igmp no flooding logic (not more need after bf_fastpath remove).<br>
 <br>
 <br>
 <br>

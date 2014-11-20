@@ -34,7 +34,7 @@ config BRIDGE
 config BRIDGE_IGMP_REPORT_NO_FLOODING
 	bool "IGMP report packets to CPU only(No flooding)"
 	depends on BRIDGE
-	default y
+	default n
 	---help---
 	  prevent IGMP report packet flooding to all NICs.
 
