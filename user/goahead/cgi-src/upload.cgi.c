@@ -375,7 +375,7 @@ int main (int argc, char *argv[])
 	// start web timer and crash rwfs BEFORE flash destroy
 	if (reset_rwfs)
 	{
-		system("echo \"1234567890\" > /dev/mtdblock5");
+		system("echo \"/bin/mtd_write erase RW-FS");
 		html_success(18*(IMAGE1_SIZE/0x100000) + 55);
 	} else
 		html_success(18*(IMAGE1_SIZE/0x100000) + 45);
