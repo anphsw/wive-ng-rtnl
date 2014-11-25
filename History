@@ -414,8 +414,10 @@
 72) kernel: fastroute: increase CB offcet (found used offset 41 in wifi drivers).<br>
 73) kernel: kernel: fix misuses of f_count() in ppp.<br>
 74) kernel: bridge: disable igmp no flooding logic (not more need after bf_fastpath remove).<br>
+
 <br>
 <b>4.12.x</b><br>
+1) goahead: cleanup dead code and fix debug.<br>
 <br>
 <br>
 <br>
