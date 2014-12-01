@@ -470,7 +470,11 @@ void announce_802_3_packet(
 	IN	PNDIS_PACKET	pNetPkt,
 	IN	UCHAR		OpMode)
 {
+#ifdef CONFIG_AP_SUPPORT
+#ifdef APCLI_SUPPORT
 	PRTMP_ADAPTER pAd = (RTMP_ADAPTER *)pAdSrc;
+#endif
+#endif
 	struct sk_buff *pRxPkt;
 
 	ASSERT(pNetPkt);

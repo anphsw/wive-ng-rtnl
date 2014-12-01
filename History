@@ -419,6 +419,7 @@
 <b>4.12.x</b><br>
 1) goahead: cleanup dead code and fix debug.<br>
 2) miniupnpd: up to 1.9.20141128 version.<br>
+3) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
 <br>
 <br>
 <br>
