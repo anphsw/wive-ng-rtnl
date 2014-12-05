@@ -1,4 +1,5 @@
 #include <asm/asm-offsets.h>
+#include <asm/thread_info.h>
 #include <asm-generic/vmlinux.lds.h>
 
 #undef mips
@@ -95,7 +96,7 @@ SECTIONS
      * arch/mips/kernel/init_task.c:30: warning: alignment of ‘init_thread_union’
      * is greater than maximum object file alignment.  Using 32768
      */
-    . = ALIGN(_PAGE_SIZE);
+    . = ALIGN((_PAGE_SIZE << (1)));
     *(.data.init_task)
 
     DATA_DATA
