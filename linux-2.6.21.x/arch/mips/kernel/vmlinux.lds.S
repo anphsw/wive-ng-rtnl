@@ -1,5 +1,4 @@
 #include <asm/asm-offsets.h>
-#include <asm/thread_info.h>
 #include <asm-generic/vmlinux.lds.h>
 
 #undef mips
