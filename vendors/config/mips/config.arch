@@ -108,7 +108,7 @@ else
 endif
 ifdef CONFIG_LIB_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
-	CFLAGS += -fno-caller-saves -fno-unwind-tables -fno-asynchronous-unwind-tables
+	CFLAGS += -fno-caller-saves -fno-reorder-blocks -fno-unwind-tables -fno-asynchronous-unwind-tables
 endif
 ifdef CONFIG_LIB_SAVERAM
 	CFLAGS += -membedded-data -muninit-const-in-rodata
@@ -158,7 +158,7 @@ else
 endif
 ifdef CONFIG_USER_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
-	CFLAGS += -fno-caller-saves -fno-unwind-tables -fno-asynchronous-unwind-tables
+	CFLAGS += -fno-caller-saves -fno-reorder-blocks -fno-unwind-tables -fno-asynchronous-unwind-tables
 endif
 ifdef CONFIG_USER_SAVERAM
 	CFLAGS += -membedded-data -muninit-const-in-rodata

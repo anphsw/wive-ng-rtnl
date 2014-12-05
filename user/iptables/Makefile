@@ -45,7 +45,7 @@ CFLAGS += -Os -std=gnu99
 CFLAGS += -Wall -Wunused
 CFLAGS += -mips32r2 -march=mips32r2
 CFLAGS += -DDISABLE_INSMOD
-CFLAGS += -fno-caller-saves -fno-unwind-tables -fno-asynchronous-unwind-tables
+CFLAGS += -fno-caller-saves -fno-reorder-blocks -fno-unwind-tables -fno-asynchronous-unwind-tables
 CFLAGS += -ffunction-sections -fdata-sections
 
 LDFLAGS += -Wl,--gc-sections
