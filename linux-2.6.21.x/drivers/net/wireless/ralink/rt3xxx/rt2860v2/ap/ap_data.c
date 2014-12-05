@@ -4375,22 +4375,10 @@ VOID APHandleRxDataFrame(
 
 		if (pEntry && IS_ENTRY_APCLI(pEntry))
 		{
-			ULONG Now32;
-			PAPCLI_STRUCT pApCliEntry = NULL;
-
 			if (!(pEntry && APCLI_IF_UP_CHECK(pAd, pEntry->MatchAPCLITabIdx)))
 			{
 				goto err;
 			}
-
-			pApCliEntry = &pAd->ApCfg.ApCliTab[pEntry->apidx];
-
-			if (pApCliEntry)
-			{
-				NdisGetSystemUpTime(&Now32);
-				pApCliEntry->ApCliRcvBeaconTime = Now32;
-			}
-
 #ifdef STATS_COUNT_SUPPORT						
 			pAd->ApCfg.ApCliTab[pEntry->MatchAPCLITabIdx].ApCliCounter.ReceivedByteCount += pRxWI->MPDUtotalByteCount;
 			INC_COUNTER64(pAd->ApCfg.ApCliTab[pEntry->MatchAPCLITabIdx].ApCliCounter.ReceivedFragmentCount);

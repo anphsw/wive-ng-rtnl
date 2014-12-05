@@ -629,6 +629,8 @@ BOOLEAN ApCliLinkUp(
 			else
 				CLIENT_STATUS_CLEAR_FLAG(pMacEntry, fCLIENT_STATUS_RALINK_CHIPSET);
 
+			NdisGetSystemUpTime(&pApCliEntry->ApCliRcvBeaconTime);
+
 			/* set the apcli interface be valid. */
 			pApCliEntry->Valid = TRUE;
 			result = TRUE;
@@ -844,7 +846,7 @@ VOID ApCliIfMonitor(
 				&& (RTMP_TIME_AFTER(pAd->Mlme.Now32 , (pApCliEntry->ApCliLinkUpTime + (30 * OS_HZ)))))
 				bForceBrocken = TRUE;
  
-			if (RTMP_TIME_AFTER(pAd->Mlme.Now32 , (pApCliEntry->ApCliRcvBeaconTime + (4 * OS_HZ))))
+			if (RTMP_TIME_AFTER(pAd->Mlme.Now32 , (pApCliEntry->ApCliRcvBeaconTime + (8 * OS_HZ))))
 				bForceBrocken = TRUE;
 		}
 		else
