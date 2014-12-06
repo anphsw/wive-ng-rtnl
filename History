@@ -416,7 +416,7 @@
 74) kernel: bridge: disable igmp no flooding logic (not more need after bf_fastpath remove).<br>
 
 <br>
-<b>4.12.x</b><br>
+<b>5.0.x</b><br>
 1) build_system: use no reorder block gcc flag for build with optimize for size.<br>
 2) goahead: cleanup dead code and fix debug.<br>
 3) miniupnpd: up to 1.9.20141204 version.<br>
