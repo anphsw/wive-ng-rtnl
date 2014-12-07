@@ -223,8 +223,10 @@ asmlinkage void process_int(int irq, struct pt_regs *fp)
 		if (irq_list[irq]) {
 			irq_list[irq]->handler(irq, irq_list[irq]->dev_id, fp);
 			irq_list[irq]->count++;
+#ifdef CONFIG_RANDOMNESS_IRQ
 			if (irq_list[irq]->flags & IRQF_SAMPLE_RANDOM)
 				add_interrupt_randomness(irq);
+#endif
 		}
 	} else {
 		BUG();

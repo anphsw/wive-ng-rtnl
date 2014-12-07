@@ -131,20 +131,24 @@ irqreturn_t no_action(int cpl, void *dev_id)
 irqreturn_t FASTPATHSYS handle_IRQ_event(unsigned int irq, struct irqaction *action)
 {
 	irqreturn_t ret, retval = IRQ_NONE;
+#ifdef CONFIG_RANDOMNESS_IRQ
 	unsigned int status = 0;
-
+#endif
 	handle_dynamic_tick(action);
 
 	do {
 		ret = action->handler(irq, action->dev_id);
+#ifdef CONFIG_RANDOMNESS_IRQ
 		if (ret == IRQ_HANDLED)
 			status |= action->flags;
+#endif
 		retval |= ret;
 		action = action->next;
 	} while (action);
-
+#ifdef CONFIG_RANDOMNESS_IRQ
 	if (status & IRQF_SAMPLE_RANDOM)
 		add_interrupt_randomness(irq);
+#endif
 	local_irq_disable();
 
 	return retval;

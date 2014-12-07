@@ -646,6 +646,7 @@ void add_input_randomness(unsigned int type, unsigned int code,
 }
 EXPORT_SYMBOL_GPL(add_input_randomness);
 
+#ifdef CONFIG_RANDOMNESS_IRQ
 void add_interrupt_randomness(int irq)
 {
 	if (irq >= NR_IRQS || irq_timer_state[irq] == NULL)
@@ -654,6 +655,7 @@ void add_interrupt_randomness(int irq)
 	DEBUG_ENT("irq event %d\n", irq);
 	add_timer_randomness(irq_timer_state[irq], 0x100 + irq);
 }
+#endif
 
 #ifdef CONFIG_BLOCK
 void add_disk_randomness(struct gendisk *disk)

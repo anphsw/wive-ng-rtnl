@@ -271,8 +271,10 @@ asmlinkage void process_int(unsigned long vec, struct pt_regs *fp)
 		if (irq_list[vec]) {
 			irq_list[vec]->handler(vec, irq_list[vec]->dev_id, fp);
 			irq_list[vec]->count++;
+#ifdef CONFIG_RANDOMNESS_IRQ
 			if (irq_list[vec]->flags & IRQF_SAMPLE_RANDOM)
 				add_interrupt_randomness(vec);
+#endif
 		}
 	} else {
 		BUG();

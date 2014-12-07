@@ -186,24 +186,27 @@ static int check_irq_lock(struct irqdesc *desc, int irq, struct pt_regs *regs)
 static void
 __do_irq(unsigned int irq, struct irqaction *action, struct pt_regs *regs)
 {
-	unsigned int status;
+#ifdef CONFIG_RANDOMNESS_IRQ
+	unsigned int status = 0;
+#endif
 	int ret;
 
 	spin_unlock(&irq_controller_lock);
 	if (!(action->flags & IRQF_DISABLED))
 		local_irq_enable();
 
-	status = 0;
 	do {
 		ret = action->handler(irq, action->dev_id, regs);
+#ifdef CONFIG_RANDOMNESS_IRQ
 		if (ret == IRQ_HANDLED)
 			status |= action->flags;
+#endif
 		action = action->next;
 	} while (action);
-
+#ifdef CONFIG_RANDOMNESS_IRQ
 	if (status & IRQF_SAMPLE_RANDOM)
 		add_interrupt_randomness(irq);
-
+#endif
 	spin_lock_irq(&irq_controller_lock);
 }
 
