@@ -2125,10 +2125,11 @@
 2) goahead: cleanup dead code and fix debug.<br>
 3) miniupnpd: up to 1.9.20141204 version.<br>
 4) xl2tpd: up to Nov 26, 2014 git version.<br>
-5) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
-6) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
-7) kernel: mips: Properly align the .data..init_task section.<br>
-8) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
+5) miniupnpd: up to 1.9.20141209 version.<br>
+6) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
+7) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
+8) kernel: mips: Properly align the .data..init_task section.<br>
+9) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
 <br>
 <br>
 <br>
