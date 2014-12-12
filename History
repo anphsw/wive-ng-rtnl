@@ -419,7 +419,7 @@
 <b>5.0.x</b><br>
 1) build_system: use no reorder block gcc flag for build with optimize for size.<br>
 2) goahead: cleanup dead code and fix debug.<br>
-3) miniupnpd: up to 1.9.20141204 version.<br>
+3) igmpproxy: fix init mrDesc.<br>
 4) xl2tpd: up to Nov 26, 2014 git version.<br>
 5) miniupnpd: up to 1.9.20141209 version.<br>
 6) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
