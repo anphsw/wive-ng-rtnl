@@ -352,10 +352,8 @@ void websCgiCleanup()
 				bfreeSafe(B_L, cgip->stdOut);
 				bfreeSafe(B_L, cgip);
 
-				if(wp->has_firmware_upload_clean){
-					sync();
-					doSystem("sleep 3 && reboot &");
-				}
+				if(wp->has_firmware_upload_clean)
+					reboot_now();
 			}
 		}
 	}
