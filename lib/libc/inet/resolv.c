@@ -721,6 +721,8 @@ int __dns_lookup(const char *name, int type, int nscount, char **nsip,
 			goto fail;
 
 		strncpy(lookup,name,MAXDNAME);
+		if (variant < 0 && strchr(lookup, '.') == NULL)
+			variant = 0;
 		if (variant >= 0) {
                         BIGLOCK;
                         if (variant < __searchdomains) {
