@@ -426,6 +426,7 @@
 7) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
 8) kernel: mips: Properly align the .data..init_task section.<br>
 9) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
+10) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
 <br>
 <br>
 <br>
