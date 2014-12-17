@@ -61,7 +61,7 @@ int ra_nv_set(int argc,char **argv)
 		fz = DEFAULT_FLASH_ZONE_NAME;
 		key = argv[1];
 		value = argv[2];
-	} else if (argc == 4) {
+	} else {
 		fz = argv[1];
 		key = argv[2];
 		value = argv[3];
@@ -209,10 +209,9 @@ static int nvram_load_default(void)
 
 static int gen_wifi_config(int getmode)
 {
-	FILE *fp;
+	FILE *fp = NULL;
 	int  i, ssid_num = 1, inic = 0, mode = getmode;
-	char tx_rate[16], wmm_enable[16];
-	char temp[2], buf[4];
+	char tx_rate[32], wmm_enable[32];
 
 	if (mode == RT2860_NVRAM) {
 		system("mkdir -p /etc/Wireless/RT2860");
@@ -232,6 +231,11 @@ static int gen_wifi_config(int getmode)
 		return 0;
 	}
 
+	if (!fp){
+		printf("gen_wifi_config: fopen failed.\n");
+		return 0;
+	}
+
 	if (nvram_init(mode) == -1) {
 		printf("gen_wifi_config: nvram init failed...\n");
 		fclose(fp);
@@ -247,33 +251,37 @@ static int gen_wifi_config(int getmode)
 	if (RT2860_NVRAM == mode) {
 		if (!inic) {
 		    FPRINT_NUM(WirelessMode);
+		    FPRINT_NUM(staWirelessMode);
 		    FPRINT_NUM(Channel);
 		    FPRINT_STR(SSID1);
 		} else {
 		    fprintf(fp, "WirelessMode=%d\n", atoi(nvram_bufget(mode, "WirelessModeINIC")));
+		    fprintf(fp, "staWirelessMode=%d\n", atoi(nvram_bufget(mode, "staWirelessModeINIC")));
 		    fprintf(fp, "Channel=%d\n", atoi(nvram_bufget(mode, "ChannelINIC")));
 		    fprintf(fp, "SSID1=%s\n", nvram_bufget(mode, "SSID1INIC"));
 		}
 
 		//TxRate(FixedRate)
 		ssid_num = atoi(nvram_bufget(mode, "BssidNum"));
-		bzero(tx_rate, sizeof(char)*16);
+		if (ssid_num > 16)
+			ssid_num = 16;
+		else if (ssid_num < 0)
+			ssid_num = 0;
+		bzero(tx_rate, sizeof(tx_rate));
 		for (i = 0; i < ssid_num; i++)
 		{
-			sprintf(tx_rate+strlen(tx_rate), "%d", atoi(nvram_bufget(mode, "TxRate")));
-			sprintf(tx_rate+strlen(tx_rate), "%c", ';');
+			snprintf(tx_rate+strlen(tx_rate), 1, "%d", atoi(nvram_bufget(mode, "TxRate")));
+			snprintf(tx_rate+strlen(tx_rate), 1, "%c", ';');
 		}
-		tx_rate[strlen(tx_rate) - 1] = '\0';
 		fprintf(fp, "TxRate=%s\n", tx_rate);
 
 		//WmmCapable
-		bzero(wmm_enable, sizeof(char)*16);
+		bzero(wmm_enable, sizeof(wmm_enable));
 		for (i = 0; i < ssid_num; i++)
 		{
-			sprintf(wmm_enable+strlen(wmm_enable), "%d", atoi(nvram_bufget(mode, "WmmCapable")));
-			sprintf(wmm_enable+strlen(wmm_enable), "%c", ';');
+			snprintf(wmm_enable+strlen(wmm_enable), 1, "%d", atoi(nvram_bufget(mode, "WmmCapable")));
+			snprintf(wmm_enable+strlen(wmm_enable), 1, "%c", ';');
 		}
-		wmm_enable[strlen(wmm_enable) - 1] = '\0';
 		fprintf(fp, "WmmCapable=%s\n", wmm_enable);
 
 		//WscConfStatus
@@ -285,6 +293,7 @@ static int gen_wifi_config(int getmode)
 		if (strcmp(nvram_bufget(mode, "WscVendorPinCode"), "") != 0)
 			FPRINT_STR(WscVendorPinCode);
 
+		FPRINT_NUM(WirelessEvent);
 		FPRINT_NUM(CountryRegion);
 		FPRINT_NUM(CountryRegionABand);
 		FPRINT_STR(CountryCode);
@@ -579,6 +588,8 @@ static int gen_wifi_config(int getmode)
 		FPRINT_NUM(HT_DisallowTKIP);
 		FPRINT_NUM(HT_40MHZ_INTOLERANT);
 		FPRINT_NUM(HT_MIMOPSMode);
+		FPRINT_NUM(HT_MIMOPS);
+		FPRINT_NUM(HSCounter);
 		FPRINT_NUM(WscConfMode);
 		FPRINT_NUM(WCNTest);
 #ifdef CONFIG_RT2860V2_AP_80211N_DRAFT3
@@ -692,8 +703,15 @@ static int gen_wifi_config(int getmode)
 		FPRINT_NUM(DeauthFloodThreshold);
 		FPRINT_NUM(EapReqFooldThreshold);
 #endif
+		FPRINT_NUM(NintendoCapable);
 		FPRINT_NUM(UseNewRateAdapt);
 		FPRINT_NUM(IdleTimeout);
+
+#ifdef CONFIG_RT2860V2_AP_INTERFERENCE_REDUCE
+		FPRINT_NUM(MO_FalseCCATh);
+		FPRINT_NUM(MO_LowFalseCCATh);
+		FPRINT_NUM(DyncVgaEnable);
+#endif
 
 		//Radio On/Off
 		if (atoi(nvram_bufget(mode, "RadioOff")) == 1)

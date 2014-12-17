@@ -176,7 +176,6 @@ void nvram_close(int index)
 {
 	int i;
 
-	//LIBNV_PRINT("--> nvram_close %d\n", index);
 	LIBNV_CHECK_INDEX();
 
 	if (!fb[index].valid)
@@ -247,7 +246,7 @@ char *nvram_bufget(int index, char *name)
 	static char *ret = NULL;
 	int fd;
 	nvram_ioctl_t nvr;
-	//LIBNV_PRINT("--> nvram_bufget %d\n", index);
+
 	LIBNV_CHECK_INDEX("");
 	LIBNV_CHECK_VALID("");
 
@@ -339,7 +338,6 @@ int nvram_bufset(int index, char *name, char *value)
 	int fd;
 	nvram_ioctl_t nvr;
 
-	//LIBNV_PRINT("--> nvram_bufset\n");
 	LIBNV_CHECK_INDEX(-1);
 	LIBNV_CHECK_VALID(-1);
 
@@ -379,8 +377,7 @@ int nvram_bufset(int index, char *name, char *value)
 		}
 		fb[index].cache[idx].name = strdup(name);
 		fb[index].cache[idx].value = strdup(value);
-	}
-	else {
+	} else {
 		//abandon the previous value
 		FREE(fb[index].cache[idx].value);
 		fb[index].cache[idx].value = strdup(value);
@@ -480,8 +477,7 @@ void toggleNvramDebug()
 	if (libnvram_debug) {
 		libnvram_debug = 0;
 		printf("%s: turn off debugging\n", __FILE__);
-	}
-	else {
+	} else {
 		libnvram_debug = 1;
 		printf("%s: turn ON debugging\n", __FILE__);
 	}
@@ -554,34 +550,24 @@ out:
 	return 0;
 }
 
+void nvram_buflist(int index)
+{
+	int i;
+
+	LIBNV_CHECK_INDEX();
+	LIBNV_CHECK_VALID();
+
+	for (i = 0; i < MAX_CACHE_ENTRY; i++) {
+		if (!fb[index].cache[i].name)
+			break;
+		printf("%s=%s\n", fb[index].cache[i].name, fb[index].cache[i].value);
+	}
+	}
+
 int nvram_show(int mode)
 {
-	char *buffer, *p;
-	int crc;
-	unsigned int len = 0x4000;
-
-	if (nvram_init(mode) == -1) {
-		fprintf(stderr, "nvram_show: Can not init!\n");
-		return -1;
-	}
-
-	len = getNvramBlockSize(mode);
-	buffer = malloc(len);
-	if (!buffer) {
-		fprintf(stderr, "nvram_show: Can not allocate memory!\n");
-		return -1;
-	}
-
-	flash_read(buffer, getNvramOffset(mode), len);
-	memcpy(&crc, buffer, 4);
-
-	if (libnvram_debug)
-	    fprintf(stderr, "crc = %x\n", crc);
-
-	for (p = buffer + 4; *p; p += strlen(p) + 1)
-		printf("%s\n", p);
-
-	FREE(buffer);
-	nvram_close(mode);
+	nvram_init(mode);
+	nvram_buflist(mode);
+	nvram_close(index);
 	return 0;
 }

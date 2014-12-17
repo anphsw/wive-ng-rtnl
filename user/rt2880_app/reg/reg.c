@@ -72,7 +72,7 @@ void ra_reg_mod_bits(int offset, int data, int  start_bit, int len)
 //  example reg w 18 12345678
 int main(int argc, char *argv[])
 {
-	int fd, method, offset = 0, value = 0;
+	int fd, method = 0, offset = 0, value = 0;
 	char *p;
 
 	if (argc < 3)
@@ -166,6 +166,11 @@ int main(int argc, char *argv[])
 	    int data=strtoul(argv[3], NULL, 16);
 	    int start_bit=strtoul(argv[4], NULL, 10);
 	    int len=strtoul(argv[5], NULL, 10);
+	    if (len > 32)
+	    {
+		    printf("len must <= 32\n");
+		    return 0;
+	    }
 	    ra_reg_mod_bits(offset,data, start_bit,len);
 	}
 	else if (*p == 'o')
@@ -240,6 +245,11 @@ int main(int argc, char *argv[])
 		printf("[interval]: 1 ~ 3ff . [count]: 1 ~ 3ff.\n");
 		return 0;
 	}
+	if (method == 0)
+	{
+		printf("no method\n");
+		return 0;
+	}
 	fd = open("/dev/rdm0", O_RDONLY);
 	if (fd < 0)
 	{
@@ -248,11 +258,9 @@ int main(int argc, char *argv[])
 	}
 
 	ioctl(fd, method, &offset);
-	if (method == RT_RDM_CMD_READ) {
+	if (method == RT_RDM_CMD_READ) 
 		printf("0x%x\n", offset);	
-	}
 	
 	close(fd);
-
 	return 0;
 }

@@ -418,16 +418,21 @@
 <br>
 <b>5.0.x</b><br>
 1) build_system: use no reorder block gcc flag for build with optimize for size.<br>
-2) goahead: cleanup dead code and fix debug.<br>
-3) igmpproxy: fix init mrDesc.<br>
-4) xl2tpd: up to Nov 26, 2014 git version.<br>
-5) miniupnpd: up to 1.9.20141209 version.<br>
-6) uClibc: resolv more compliant with RFC1034.<br>
-7) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
-8) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
-9) kernel: mips: Properly align the .data..init_task section.<br>
-10) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
-11) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
+2) reg tool: small fixup.<br>
+3) mii tool: fixup and add 7628 support.<br>
+4) gpio tool: fix 9532 mode support.<br>
+5) nvram lib: do not direct read from flash at show.<br>
+6) nvram tool: fix generate wifi config.<br>
+7) goahead: cleanup dead code and fix debug.<br>
+8) igmpproxy: fix init mrDesc.<br>
+9) xl2tpd: up to Nov 26, 2014 git version.<br>
+10) miniupnpd: up to 1.9.20141209 version.<br>
+11) uClibc: resolv more compliant with RFC1034.<br>
+12) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
+13) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
+14) kernel: mips: Properly align the .data..init_task section.<br>
+15) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
+16) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
 <br>
 <br>
 <br>
