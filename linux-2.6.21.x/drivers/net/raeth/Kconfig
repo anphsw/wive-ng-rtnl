@@ -282,8 +282,3 @@ config RAETH_ESW_DISABLE
 	bool "Link down ethernet switch port during kernel initial."
 	depends on RT_3052_ESW
 	default y
-
-config RAETH_SKB_RECYCLE_2K
-	bool "SKB Recycling"
-	depends on RAETH
-	default n

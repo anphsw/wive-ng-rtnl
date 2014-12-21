@@ -184,6 +184,7 @@ void enable_auto_negotiate(int ge)
 }
 #endif
 #endif
+
 void ra2880stop(END_DEVICE *ei_local)
 {
 	unsigned int regValue;

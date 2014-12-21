@@ -353,17 +353,7 @@ void FASTPATHNET __kfree_skb(struct sk_buff *skb)
 	if(IS_MAGIC_TAG_VALID(skb) || FOE_MAGIC_TAG(skb) == FOE_MAGIC_PPE)
 	    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
 #endif
-#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
-	skb_release_head_state(skb);
-	if (skb->skb_recycling_callback) {
-	    if (skb->skb_recycling_callback(skb))
-		    return;
-	}
-	skb->skb_recycling_callback = NULL;
-	skb_release_data(skb);
-#else
 	skb_release_all(skb);
-#endif
 	kfree_skbmem(skb);
 }
 
@@ -419,10 +409,6 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 #endif
 	C(protocol);
 	n->destructor = NULL;
-#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
-	n->skb_recycling_callback = NULL;
-	skb->skb_recycling_callback = NULL;
-#endif
 	C(mark);
 	__nf_copy(n, skb);
 #if defined(CONFIG_NETFILTER_XT_TARGET_TRACE) || \
@@ -551,9 +537,6 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	new->tc_index	= old->tc_index;
 #endif
 	new->vlan_tci		= old->vlan_tci;
-#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
-	new->skb_recycling_callback = NULL;
-#endif
 	skb_copy_secmark(new, old);
 	atomic_set(&new->users, 1);
 	skb_shinfo(new)->gso_size = skb_shinfo(old)->gso_size;
@@ -2089,92 +2072,8 @@ err:
 	return ERR_PTR(err);
 }
 
-#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
-
-#define SKBMGR_RX_BUF_LEN		SKB_WITH_OVERHEAD(2048)
-#define SKBMGR_DEF_HOT_LIST_LEN		512
-
-int skbmgr_hot_list_len = SKBMGR_DEF_HOT_LIST_LEN;
-int skbmgr_max_list_len = 0;
-
-struct sk_buff_head rx0_recycle;
-
-inline struct sk_buff *skbmgr_alloc_skb2k(void)
-{
-        struct sk_buff *skb;
-	unsigned long flags;
-
-        if (skb_queue_len(&rx0_recycle)) {
-                unsigned int size;
-                struct skb_shared_info *shinfo;
-                u8 *data;
-
-		local_irq_save(flags);
-                skb = __skb_dequeue_tail(&rx0_recycle);
-		local_irq_restore(flags);
-
-		if (unlikely(skb == NULL))
-                        goto try_normal;
-
-		size = skb->truesize - SKB_TRUESIZE(0);
-                data = skb->head;
-
-		/*
-                 * See comment in sk_buff definition, just before the 'tail' member
-                 */
-		memset(skb, 0, offsetof(struct sk_buff, tail));
-		/* Account for allocated memory : skb + skb->head */
-		skb->truesize = SKB_TRUESIZE(size);
-		atomic_set(&skb->users, 1);
-		skb->head = data;
-		skb->data = data;
-		skb_reset_tail_pointer(skb);
-		skb->end  = skb->tail + size;
-		skb->vlan_tci = 0;
-		/* make sure we initialize shinfo sequentially */
-		shinfo = skb_shinfo(skb);
-		memset(shinfo, 0, offsetof(struct skb_shared_info, dataref));
-		atomic_set(&shinfo->dataref, 1);
-		skb->skb_recycling_callback = skbmgr_recycling_callback;
-
-		return skb;
-        }
-
-try_normal:
-        skb = alloc_skb(SKBMGR_RX_BUF_LEN, GFP_ATOMIC|__GFP_NOWARN);
-        if (likely(skb))
-                skb->skb_recycling_callback = skbmgr_recycling_callback;
-        return skb;
-}
-
-inline int skbmgr_recycling_callback(struct sk_buff *skb)
-{
-
-	unsigned long flags;
-
-	if (skb_queue_len(&rx0_recycle) < skbmgr_hot_list_len) {
-                if ((skb->truesize - SKB_TRUESIZE(0) != SKBMGR_RX_BUF_LEN) || (skb_shinfo(skb)->nr_frags) || (skb_shinfo(skb)->frag_list))
-                        return 0;
-
-                if (skb_queue_len(&rx0_recycle) > skbmgr_max_list_len)
-                    skbmgr_max_list_len = skb_queue_len(&rx0_recycle) + 1;
-
-		local_irq_save(flags);
-                __skb_queue_head(&rx0_recycle, skb);
-		local_irq_restore(flags);
-
-                return 1;
-        }
-
-        return 0;
-}
-#endif
-
 void __init skb_init(void)
 {
-#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
-	skb_queue_head_init(&rx0_recycle);
-#endif
 	skbuff_head_cache = kmem_cache_create("skbuff_head_cache",
 					      sizeof(struct sk_buff),
 					      0,

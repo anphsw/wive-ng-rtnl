@@ -190,40 +190,10 @@ static int ei_close(struct net_device *dev);
 static int ra2882eth_init(void);
 static void ra2882eth_cleanup_module(void);
 
-#if 0
-void skb_dump(struct sk_buff* sk) {
-        unsigned int i;
-
-        printk("skb_dump: from %s with len %d (%d) headroom=%d tailroom=%d\n",
-                sk->dev?sk->dev->name:"ip stack",sk->len,sk->truesize,
-                skb_headroom(sk),skb_tailroom(sk));
-
-        //for(i=(unsigned int)sk->head;i<=(unsigned int)sk->tail;i++) {
-        for(i=(unsigned int)sk->head;i<=(unsigned int)sk->data+20;i++) {
-                if((i % 20) == 0)
-                        printk("\n");
-                if(i==(unsigned int)sk->data) printk("{");
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
-                if(i==(unsigned int)sk->transport_header) printk("#");
-                if(i==(unsigned int)sk->network_header) printk("|");
-                if(i==(unsigned int)sk->mac_header) printk("*");
-#else
-                if(i==(unsigned int)sk->h.raw) printk("#");
-                if(i==(unsigned int)sk->nh.raw) printk("|");
-                if(i==(unsigned int)sk->mac.raw) printk("*");
-#endif
-                printk("%02X-",*((unsigned char*)i));
-                if(i==(unsigned int)sk->tail) printk("}");
-        }
-        printk("\n");
-}
-#endif
-
 #if defined (TASKLET_WORKQUEUE_SW)
 int init_schedule;
 int working_schedule;
 #endif
-
 
 #if defined (CONFIG_GIGAPHY) || defined (CONFIG_P5_MAC_TO_PHY_MODE)
 int isICPlusGigaPHY(int ge)
@@ -450,22 +420,26 @@ static void forward_config(struct net_device *dev)
 	unsigned int	regVal2;
 #endif
 
-#if defined (CONFIG_RAETH_HW_VLAN_RX)
-#if defined (CONFIG_VLAN_8021Q_DOUBLE_TAG)
+#ifdef CONFIG_RAETH_HW_VLAN_RX
+#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
 	if ((!vlan_double_tag) && (ra_sw_nat_hook_rx == NULL))
 	{
 	    /* enable HW VLAN RX */
+#if defined (CONFIG_RALINK_MT7620)
 	    sysRegWrite(CDMP_EG_CTRL, 1);
+#endif
 	    dev->features |= NETIF_F_HW_VLAN_RX;
 	    printk("raeth: RX vlan hardware offload enabled\n");
 	} else
 #endif
+#endif
 	{
 	    /* disable HW VLAN RX */
+#if defined (CONFIG_RALINK_MT7620)
 	    sysRegWrite(CDMP_EG_CTRL, 0);
+#endif
 	    dev->features &= ~(NETIF_F_HW_VLAN_RX);
 	}
-#endif
 
 #ifdef CONFIG_RAETH_HW_VLAN_TX
 	update_hw_vlan_tx();
@@ -477,11 +451,11 @@ static void forward_config(struct net_device *dev)
     	    printk("raeth: TX vlan hardware offload enabled\n");
     	} else
 #endif
+#endif
     	{
 	    /* disable HW VLAN TX */
 	    dev->features &= ~(NETIF_F_HW_VLAN_TX);
 	}
-#endif
 
 	regVal = sysRegRead(GDMA1_FWD_CFG);
 	regCsg = sysRegRead(CDMA_CSG_CFG);
@@ -490,7 +464,7 @@ static void forward_config(struct net_device *dev)
 	regVal2 = sysRegRead(GDMA2_FWD_CFG);
 #endif
 
-	//set unicast/multicast/broadcast frame to cpu
+	/* set unicast/multicast/broadcast frame to CPU */
 #if defined (CONFIG_RALINK_MT7620)
 	/* GDMA1 frames destination port is port0 CPU*/
 	regVal &= ~0x7;
@@ -522,8 +496,9 @@ static void forward_config(struct net_device *dev)
 	regVal2 |= GDM1_TCS_EN;
 	regVal2 |= GDM1_UCS_EN;
 #endif
+	/* Can checksum TCP/UDP over IPv4 */
+	dev->features |= NETIF_F_IP_CSUM;
 
-	dev->features |= NETIF_F_IP_CSUM; /* Can checksum TCP/UDP over IPv4 */
 #if defined(CONFIG_RALINK_MT7620)
 #if defined (CONFIG_RAETH_TSO)
 	if ((sysRegRead(0xB000000C) & 0xf) >= 0x5) {
@@ -539,12 +514,11 @@ static void forward_config(struct net_device *dev)
 #endif
 	}
 #endif // CONFIG_RAETH_TSOV6 //
-#else
+#else // not 7620
 #if defined (CONFIG_RAETH_TSO)
 	dev->features |= NETIF_F_SG;
 	dev->features |= NETIF_F_TSO;
 #endif // CONFIG_RAETH_TSO //
-
 #if defined (CONFIG_RAETH_TSOV6)
 	dev->features |= NETIF_F_TSO6;
 #ifdef NETIF_F_IPV6_CSUM
@@ -552,7 +526,6 @@ static void forward_config(struct net_device *dev)
 #endif
 #endif // CONFIG_RAETH_TSOV6 //
 #endif // CONFIG_MT7620 //
-
 #else // Checksum offload disabled
 
 	//disable ipv4 header checksum check
@@ -629,7 +602,6 @@ static void forward_config(struct net_device *dev)
 	printk("CDMA_CSG_CFG = %0X\n",regCsg);
 	regVal = sysRegRead(GDMA1_FWD_CFG);
 	printk("GDMA1_FWD_CFG = %0X\n",regVal);
-
 #ifdef CONFIG_PSEUDO_SUPPORT
 	regVal = sysRegRead(GDMA2_FWD_CFG);
 	printk("GDMA2_FWD_CFG = %0X\n",regVal);
@@ -1345,11 +1317,7 @@ static inline int rt2880_eth_recv(struct net_device* dev)
 
 		/* We have to check the free memory size is big enough
 		 * before pass the packet to cpu*/
-#if defined (CONFIG_RAETH_SKB_RECYCLE_2K)
-		skb = skbmgr_dev_alloc_skb2k();
-#else
 		skb = __netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN , GFP_ATOMIC);
-#endif
 		if (unlikely(skb == NULL))
 		{
 			if (net_ratelimit())
@@ -1506,8 +1474,6 @@ static inline int rt2880_eth_recv(struct net_device* dev)
 	return bReschedule;
 }
 
-
-
 ///////////////////////////////////////////////////////////////////
 /////
 ///// ra_get_stats - gather packet information for management plane
@@ -1517,7 +1483,6 @@ static inline int rt2880_eth_recv(struct net_device* dev)
 /////
 ///// RETURNS: pointer to net_device_stats
 ///////////////////////////////////////////////////////////////////
-
 static struct net_device_stats *ra_get_stats(struct net_device *dev)
 {
 	END_DEVICE *ei_local = netdev_priv(dev);
@@ -2512,8 +2477,9 @@ static void ei_vlan_rx_register(struct net_device *dev, struct vlan_group *grp)
 	ei_local->vlgrp = grp;
 
 	/* enable HW VLAN RX */
+#if defined (CONFIG_RALINK_MT7620)
 	sysRegWrite(CDMP_EG_CTRL, 1);
-
+#endif
 }
 #endif
 
@@ -2564,7 +2530,6 @@ static void ra2880_setup_dev_fptable(struct net_device *dev)
 	dev->weight		= DEV_WEIGHT;
 #endif
 #endif
-
 #ifdef CONFIG_ETHTOOL
 	dev->ethtool_ops	= &ra_ethtool_ops;
 #endif
@@ -3189,26 +3154,19 @@ static int ei_open(struct net_device *dev)
 #endif
 #endif // CONFIG_RAETH_LRO //
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 	if (!try_module_get(THIS_MODULE))
 	{
 		printk("%s: Cannot reserve module\n", __FUNCTION__);
 		return -1;
 	}
-#else
-	MOD_INC_USE_COUNT;
-#endif
 
-	printk("Raeth %s (",RAETH_VERSION);
+	printk("Raeth %s (" ,RAETH_VERSION);
 #if defined (CONFIG_RAETH_NAPI)
 	printk("NAPI ");
 #elif defined (CONFIG_RA_NETWORK_TASKLET_BH)
 	printk("Tasklet ");
 #elif defined (CONFIG_RA_NETWORK_WORKQUEUE_BH)
 	printk("Workqueue ");
-#endif
-#if defined (CONFIG_RAETH_SKB_RECYCLE_2K)
-	printk("SkbRecycle ");
 #endif
 	printk(")\n");
 
@@ -3224,11 +3182,7 @@ static int ei_open(struct net_device *dev)
         /* receiving packet buffer allocation - NUM_RX_DESC x MAX_RX_LENGTH */
         for ( i = 0; i < NUM_RX_DESC; i++)
         {
-#if defined (CONFIG_RAETH_SKB_RECYCLE_2K)
-		ei_local->netrx0_skbuf[i] = skbmgr_dev_alloc_skb2k();
-#else
                 ei_local->netrx0_skbuf[i] = netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN);
-#endif
                 if (ei_local->netrx0_skbuf[i] == NULL ) {
                         printk("rx skbuff buffer allocation failed!");
 		} else {
@@ -3238,11 +3192,7 @@ static int ei_open(struct net_device *dev)
 		}
 
 #if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
-#if defined (CONFIG_RAETH_SKB_RECYCLE_2K)
-		ei_local->netrx1_skbuf[i] = skbmgr_dev_alloc_skb2k();
-#else
 		ei_local->netrx1_skbuf[i] = netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN);
-#endif
                 if (ei_local->netrx1_skbuf[i] == NULL )
                         printk("rx1 skbuff buffer allocation failed!");
 		} else {
@@ -3448,15 +3398,11 @@ static int ei_close(struct net_device *dev)
         netif_poll_disable(dev);
 #endif
 #endif
-
 	fe_reset();
 	spin_unlock_irqrestore(&(ei_local->page_lock), flags);
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 	module_put(THIS_MODULE);
-#else
-	MOD_DEC_USE_COUNT;
-#endif
+
 	return 0;
 }
 
@@ -3576,7 +3522,6 @@ static void rt6855A_gsw_init(void)
 #endif
 
 #if defined (CONFIG_RT6855A_ASIC)
-
 #if defined (CONFIG_P5_RGMII_TO_MAC_MODE)
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x3500) = 0x5e33b;//(P5, Force mode, Link Up, 1000Mbps, Full-Duplex, FC ON)
 #elif defined (CONFIG_P5_MII_TO_MAC_MODE)

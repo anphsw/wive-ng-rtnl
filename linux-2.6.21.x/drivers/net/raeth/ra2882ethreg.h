@@ -5,9 +5,7 @@
 #include <linux/version.h>	/* check linux version for 2.4 and 2.6 compatibility */
 #include <linux/cache.h>       /* for L1 cacheline size */
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
 #include <asm/rt2880/rt_mmap.h>
-#endif
 #include "raether.h"
 
 #ifdef WORKQUEUE_BH
@@ -139,8 +137,6 @@ typedef struct _PSEUDO_ADAPTER {
 
 #define MAX_PSEUDO_ENTRY               1
 #endif
-
-
 
 /* Register Categories Definition */
 #define RAFRAMEENGINE_OFFSET	0x0000
