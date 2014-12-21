@@ -63,13 +63,13 @@ config RAETH_LRO
 
 config RAETH_HW_VLAN_TX
         bool "Transmit VLAN HW (DoubleVLAN is not supported)"
-        depends on RAETH && !RALINK_RT5350
+        depends on RAETH && (RALINK_RT3883 || RALINK_MT7620 || RALINK_MT7621)
         ---help---
           Please set net.ipv4.vlan_double_tag=0 for enable vlan hw offload before eth2 up.
 
 config RAETH_HW_VLAN_RX
         bool "Receive VLAN HW (DoubleVLAN is not supported)"
-        depends on RAETH && RALINK_MT7621
+        depends on RAETH && (RALINK_RT3883 || RALINK_MT7620 || RALINK_MT7621)
         ---help---
           Please disable HW_VLAN_RX if you need double vlan
 

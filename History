@@ -429,13 +429,14 @@
 10) xl2tpd: up to Nov 26, 2014 git version.<br>
 11) miniupnpd: up to 1.9.20141209 version.<br>
 12) uClibc: resolv more compliant with RFC1034.<br>
-13) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
-14) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
-15) kernel: mips: Properly align the .data..init_task section.<br>
-16) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
-17) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
-18) kernel: netfilter: nf_conntrack: allow server to become a client in TW handling.<br>
-19) kernel: skb/raeth: add skb_recycle2k support.<br>
+13) kernel/configs: full disable vlan offload support for 3x5x (not correct work and not used long time).<br>
+14) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
+15) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
+16) kernel: mips: Properly align the .data..init_task section.<br>
+17) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
+18) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
+19) kernel: netfilter: nf_conntrack: allow server to become a client in TW handling.<br>
+20) kernel: skb/raeth: add skb_recycle2k support.<br>
 <br>
 <br>
 <br>
