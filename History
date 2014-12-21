@@ -435,6 +435,7 @@
 16) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
 17) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
 18) kernel: netfilter: nf_conntrack: allow server to become a client in TW handling.<br>
+19) kernel: skb/raeth: add skb_recycle2k support.<br>
 <br>
 <br>
 <br>
