@@ -33,8 +33,7 @@
 #define CHECKSUM_COMPLETE 2
 #define CHECKSUM_PARTIAL 3
 
-#define SKB_DATA_ALIGN(X)	(((X) + (SMP_CACHE_BYTES - 1)) & \
-				 ~(SMP_CACHE_BYTES - 1))
+#define SKB_DATA_ALIGN(X)	ALIGN(X, SMP_CACHE_BYTES)
 #define SKB_WITH_OVERHEAD(X)	\
 	((X) - SKB_DATA_ALIGN(sizeof(struct skb_shared_info)))
 #define SKB_MAX_ORDER(X, ORDER) \
@@ -317,6 +316,9 @@ struct sk_buff {
 	__be16			protocol;
 
 	void			(*destructor)(struct sk_buff *skb);
+#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
+	int                     (*skb_recycling_callback)(struct sk_buff *skb);
+#endif
 #ifdef CONFIG_NETFILTER
 	struct nf_conntrack	*nfct;
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
@@ -935,6 +937,11 @@ static __inline__ int skb_pagelen(const struct sk_buff *skb)
 	return len + skb_headlen(skb);
 }
 
+static __inline__ bool skb_has_frags(const struct sk_buff *skb)
+{
+	return skb_shinfo(skb)->nr_frags;
+}
+
 static __inline__ void skb_fill_page_desc(struct sk_buff *skb, int i,
 				      struct page *page, int off, int size)
 {
@@ -1178,7 +1185,7 @@ static __inline__ void skb_set_mac_header(struct sk_buff *skb, const int offset)
  */
 #ifndef NET_SKB_PAD
 #if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) ||  defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352) || defined (CONFIG_RALINK_MT7620)
+    defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
 /* ralink depended hacks */
 #define NET_SKB_PAD		96
 #define NET_SKB_PAD_ORIG	max(64, L1_CACHE_BYTES)
@@ -1335,6 +1342,19 @@ static __inline__ struct sk_buff *netdev_alloc_skb(struct net_device *dev,
 {
 	return __netdev_alloc_skb(dev, length, GFP_ATOMIC);
 }
+
+#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
+struct sk_buff *skbmgr_alloc_skb2k(void);
+int skbmgr_recycling_callback(struct sk_buff *skb);
+
+static __inline__ struct sk_buff *skbmgr_dev_alloc_skb2k(void)
+{
+        struct sk_buff *skb = skbmgr_alloc_skb2k();
+        if (likely(skb))
+                skb_reserve(skb, NET_SKB_PAD);
+        return skb;
+}
+#endif
 
 static __inline__ struct sk_buff *netdev_alloc_skb_ip_align(struct net_device *dev,
 		unsigned int length)

@@ -417,26 +417,27 @@
 
 <br>
 <b>5.0.x</b><br>
-1) build_system: use no reorder block gcc flag for build with optimize for size.<br>
-2) uboot: update to last version.<br>
-3) reg tool: small fixup.<br>
-4) mii tool: fixup and add 7628 support.<br>
-5) gpio tool: fix 9532 mode support.<br>
-6) nvram lib: do not direct read from flash at show.<br>
-7) nvram tool: fix generate wifi config.<br>
-8) goahead: cleanup dead code and fix debug.<br>
-9) igmpproxy: fix init mrDesc.<br>
-10) xl2tpd: up to Nov 26, 2014 git version.<br>
-11) miniupnpd: up to 1.9.20141209 version.<br>
-12) uClibc: resolv more compliant with RFC1034.<br>
-13) kernel/configs: full disable vlan offload support for 3x5x (not correct work and not used long time).<br>
-14) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
-15) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
-16) kernel: mips: Properly align the .data..init_task section.<br>
-17) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
-18) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
-19) kernel: netfilter: nf_conntrack: allow server to become a client in TW handling.<br>
-20) kernel: skb/raeth: add skb_recycle2k support.<br>
+1) toolchain: update kernel headers and sync gcc with upstream.<br>
+2) build_system: use no reorder block gcc flag for build with optimize for size.<br>
+3) uboot: update to last version.<br>
+4) reg tool: small fixup.<br>
+5) mii tool: fixup and add 7628 support.<br>
+6) gpio tool: fix 9532 mode support.<br>
+7) nvram lib: do not direct read from flash at show.<br>
+8) nvram tool: fix generate wifi config.<br>
+9) goahead: cleanup dead code and fix debug.<br>
+10) igmpproxy: fix init mrDesc.<br>
+11) xl2tpd: up to Nov 26, 2014 git version.<br>
+12) miniupnpd: up to 1.9.20141209 version.<br>
+13) uClibc: resolv more compliant with RFC1034.<br>
+14) kernel/configs: full disable vlan offload support for 3x5x (not correct work and not used long time).<br>
+15) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
+16) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
+17) kernel: mips: Properly align the .data..init_task section.<br>
+18) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
+19) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
+20) kernel: netfilter: nf_conntrack: allow server to become a client in TW handling.<br>
+21) kernel: skb/raeth: add skb_recycle2k support.<br>
 <br>
 <br>
 <br>
