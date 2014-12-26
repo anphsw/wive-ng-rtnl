@@ -1972,9 +1972,12 @@ static void net_rx_action(struct softirq_action *h)
 
 	local_irq_disable();
 
-	while (!list_empty(&queue->poll_list)) {
+	for (;;) {
 		struct net_device *dev;
 		void *have;
+
+		if (list_empty(&queue->poll_list))
+			    break;
 
 		/* If softirq window is exhuasted then punt.
 		 * Allow this to run for 2 jiffies since which will allow
@@ -1986,7 +1989,9 @@ static void net_rx_action(struct softirq_action *h)
     			if(WdgLoadValue)
 			    RaWdgReload();
 #endif
-			goto softnet_break;
+			    __get_cpu_var(netdev_rx_stat).time_squeeze++;
+			    __raise_softirq_irqoff(NET_RX_SOFTIRQ);
+			    break;
 		}
 
 		local_irq_enable();
@@ -2009,8 +2014,9 @@ static void net_rx_action(struct softirq_action *h)
 			local_irq_disable();
 		}
 	}
-out:
+
 	local_irq_enable();
+
 #ifdef CONFIG_NET_DMA
 	/*
 	 * There may not be any more sk_buffs coming right now, so push
@@ -2024,12 +2030,6 @@ out:
 		rcu_read_unlock();
 	}
 #endif
-	return;
-
-softnet_break:
-	__get_cpu_var(netdev_rx_stat).time_squeeze++;
-	__raise_softirq_irqoff(NET_RX_SOFTIRQ);
-	goto out;
 }
 
 static gifconf_func_t * gifconf_list [NPROTO];
