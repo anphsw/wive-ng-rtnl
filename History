@@ -417,7 +417,7 @@
 
 <br>
 <b>5.0.x</b><br>
-1) toolchain: update kernel headers and sync gcc with upstream.<br>
+1) toolchain: update kernel headers and gcc up to 4.8.4 release.<br>
 2) build_system: use no reorder block gcc flag for build with optimize for size.<br>
 3) uboot: update to last version.<br>
 4) busybox: update to 1.23.0 version.<br>
