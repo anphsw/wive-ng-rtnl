@@ -1752,7 +1752,9 @@ BOOLEAN  ApCliHandleRxBroadcastFrame(
 {
 	PRT28XX_RXD_STRUC	pRxD = &(pRxBlk->RxD);
 	PHEADER_802_11		pHeader = pRxBlk->pHeader;
+#ifndef MAC_APCLI_SUPPORT
 	PRXWI_STRUC			pRxWI = pRxBlk->pRxWI;		
+#endif
 	PAPCLI_STRUCT   	pApCliEntry = NULL;
 	
 	// It is possible to receive the multicast packet when in AP Client mode

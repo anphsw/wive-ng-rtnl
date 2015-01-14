@@ -401,7 +401,8 @@ NDIS_STATUS APSendPacket(
 		  
 		if (checkIgmpPkt)
 		{
-			if (IgmpPktInfoQuery(pAd, pSrcBufVA, pPacket, FromWhichBSSID, &InIgmpGroup, &pGroupEntry) != NDIS_STATUS_SUCCESS)
+			if (IgmpPktInfoQuery(pAd, pSrcBufVA, pPacket, FromWhichBSSID,
+						&InIgmpGroup, &pGroupEntry) != NDIS_STATUS_SUCCESS)
 				return NDIS_STATUS_FAILURE;
 		} 
 	}
@@ -564,11 +565,12 @@ NDIS_STATUS APSendPacket(
 #ifdef IGMP_SNOOP_SUPPORT
 		/* if it's a mcast packet in igmp gourp. */
 		/* ucast clone it for all members in the gourp. */
-		if(pAd->ApCfg.IgmpSnoopEnable && (((InIgmpGroup == IGMP_IN_GROUP) && pGroupEntry && (IgmpMemberCnt(&pGroupEntry->MemberList) > 0)) || (InIgmpGroup == IGMP_PKT)))
+		if (((InIgmpGroup == IGMP_IN_GROUP) && pGroupEntry && (IgmpMemberCnt(&pGroupEntry->MemberList) > 0)) ||
+		     (InIgmpGroup == IGMP_PKT))
 		{
 			NDIS_STATUS PktCloneResult = IgmpPktClone(pAd, pSrcBufVA, pPacket, InIgmpGroup, pGroupEntry, QueIdx, UserPriority);
 			RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_SUCCESS);
-			return PktCloneResult; /* need to always return to prevent skb double free. */
+			return PktCloneResult;
 		}
 		else
 #endif /* IGMP_SNOOP_SUPPORT */
@@ -4002,8 +4004,9 @@ VOID APRxDataFrameAnnounce(
 
 
 #ifdef IGMP_SNOOP_SUPPORT
-		if (pAd->ApCfg.IgmpSnoopEnable && pEntry
+		if (pEntry
 			&& (IS_ENTRY_CLIENT(pEntry) || IS_ENTRY_WDS(pEntry))
+			&& (pAd->ApCfg.IgmpSnoopEnable) 
 			&& IS_MULTICAST_MAC_ADDR(pRxBlk->pHeader->Addr3))
 		{
 			PUCHAR pDA = pRxBlk->pHeader->Addr3;
