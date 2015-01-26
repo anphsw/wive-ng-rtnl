@@ -1663,8 +1663,8 @@ VOID AP_AMPDU_Frame_Tx(
 			
 		if (pMbss != NULL)
 		{
-			pMbss->TransmittedByteCount += pTxBlk->SrcBufLen;
-			pMbss->TxCount ++;
+			pMbss->TransmittedByteCount.QuadPart += pTxBlk->SrcBufLen;
+			INC_COUNTER64(pMbss->TxCount);
 
 #ifdef STATS_COUNT_SUPPORT
 			if(IS_MULTICAST_MAC_ADDR(pTxBlk->pSrcBufHeader))
@@ -1687,7 +1687,7 @@ VOID AP_AMPDU_Frame_Tx(
 		if (pMacEntry && IS_ENTRY_WDS(pMacEntry))
 		{
 			INC_COUNTER64(pAd->WdsTab.WdsEntry[pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedFragmentCount);				
-			pAd->WdsTab.WdsEntry[pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+			pAd->WdsTab.WdsEntry[pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedByteCount.QuadPart += pTxBlk->SrcBufLen;
 		}	
 #endif /* WDS_SUPPORT */
 
@@ -1695,7 +1695,7 @@ VOID AP_AMPDU_Frame_Tx(
 		if (pMacEntry && IS_ENTRY_APCLI(pMacEntry))
 		{
 			INC_COUNTER64(pAd->ApCfg.ApCliTab[pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedFragmentCount);				
-			pAd->ApCfg.ApCliTab[pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+			pAd->ApCfg.ApCliTab[pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedByteCount.QuadPart += pTxBlk->SrcBufLen;
 		}	
 #endif /* APCLI_SUPPORT */
 #endif /* STATS_COUNT_SUPPORT */
@@ -1897,8 +1897,8 @@ REPEATER_CLIENT_ENTRY *pReptEntry = NULL;
 		
 			if (pMbss != NULL)
 			{
-				pMbss->TransmittedByteCount += totalMPDUSize;
-				pMbss->TxCount ++;
+				pMbss->TransmittedByteCount.QuadPart += totalMPDUSize;
+				INC_COUNTER64(pMbss->TxCount);
 
 #ifdef STATS_COUNT_SUPPORT
 				if(IS_MULTICAST_MAC_ADDR(pTxBlk->pSrcBufHeader))
@@ -1921,7 +1921,7 @@ REPEATER_CLIENT_ENTRY *pReptEntry = NULL;
 		if (pTxBlk->pMacEntry && IS_ENTRY_WDS(pTxBlk->pMacEntry))
 		{
 			INC_COUNTER64(pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedFragmentCount);
-			pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+			pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedByteCount.QuadPart += pTxBlk->SrcBufLen;
 		}	
 #endif /* WDS_SUPPORT */
 
@@ -1929,7 +1929,7 @@ REPEATER_CLIENT_ENTRY *pReptEntry = NULL;
 		if (pTxBlk->pMacEntry && IS_ENTRY_APCLI(pTxBlk->pMacEntry))
 		{
 			INC_COUNTER64(pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedFragmentCount);				
-			pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+			pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedByteCount.QuadPart += pTxBlk->SrcBufLen;
 		}	
 #endif /* APCLI_SUPPORT */
 #endif /* STATS_COUNT_SUPPORT */
@@ -2252,8 +2252,8 @@ VOID AP_Legacy_Frame_Tx(
 	
 		if (pMbss != NULL)
 		{
-			pMbss->TransmittedByteCount += pTxBlk->SrcBufLen;
-			pMbss->TxCount ++;
+			pMbss->TransmittedByteCount.QuadPart += pTxBlk->SrcBufLen;
+			INC_COUNTER64(pMbss->TxCount);
 
 #ifdef STATS_COUNT_SUPPORT
 			if(IS_MULTICAST_MAC_ADDR(pTxBlk->pSrcBufHeader))
@@ -2276,7 +2276,7 @@ VOID AP_Legacy_Frame_Tx(
 		if (pTxBlk->pMacEntry && IS_ENTRY_WDS(pTxBlk->pMacEntry))
 		{
 			INC_COUNTER64(pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedFragmentCount);
-			pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+			pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedByteCount.QuadPart += pTxBlk->SrcBufLen;
 		}
 #endif /* WDS_SUPPORT */
 
@@ -2284,7 +2284,7 @@ VOID AP_Legacy_Frame_Tx(
 		if (pTxBlk->pMacEntry && IS_ENTRY_APCLI(pTxBlk->pMacEntry))
 		{
 			INC_COUNTER64(pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedFragmentCount);				
-			pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+			pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedByteCount.QuadPart += pTxBlk->SrcBufLen;
 		}	
 #endif /* APCLI_SUPPORT */
 #endif /* STATS_COUNT_SUPPORT */
@@ -2540,8 +2540,8 @@ VOID AP_Fragment_Frame_Tx(
 	
 		if (pMbss != NULL)
 		{
-			pMbss->TransmittedByteCount += pTxBlk->SrcBufLen;
-			pMbss->TxCount ++;
+			pMbss->TransmittedByteCount.QuadPart += pTxBlk->SrcBufLen;
+			INC_COUNTER64(pMbss->TxCount);
 
 #ifdef STATS_COUNT_SUPPORT
 			if(IS_MULTICAST_MAC_ADDR(pTxBlk->pSrcBufHeader))
@@ -2564,7 +2564,7 @@ VOID AP_Fragment_Frame_Tx(
 		if (pTxBlk->pMacEntry && IS_ENTRY_WDS(pTxBlk->pMacEntry))
 		{
 			INC_COUNTER64(pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedFragmentCount);
-			pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+			pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedByteCount.QuadPart += pTxBlk->SrcBufLen;
 		}
 #endif /* WDS_SUPPORT */
 
@@ -2572,7 +2572,7 @@ VOID AP_Fragment_Frame_Tx(
 		if (pTxBlk->pMacEntry && IS_ENTRY_APCLI(pTxBlk->pMacEntry))
 		{
 			INC_COUNTER64(pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedFragmentCount);				
-			pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+			pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedByteCount.QuadPart += pTxBlk->SrcBufLen;
 		}	
 #endif /* APCLI_SUPPORT */
 #endif /* STATS_COUNT_SUPPORT */
@@ -2900,8 +2900,8 @@ VOID AP_ARalink_Frame_Tx(
 
 			if (pMbss != NULL)
 			{
-				pMbss->TransmittedByteCount += totalMPDUSize;
-				pMbss->TxCount ++;
+				pMbss->TransmittedByteCount.QuadPart += totalMPDUSize;
+				INC_COUNTER64(pMbss->TxCount);
 
 #ifdef STATS_COUNT_SUPPORT
 				if(IS_MULTICAST_MAC_ADDR(pTxBlk->pSrcBufHeader))
@@ -2925,7 +2925,7 @@ VOID AP_ARalink_Frame_Tx(
 		if (pTxBlk->pMacEntry && IS_ENTRY_WDS(pTxBlk->pMacEntry))
 		{
 			INC_COUNTER64(pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedFragmentCount);
-			pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+			pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->MatchWDSTabIdx].WdsCounter.TransmittedByteCount.QuadPart += pTxBlk->SrcBufLen;
 		}
 #endif /* WDS_SUPPORT */
 
@@ -2933,7 +2933,7 @@ VOID AP_ARalink_Frame_Tx(
 		if (pTxBlk->pMacEntry && IS_ENTRY_APCLI(pTxBlk->pMacEntry))
 		{
 			INC_COUNTER64(pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedFragmentCount);				
-			pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+			pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->MatchAPCLITabIdx].ApCliCounter.TransmittedByteCount.QuadPart += pTxBlk->SrcBufLen;
 		}	
 #endif /* APCLI_SUPPORT */
 #endif /* STATS_COUNT_SUPPORT */
@@ -4315,8 +4315,8 @@ VOID APHandleRxDataFrame(
 					MULTISSID_STRUCT *pMbss = pEntry->pMbss;
 					if (pMbss != NULL)
 					{
-						pMbss->ReceivedByteCount += pRxWI->MPDUtotalByteCount;
-						pMbss->RxCount ++;
+						pMbss->ReceivedByteCount.QuadPart += pRxWI->MPDUtotalByteCount;
+						INC_COUNTER64(pMbss->RxCount);
 					}
 				}
 				RX_BLK_SET_FLAG(pRxBlk, fRX_WDS);
@@ -4382,7 +4382,7 @@ VOID APHandleRxDataFrame(
 				goto err;
 			}
 #ifdef STATS_COUNT_SUPPORT						
-			pAd->ApCfg.ApCliTab[pEntry->MatchAPCLITabIdx].ApCliCounter.ReceivedByteCount += pRxWI->MPDUtotalByteCount;
+			pAd->ApCfg.ApCliTab[pEntry->MatchAPCLITabIdx].ApCliCounter.ReceivedByteCount.QuadPart += pRxWI->MPDUtotalByteCount;
 			INC_COUNTER64(pAd->ApCfg.ApCliTab[pEntry->MatchAPCLITabIdx].ApCliCounter.ReceivedFragmentCount);
 #endif /* STATS_COUNT_SUPPORT */
 
@@ -4394,7 +4394,7 @@ VOID APHandleRxDataFrame(
 			if (pRxD->Mcast || pRxD->Bcast)
 			{
 #ifdef STATS_COUNT_SUPPORT						
-				INC_COUNTER64(pAd->ApCfg.ApCliTab[pEntry->MatchAPCLITabIdx].ApCliCounter.MulticastReceivedFrameCount);
+				pAd->ApCfg.ApCliTab[pEntry->MatchAPCLITabIdx].ApCliCounter.MulticastReceivedFrameCount++;
 #endif /* STATS_COUNT_SUPPORT */
 
 				/* Process the received broadcast frame for AP-Client. */
@@ -4435,8 +4435,8 @@ VOID APHandleRxDataFrame(
 			MULTISSID_STRUCT *pMbss = pEntry->pMbss;
 			if (pMbss != NULL)
 			{
-				pMbss->ReceivedByteCount += pRxWI->MPDUtotalByteCount;
-				pMbss->RxCount ++;
+				pMbss->ReceivedByteCount.QuadPart += pRxWI->MPDUtotalByteCount;
+				INC_COUNTER64(pMbss->RxCount);
 			}
 		}
 
@@ -4892,7 +4892,7 @@ BOOLEAN APRxDoneInterruptHandle(
 		SET_OPMODE_AP(&RxCell);
 
 		/* Increase Total receive byte counter after real data received no mater any error or not */
-		pAd->RalinkCounters.ReceivedByteCount += pRxWI->MPDUtotalByteCount;
+		pAd->RalinkCounters.ReceivedByteCount.QuadPart += pRxWI->MPDUtotalByteCount;
 		pAd->RalinkCounters.OneSecReceivedByteCount += pRxWI->MPDUtotalByteCount;
 		pAd->RalinkCounters.RxCount ++;
 		pAd->RalinkCounters.OneSecRxCount ++;
@@ -4972,11 +4972,11 @@ BOOLEAN APRxDoneInterruptHandle(
 #ifdef STATS_COUNT_SUPPORT
 			if(pEntry)
 			{
-				pAd->WdsTab.WdsEntry[pEntry->MatchWDSTabIdx].WdsCounter.ReceivedByteCount += pRxWI->MPDUtotalByteCount;
+				pAd->WdsTab.WdsEntry[pEntry->MatchWDSTabIdx].WdsCounter.ReceivedByteCount.QuadPart += pRxWI->MPDUtotalByteCount;
 				INC_COUNTER64(pAd->WdsTab.WdsEntry[pEntry->MatchWDSTabIdx].WdsCounter.ReceivedFragmentCount);
 
 				if(IS_MULTICAST_MAC_ADDR(pHeader->Addr3))
-					INC_COUNTER64(pAd->WdsTab.WdsEntry[pEntry->MatchWDSTabIdx].WdsCounter.MulticastReceivedFrameCount);
+					pAd->WdsTab.WdsEntry[pEntry->MatchWDSTabIdx].WdsCounter.MulticastReceivedFrameCount++;
 
 			}
 #endif /* STATS_COUNT_SUPPORT */
@@ -5115,11 +5115,11 @@ BOOLEAN APHandleRxDonePacket(
 #ifdef STATS_COUNT_SUPPORT
 		if(pEntry)
 		{
-			pAd->WdsTab.WdsEntry[pEntry->MatchWDSTabIdx].WdsCounter.ReceivedByteCount += pRxWI->MPDUtotalByteCount;
+			pAd->WdsTab.WdsEntry[pEntry->MatchWDSTabIdx].WdsCounter.ReceivedByteCount.QuadPart += pRxWI->MPDUtotalByteCount;
 			INC_COUNTER64(pAd->WdsTab.WdsEntry[pEntry->MatchWDSTabIdx].WdsCounter.ReceivedFragmentCount);
 
 			if(IS_MULTICAST_MAC_ADDR(pHeader->Addr3))
-				INC_COUNTER64(pAd->WdsTab.WdsEntry[pEntry->MatchWDSTabIdx].WdsCounter.MulticastReceivedFrameCount);
+				pAd->WdsTab.WdsEntry[pEntry->MatchWDSTabIdx].WdsCounter.MulticastReceivedFrameCount++;
 		}
 #endif /* STATS_COUNT_SUPPORT */
 	}

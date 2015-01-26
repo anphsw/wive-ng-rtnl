@@ -259,8 +259,8 @@ static struct net_device_stats *RT28xx_get_wds_ether_stats(
 			pAd->stats.rx_packets = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.ReceivedFragmentCount.QuadPart;
 			pAd->stats.tx_packets = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.TransmittedFragmentCount.QuadPart;
 
-			pAd->stats.rx_bytes = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.ReceivedByteCount;
-			pAd->stats.tx_bytes = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.TransmittedByteCount;
+			pAd->stats.rx_bytes = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.ReceivedByteCount.QuadPart;
+			pAd->stats.tx_bytes = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.TransmittedByteCount.QuadPart;
 
 			pAd->stats.rx_errors = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.RxErrors;
 			pAd->stats.tx_errors = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.TxErrors;
@@ -268,7 +268,7 @@ static struct net_device_stats *RT28xx_get_wds_ether_stats(
 			pAd->stats.rx_dropped = 0;
 			pAd->stats.tx_dropped = 0;
 
-	  		pAd->stats.multicast = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.MulticastReceivedFrameCount.QuadPart;   // multicast packets received
+	  		pAd->stats.multicast = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.MulticastReceivedFrameCount;   // multicast packets received
 	  		pAd->stats.collisions = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.OneCollision + pAd->WdsTab.WdsEntry[index].WdsCounter.MoreCollisions;  // Collision packets
 	  
 	  		pAd->stats.rx_length_errors = 0;

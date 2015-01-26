@@ -1051,11 +1051,11 @@ INT RTMP_COM_IoctlHandle(
 				{
 					pStats->rx_packets = pAd->WlanCounters.ReceivedFragmentCount.QuadPart;
 					pStats->tx_packets = pAd->WlanCounters.TransmittedFragmentCount.QuadPart;
-					pStats->rx_bytes = pAd->RalinkCounters.ReceivedByteCount;
-					pStats->tx_bytes = pAd->RalinkCounters.TransmittedByteCount;
+					pStats->rx_bytes = pAd->RalinkCounters.ReceivedByteCount.QuadPart;
+					pStats->tx_bytes = pAd->RalinkCounters.TransmittedByteCount.QuadPart;
 					pStats->rx_errors = pAd->Counters8023.RxErrors;
 					pStats->tx_errors = pAd->Counters8023.TxErrors;
-					pStats->multicast = pAd->WlanCounters.MulticastReceivedFrameCount.QuadPart;   /* multicast packets received*/
+					pStats->multicast = pAd->WlanCounters.MulticastReceivedFrameCount.u.LowPart;   /* multicast packets received*/
 					pStats->collisions = pAd->Counters8023.OneCollision + pAd->Counters8023.MoreCollisions;  /* Collision packets*/
 					pStats->rx_over_errors = pAd->Counters8023.RxNoBuffer;                   /* receiver ring buff overflow*/
 					pStats->rx_crc_errors = 0;/*pAd->WlanCounters.FCSErrorCount;      recved pkt with crc error*/
@@ -1094,10 +1094,10 @@ INT RTMP_COM_IoctlHandle(
 						return NDIS_STATUS_FAILURE;
 					}
 					
-					pStats->rx_packets = pAd->ApCfg.MBSSID[index].RxCount;
-					pStats->tx_packets = pAd->ApCfg.MBSSID[index].TxCount;
-					pStats->rx_bytes = pAd->ApCfg.MBSSID[index].ReceivedByteCount;
-					pStats->tx_bytes = pAd->ApCfg.MBSSID[index].TransmittedByteCount;
+					pStats->rx_packets = pAd->ApCfg.MBSSID[index].RxCount.QuadPart;
+					pStats->tx_packets = pAd->ApCfg.MBSSID[index].TxCount.QuadPart;
+					pStats->rx_bytes = pAd->ApCfg.MBSSID[index].ReceivedByteCount.QuadPart;
+					pStats->tx_bytes = pAd->ApCfg.MBSSID[index].TransmittedByteCount.QuadPart;
 					pStats->rx_errors = pAd->ApCfg.MBSSID[index].RxErrorCount;
 					pStats->tx_errors = pAd->ApCfg.MBSSID[index].TxErrorCount;
 					pStats->multicast = pAd->ApCfg.MBSSID[index].mcPktsRx; /* multicast packets received */

@@ -3763,10 +3763,10 @@ INT RTMPAPQueryInformation(
 			os_alloc_mem(pAd, (UCHAR * *) &pMbssStat, sizeof(MBSS_STATISTICS));
 			NdisZeroMemory(pMbssStat, sizeof(MBSS_STATISTICS));
 
-			pMbssStat->TransmittedByteCount = pMbss->TransmittedByteCount;
-			pMbssStat->ReceivedByteCount =  pMbss->ReceivedByteCount;
-			pMbssStat->TxCount =  pMbss->TxCount;
-			pMbssStat->RxCount =  pMbss->RxCount;
+			pMbssStat->TransmittedByteCount.QuadPart = pMbss->TransmittedByteCount.QuadPart;
+			pMbssStat->ReceivedByteCount.QuadPart =  pMbss->ReceivedByteCount.QuadPart;
+			pMbssStat->TxCount.QuadPart =  pMbss->TxCount.QuadPart;
+			pMbssStat->RxCount.QuadPart =  pMbss->RxCount.QuadPart;
 			pMbssStat->RxErrorCount =  pMbss->RxErrorCount;
 			pMbssStat->RxDropCount =  pMbss->RxDropCount;
 			pMbssStat->TxErrorCount =  pMbss->TxErrorCount;
@@ -6466,10 +6466,10 @@ INT	Show_Sat_Proc(
 	for (apidx=0; apidx < pAd->ApCfg.BssidNum; apidx++)
 	{
 		printk("-- IF-ra%d -- \n", apidx);
-		printk("Packets Received = %ld\n", (ULONG)pAd->ApCfg.MBSSID[apidx].RxCount);
-		printk("Packets Sent = %ld\n", (ULONG)pAd->ApCfg.MBSSID[apidx].TxCount);
-		printk("Bytes Received = %ld\n", (ULONG)pAd->ApCfg.MBSSID[apidx].ReceivedByteCount);
-		printk("Byte Sent = %ld\n", (ULONG)pAd->ApCfg.MBSSID[apidx].TransmittedByteCount);
+		printk("Packets Received = %ld\n", (ULONG)pAd->ApCfg.MBSSID[apidx].RxCount.u.LowPart);
+		printk("Packets Sent = %ld\n", (ULONG)pAd->ApCfg.MBSSID[apidx].TxCount.u.LowPart);
+		printk("Bytes Received = %ld\n", (ULONG)pAd->ApCfg.MBSSID[apidx].ReceivedByteCount.u.LowPart);
+		printk("Byte Sent = %ld\n", (ULONG)pAd->ApCfg.MBSSID[apidx].TransmittedByteCount.u.LowPart);
 		printk("Error Packets Received = %ld\n", (ULONG)pAd->ApCfg.MBSSID[apidx].RxErrorCount);
 		printk("Drop Received Packets = %ld\n", (ULONG)pAd->ApCfg.MBSSID[apidx].RxDropCount);
 		
@@ -8161,10 +8161,10 @@ VOID RTMPIoctlStatistics(
  * Therefore, we can parse them out in cfg_manager. --Trey */
 #ifdef BB_SOC
     for (index = 0; index < pAd->ApCfg.BssidNum; index++){
-        rxPackets += (ULONG)pAd->ApCfg.MBSSID[index].RxCount;
-        txPackets += (ULONG)pAd->ApCfg.MBSSID[index].TxCount;
-        rxBytes += (ULONG)pAd->ApCfg.MBSSID[index].ReceivedByteCount;
-        txBytes += (ULONG)pAd->ApCfg.MBSSID[index].TransmittedByteCount;
+        rxPackets += (ULONG)pAd->ApCfg.MBSSID[index].RxCount.u.LowPart;
+        txPackets += (ULONG)pAd->ApCfg.MBSSID[index].TxCount.u.LowPart;
+        rxBytes += (ULONG)pAd->ApCfg.MBSSID[index].ReceivedByteCount.u.LowPart;
+        txBytes += (ULONG)pAd->ApCfg.MBSSID[index].TransmittedByteCount.u.LowPart;
     }
     sprintf(msg+strlen(msg), "Packets Received       = %lu\n", rxPackets);
     sprintf(msg+strlen(msg), "Packets Sent           = %lu\n", txPackets);

@@ -502,10 +502,10 @@ typedef struct _NDIS_802_11_STATISTICS {
 } NDIS_802_11_STATISTICS, *PNDIS_802_11_STATISTICS;
 
 typedef struct _MBSS_STATISTICS {
-	LONG TxCount;
-	ULONG RxCount;
-	ULONG ReceivedByteCount;
-	ULONG TransmittedByteCount;
+	LARGE_INTEGER TxCount;
+	LARGE_INTEGER RxCount;
+	LARGE_INTEGER ReceivedByteCount;
+	LARGE_INTEGER TransmittedByteCount;
 	ULONG RxErrorCount;
 	ULONG RxDropCount;
 	ULONG TxErrorCount;

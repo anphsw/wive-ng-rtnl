@@ -1162,7 +1162,7 @@ BOOLEAN STARxDoneInterruptHandle(
 		SET_OPMODE_STA(&RxCell);
 
 		/* Increase Total receive byte counter after real data received no mater any error or not */
-		pAd->RalinkCounters.ReceivedByteCount += pRxWI->MPDUtotalByteCount;
+		pAd->RalinkCounters.ReceivedByteCount.QuadPart += pRxWI->MPDUtotalByteCount;
 		pAd->RalinkCounters.OneSecReceivedByteCount += pRxWI->MPDUtotalByteCount;
 		pAd->RalinkCounters.RxCount++;
 

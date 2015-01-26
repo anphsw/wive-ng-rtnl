@@ -1137,8 +1137,8 @@ static struct net_device_stats *RT28xx_get_ether_stats(
 		pAd->stats.rx_packets = pAd->WlanCounters.ReceivedFragmentCount.QuadPart;
 		pAd->stats.tx_packets = pAd->WlanCounters.TransmittedFragmentCount.QuadPart;
 
-		pAd->stats.rx_bytes = pAd->RalinkCounters.ReceivedByteCount;
-		pAd->stats.tx_bytes = pAd->RalinkCounters.TransmittedByteCount;
+		pAd->stats.rx_bytes = pAd->RalinkCounters.ReceivedByteCount.QuadPart;
+		pAd->stats.tx_bytes = pAd->RalinkCounters.TransmittedByteCount.QuadPart;
 
 		pAd->stats.rx_errors = pAd->Counters8023.RxErrors;
 		pAd->stats.tx_errors = pAd->Counters8023.TxErrors;
@@ -1146,7 +1146,7 @@ static struct net_device_stats *RT28xx_get_ether_stats(
 		pAd->stats.rx_dropped = 0;
 		pAd->stats.tx_dropped = 0;
 
-	    pAd->stats.multicast = pAd->WlanCounters.MulticastReceivedFrameCount.QuadPart;   // multicast packets received
+	    pAd->stats.multicast = pAd->WlanCounters.MulticastReceivedFrameCount.u.LowPart;   // multicast packets received
 	    pAd->stats.collisions = pAd->Counters8023.OneCollision + pAd->Counters8023.MoreCollisions;  // Collision packets
 
 	    pAd->stats.rx_length_errors = 0;

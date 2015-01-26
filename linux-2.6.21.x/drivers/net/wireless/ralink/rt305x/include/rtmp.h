@@ -846,8 +846,8 @@ typedef struct _COUNTER_RALINK {
 	UINT32          OneSecRxAggregationCount;
 	UINT32			OneSecEnd; /* for one sec count clear use */
 
-	ULONG           TransmittedByteCount;   // both successful and failure, used to calculate TX throughput
-	ULONG           ReceivedByteCount;      // both CRC okay and CRC error, used to calculate RX throughput
+	LARGE_INTEGER           TransmittedByteCount;   // both successful and failure, used to calculate TX throughput
+	LARGE_INTEGER           ReceivedByteCount;      // both CRC okay and CRC error, used to calculate RX throughput
 	ULONG           BadCQIAutoRecoveryCount;
 	ULONG           PoorCQIRoamingCount;
 	ULONG           MgmtRingFullCount;
@@ -1708,10 +1708,10 @@ typedef struct _MULTISSID_STRUCT {
 	NDIS_802_11_WEP_STATUS				GroupKeyWepStatus;
 	WPA_MIX_PAIR_CIPHER					WpaMixPairCipher;
 
-	ULONG								TxCount;
-	ULONG								RxCount;
-	ULONG								ReceivedByteCount;
-	ULONG								TransmittedByteCount;
+	LARGE_INTEGER								TxCount;
+	LARGE_INTEGER								RxCount;
+	LARGE_INTEGER								ReceivedByteCount;
+	LARGE_INTEGER								TransmittedByteCount;
 	ULONG								RxErrorCount;
 	ULONG								RxDropCount;
 
@@ -3121,11 +3121,11 @@ typedef struct _MAC_TABLE {
 typedef struct _WDS_COUNTER {
 	LARGE_INTEGER   ReceivedFragmentCount;
 	LARGE_INTEGER   TransmittedFragmentCount;
-	ULONG           ReceivedByteCount;
-	ULONG           TransmittedByteCount; 
+	LARGE_INTEGER           ReceivedByteCount;
+	LARGE_INTEGER           TransmittedByteCount; 
 	ULONG       RxErrors;
 	ULONG       TxErrors;
-	LARGE_INTEGER   MulticastReceivedFrameCount;
+	ULONG   MulticastReceivedFrameCount;
 	ULONG       OneCollision;
 	ULONG       MoreCollisions;
 	ULONG       RxNoBuffer;

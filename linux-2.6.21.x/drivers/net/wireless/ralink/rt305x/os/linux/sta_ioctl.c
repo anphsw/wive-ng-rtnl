@@ -5702,8 +5702,8 @@ ACM_BANDWIDTH_INFO BwInfo, *pInfo;
             {
                 pLinkStatus->CurrTxRate = RateIdTo500Kbps[pAd->CommonCfg.TxRate];   // unit : 500 kbps
                 pLinkStatus->ChannelQuality = pAd->Mlme.ChannelQuality;
-                pLinkStatus->RxByteCount = pAd->RalinkCounters.ReceivedByteCount;
-                pLinkStatus->TxByteCount = pAd->RalinkCounters.TransmittedByteCount;
+                pLinkStatus->RxByteCount = pAd->RalinkCounters.ReceivedByteCount.u.LowPart;
+                pLinkStatus->TxByteCount = pAd->RalinkCounters.TransmittedByteCount.u.LowPart;
         		pLinkStatus->CentralChannel = pAd->CommonCfg.CentralChannel;
                 wrq->u.data.length = sizeof(RT_802_11_LINK_STATUS);
                 Status = copy_to_user(wrq->u.data.pointer, pLinkStatus, wrq->u.data.length);

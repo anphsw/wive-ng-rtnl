@@ -2861,13 +2861,13 @@ BOOLEAN ApCli_StatsGet(
 	pStats->rx_packets = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.ReceivedFragmentCount.QuadPart;
 	pStats->tx_packets = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.TransmittedFragmentCount.QuadPart;
 
-	pStats->rx_bytes = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.ReceivedByteCount;
-	pStats->tx_bytes = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.TransmittedByteCount;
+	pStats->rx_bytes = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.ReceivedByteCount.QuadPart;
+	pStats->tx_bytes = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.TransmittedByteCount.QuadPart;
 
 	pStats->rx_errors = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.RxErrors;
 	pStats->tx_errors = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.TxErrors;
 
-	pStats->multicast = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.MulticastReceivedFrameCount.QuadPart;   /* multicast packets received */
+	pStats->multicast = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.MulticastReceivedFrameCount;   /* multicast packets received */
 	pStats->collisions = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.OneCollision + pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.MoreCollisions;  /* Collision packets */
 
 	pStats->rx_over_errors = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.RxNoBuffer;                   /* receiver ring buff overflow */

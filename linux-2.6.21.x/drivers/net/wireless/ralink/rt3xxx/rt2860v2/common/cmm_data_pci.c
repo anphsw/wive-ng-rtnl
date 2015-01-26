@@ -698,7 +698,7 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 
 				if  ((pAd->ate.bQATxStart == TRUE) && (pAd->ate.Mode & ATE_TXFRAME) && (pAd->ate.TxDoneCount < pAd->ate.TxCount))
 				{
-					pAd->RalinkCounters.TransmittedByteCount +=  (pTxD->SDLen1 + pTxD->SDLen0);
+					pAd->RalinkCounters.TransmittedByteCount.QuadPart +=  (pTxD->SDLen1 + pTxD->SDLen0);
 					pAd->RalinkCounters.OneSecTransmittedByteCount += (pTxD->SDLen1 + pTxD->SDLen0);
 					pAd->RalinkCounters.OneSecDmaDoneCount[QueIdx] ++;
 
@@ -848,7 +848,7 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 		/* flush dcache if no consistent memory is supported */
 		RTMP_DCACHE_FLUSH(pTxRing->Cell[pTxRing->TxSwFreeIdx].AllocPa, RXD_SIZE);
 
-		pAd->RalinkCounters.TransmittedByteCount +=  (pTxD->SDLen1 + pTxD->SDLen0);
+		pAd->RalinkCounters.TransmittedByteCount.QuadPart +=  (pTxD->SDLen1 + pTxD->SDLen0);
 		pAd->RalinkCounters.OneSecTransmittedByteCount += (pTxD->SDLen1 + pTxD->SDLen0);
 		pAd->RalinkCounters.OneSecDmaDoneCount[QueIdx] ++;
 		INC_RING_INDEX(pTxRing->TxSwFreeIdx, TX_RING_SIZE);
