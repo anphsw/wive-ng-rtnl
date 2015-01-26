@@ -127,7 +127,7 @@ start() {
     # timezone
     #
     if [ "$TZ" = "" ]; then
-        nvram_set 2860 "OMST-7"
+        nvram_set 2860 TZ "OMST-7"
     fi
 
     #
