@@ -44,7 +44,7 @@
 
 #include <linux/autoconf.h>
 
-#include "defs.h"
+#include "igmpproxy.h"
 
 #if defined(WIFI_IGMPSNOOP_SUPPORT) || defined(SEARCH_CLIENT_IN_WIFI_MACTABLE)
 #include "wireless.h"

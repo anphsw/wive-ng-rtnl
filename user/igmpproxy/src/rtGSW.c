@@ -9,8 +9,7 @@
 #include <sys/socket.h>
 
 #include <linux/autoconf.h>
-#include "defs.h"
-#include "ralink.h"
+#include "igmpproxy.h"
 #include "ra_ioctl.h"			/*new switch address define*/
 
 #define END_OF_MAC_TABLE		0xFFFFFFFF

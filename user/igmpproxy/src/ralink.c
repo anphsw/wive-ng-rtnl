@@ -38,8 +38,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 
-#include "defs.h"
-#include "ralink.h"
+#include "igmpproxy.h"
 #include <linux/autoconf.h>
 #include <linux/wireless.h>
 
