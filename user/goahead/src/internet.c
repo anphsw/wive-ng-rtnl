@@ -738,10 +738,12 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 	system("service vpnhelper restart");
 
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	if (submitUrl[0])
-		websRedirect(wp, submitUrl);
-	else
+#ifdef PRINT_DEBUG
+	if (!submitUrl || !submitUrl[0])
 		websDone(wp, 200);
+	else
+#endif
+		websRedirect(wp, submitUrl);
 }
 
 /*
@@ -1869,10 +1871,12 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("<script language=\"JavaScript\" type=\"text/javascript\">ajaxReloadDelayedPage(10000, '/internet/routing.asp', true);</script>\n"));
 	websFooter(wp);
 
-	if (submitUrl[0])
-		websRedirect(wp, submitUrl);
-	else
+	if (!submitUrl || !submitUrl[0])
+#ifdef PRINT_DEBUG
 		websDone(wp, 200);
+	else
+#endif
+		websRedirect(wp, submitUrl);
 }
 
 #ifdef CONFIG_USER_ZEBRA
@@ -2005,7 +2009,7 @@ void initInternet(void)
 #if defined(CONFIG_RT2860V2_STA) || defined(CONFIG_RT2860V2_STA_MODULE)
 	char *opmode;
 #endif
-	//first generate user routes files and fierwall script
+	//first generate user routes and fierwall scripts
 	staticRoutingInit();
 	firewall_rebuild_etc();
 
@@ -2115,7 +2119,7 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 #ifdef PRINT_DEBUG
-	if (! submitUrl[0])
+	if (!submitUrl || !submitUrl[0])
 	{
 		//debug print
 		websHeader(wp);
@@ -2409,10 +2413,12 @@ static void setIPv6(webs_t wp, char_t *path, char_t *query)
 	websFooter(wp);
 
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	if (submitUrl[0])
-		websRedirect(wp, submitUrl);
-	else
+#ifdef PRINT_DEBUG
+	if (!submitUrl || !submitUrl[0])
 		websDone(wp, 200);
+	else
+#endif
+		websRedirect(wp, submitUrl);
 }
 
 #ifdef CONFIG_USER_CHILLISPOT

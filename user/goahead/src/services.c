@@ -308,10 +308,12 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 	doSystem("service dhcpd restart");
 
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	if (submitUrl != NULL)
-		websRedirect(wp, submitUrl);
-	else
+#ifdef PRINT_DEBUG
+	if (!submitUrl || !submitUrl[0])
 		websDone(wp, 200);
+	else
+#endif
+		websRedirect(wp, submitUrl);
 }
 
 
@@ -480,10 +482,12 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 		doSystem("services_restart.sh misc");
 
 		char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-		if (submitUrl != NULL)
-			websRedirect(wp, submitUrl);
-		else
+#ifdef PRINT_DEBUG
+		if (!submitUrl || !submitUrl[0])
 			websDone(wp, 200);
+		else
+#endif
+			websRedirect(wp, submitUrl);
 	}
 }
 
@@ -519,10 +523,12 @@ static void setSamba(webs_t wp, char_t *path, char_t *query)
 	doSystem("service samba restart");
 
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	if (submitUrl != NULL)
-		websRedirect(wp, submitUrl);
-	else
+#ifdef PRINT_DEBUG
+	if (!submitUrl || !submitUrl[0])
 		websDone(wp, 200);
+	else
+#endif
+		websRedirect(wp, submitUrl);
 }
 
 //------------------------------------------------------------------------------
@@ -554,13 +560,16 @@ void formIptAccounting(webs_t wp, char_t *path, char_t *query)
 	}
 
 	doSystem("modprobe -q ipt_account");
-	doSystem("service iptables restart");
+
+	firewall_rebuild();
 
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	if (submitUrl != NULL)
-		websRedirect(wp, submitUrl);
-	else
+#ifdef PRINT_DEBUG
+	if (!submitUrl || !submitUrl[0])
 		websDone(wp, 200);
+	else
+#endif
+		websRedirect(wp, submitUrl);
 }
 
 #ifndef IPT_SHORT_ACCOUNT
@@ -772,15 +781,18 @@ static void l2tpConfig(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
+	firewall_rebuild();
+
 	doSystem("service vpnserver restart");
-	doSystem("service iptables restart");
 
 	// Redirect if possible
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	if (submitUrl != NULL)
-		websRedirect(wp, submitUrl);
-	else
+#ifdef PRINT_DEBUG
+	if (!submitUrl || !submitUrl[0])
 		websDone(wp, 200);
+	else
+#endif
+		websRedirect(wp, submitUrl);
 }
 
 static int getL2TPUserList(int eid, webs_t wp, int argc, char_t **argv)

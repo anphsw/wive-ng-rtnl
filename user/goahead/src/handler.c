@@ -411,6 +411,3 @@ static char_t *websCondenseMultipleChars(char_t *strToCondense, char_t cCondense
 
 	return strToCondense;
 }
-
-/******************************************************************************/
-

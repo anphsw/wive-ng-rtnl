@@ -473,7 +473,7 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	    RT_802_11_MAC_ENTRY *pe = &(table.Entry[i]);
 
 	    // MAC Address
-	    websWrite(wp, T("<tr><td>%02X:%02X:%02X:%02X:%02X:%02X</td>"),
+	    websWrite(wp, T("<tr><td bgcolor=\"#c4d7ff\">%02X:%02X:%02X:%02X:%02X:%02X</td>"),
 			pe->Addr[0], pe->Addr[1], pe->Addr[2], pe->Addr[3], pe->Addr[4], pe->Addr[5]);
 
 	    // Connection Time
@@ -531,7 +531,7 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	    RT_802_11_MAC_ENTRY2 *pe = &(table2.Entry[i]);
 
 	    // MAC Address
-	    websWrite(wp, T("<tr><td>%02X:%02X:%02X:%02X:%02X:%02X</td>"),
+	    websWrite(wp, T("<tr><td bgcolor=\"#c4ffc4\">%02X:%02X:%02X:%02X:%02X:%02X</td>"),
 			pe->Addr[0], pe->Addr[1], pe->Addr[2], pe->Addr[3], pe->Addr[4], pe->Addr[5]);
 
 	    // Connection Time
@@ -979,7 +979,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 #ifdef PRINT_DEBUG
-	if (! submitUrl[0])
+	if (!submitUrl || !submitUrl[0])
 	{
 		//debug print
 		websHeader(wp);
@@ -1173,7 +1173,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 #ifdef PRINT_DEBUG
-	if (! submitUrl[0]) {
+	if (!submitUrl || !submitUrl[0]) {
 		//debug print
 		websHeader(wp);
 		websWrite(wp, T("bg_protection: %s<br>\n"), bg_protection);
@@ -1188,7 +1188,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 		websWrite(wp, T("pkt_aggregate: %s<br>\n"), pkt_aggregate);
 		websWrite(wp, T("rd_region: %s<br>\n"), rd_region);
 		websWrite(wp, T("countrycode: %s<br>\n"), countrycode);
-		websWrite(wp, T("lna_gain: %s<br>\n"), lna_gain);
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 		websWrite(wp, T("m2u_enable: %s<br>\n"), m2u_enable);
 		websWrite(wp, T("mcast_mcs: %s<br>\n"), mcast_mcs);
@@ -1237,7 +1236,7 @@ static void wirelessWds(webs_t wp, char_t *path, char_t *query)
 
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 #ifdef PRINT_DEBUG
-	if (! submitUrl[0])
+	if (!submitUrl || !submitUrl[0])
 	{
 		//debug print
 		websHeader(wp);
@@ -1281,12 +1280,13 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	//debug print
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	if (submitUrl[0])
-		websRedirect(wp, submitUrl);
-	else
+#ifdef PRINT_DEBUG
+	if (!submitUrl || !submitUrl[0])
 		websDone(wp, 200);
+	else
+#endif
+		websRedirect(wp, submitUrl);
 
 	//network configure
 	doSystem("internet.sh");
@@ -1743,7 +1743,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 #ifdef PRINT_DEBUG
-	if (! submitUrl[0])
+	if (!submitUrl || !submitUrl[0])
 	{
 		//debug print
 		websHeader(wp);
@@ -1919,19 +1919,28 @@ void disconnectSta(webs_t wp, char_t *path, char_t *query)
 
 	if ((mac != NULL) && (strlen(mac) > 0))
 	{
-		if (strcmp(mac, "*") == 0)
+		if (strcmp(mac, "*") == 0) {
 			doSystem("iwpriv ra0 set DisConnectAllSta=1");
-		else if (strlen(mac) == 17)
-		{
+#if defined(CONFIG_RT3090_AP) || defined(CONFIG_RT3090_AP_MODULE)
+			doSystem("iwpriv rai0 set DisConnectAllSta=1");
+#endif
+		} else if (strlen(mac) == 17) {
 			char cmd[80];
+
 			sprintf(cmd, "iwpriv ra0 set DisConnectSta=%s", mac);
 			doSystem(cmd);
+#if defined(CONFIG_RT3090_AP) || defined(CONFIG_RT3090_AP_MODULE)
+			sprintf(cmd, "iwpriv rai0 set DisConnectSta=%s", mac);
+			doSystem(cmd);
+#endif
 		}
 	}
 
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	if (submitUrl[0])
-		websRedirect(wp, submitUrl);
-	else
+#ifdef PRINT_DEBUG
+	if (!submitUrl || !submitUrl[0])
 		websDone(wp, 200);
+	else
+#endif
+		websRedirect(wp, submitUrl);
 }
