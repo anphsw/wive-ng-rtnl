@@ -18,11 +18,14 @@ umount_all() {
     fi
 
     # disable swaps
-    if [ -f /bin/swapoff ]; then
-	echo "Disable swaps."
-	swapoff -a
+    if [ -f /proc/swaps ] && [ -f /bin/swapoff ]; then
+	swapparts=`cat /proc/swaps | grep dev | awk {' print $1 '}`
+	for disk in $swapparts; do
+	    $LOG "swap off dev $disk"
+	    swapoff "$disk"
+    	    sleep 2
+	done
     fi
-
 }
 
 umount_all
