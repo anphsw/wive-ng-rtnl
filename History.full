@@ -2135,23 +2135,24 @@
 12) nvram tool: fix generate wifi config.<br>
 13) goahead: cleanup dead code and fix debug.<br>
 14) goahead: fix redirect submit-url issue (may be crash or not correct redirects).<br>
-15) igmpproxy: fix init mrDesc.<br>
-16) xl2tpd: up to Nov 26, 2014 git version.<br>
-17) miniupnpd: up to 1.9.20141209 version.<br>
-18) uClibc: resolv more compliant with RFC1034.<br>
-19) pppd: fix segfault pppol2tp plugin on IPv6 disabled (broken L2TP).<br>
-20) xupnpd: update to 404r.<br>
-21) xupnpd: lua: update to 5.3.0 version.<br>
-22) igmpproxy: optimize retry timeouts.<br>
-23) kernel/configs: full disable vlan offload support for 3x5x (not correct work and not used long time).<br>
-24) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
-25) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
-26) kernel: ralink_wifi: use 64 bit traffic counters.<br>
-27) kernel: mips: Properly align the .data..init_task section.<br>
-28) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
-29) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
-30) kernel: netfilter: nf_conntrack: allow server to become a client in TW handling.<br>
-31) kernel: net: rearrange loop in net_rx_action.<br>
+15) goahead: boost ipaddress buffer size.<br>
+16) igmpproxy: fix init mrDesc.<br>
+17) xl2tpd: up to Nov 26, 2014 git version.<br>
+18) miniupnpd: up to 1.9.20141209 version.<br>
+19) uClibc: resolv more compliant with RFC1034.<br>
+20) pppd: fix segfault pppol2tp plugin on IPv6 disabled (broken L2TP).<br>
+21) xupnpd: update to 404r.<br>
+22) xupnpd: lua: update to 5.3.0 version.<br>
+23) igmpproxy: optimize retry timeouts.<br>
+24) kernel/configs: full disable vlan offload support for 3x5x (not correct work and not used long time).<br>
+25) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
+26) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
+27) kernel: ralink_wifi: use 64 bit traffic counters.<br>
+28) kernel: mips: Properly align the .data..init_task section.<br>
+29) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
+30) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
+31) kernel: netfilter: nf_conntrack: allow server to become a client in TW handling.<br>
+32) kernel: net: rearrange loop in net_rx_action.<br>
 <br>
 <br>
 <br>
