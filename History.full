@@ -2124,36 +2124,37 @@
 1) toolchain: update kernel headers and gcc up to 4.8.4 release.<br>
 2) build_system: use no reorder block gcc flag for build with optimize for size.<br>
 3) uboot: update to last version.<br>
-4) busybox: update to 1.23.0 version.<br>
-5) busybox: sync with upstream (busybox-1.23.0-ash.patch, busybox-1.23.0-modprobe.patch, busybox-1.23.0-vi.patch).<br>
-6) busybox: downgrade zcip code to 1.22.x version(easy fix new gcc issue, need rewrite later).<br>
-7) busybox: fix create char device /dev/mtdX as block device (child for /dev/mtdblockX).<br>
-8) reg tool: small fixup.<br>
-9) mii tool: fixup and add 7628 support.<br>
-10) gpio tool: fix 9532 mode support.<br>
-11) nvram lib: do not direct read from flash at show.<br>
-12) nvram tool: fix generate wifi config.<br>
-13) goahead: cleanup dead code and fix debug.<br>
-14) goahead: fix redirect submit-url issue (may be crash or not correct redirects).<br>
-15) goahead: boost ipaddress buffer size.<br>
-16) goahead: tune default parametrs (increase preallocated bufferss and others).<br>
-17) igmpproxy: fix init mrDesc.<br>
-18) xl2tpd: up to Nov 26, 2014 git version.<br>
-19) miniupnpd: up to 1.9.20141209 version.<br>
-20) uClibc: resolv more compliant with RFC1034.<br>
-21) pppd: fix segfault pppol2tp plugin on IPv6 disabled (broken L2TP).<br>
-22) xupnpd: update to 404r.<br>
-23) xupnpd: lua: update to 5.3.0 version.<br>
-24) igmpproxy: optimize retry timeouts.<br>
-25) kernel/configs: full disable vlan offload support for 3x5x (not correct work and not used long time).<br>
-26) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
-27) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
-28) kernel: ralink_wifi: use 64 bit traffic counters.<br>
-29) kernel: mips: Properly align the .data..init_task section.<br>
-30) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
-31) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
-32) kernel: netfilter: nf_conntrack: allow server to become a client in TW handling.<br>
-33) kernel: net: rearrange loop in net_rx_action.<br>
+4) libevent: up to 2.0.22 version.<br>
+5) busybox: update to 1.23.0 version.<br>
+6) busybox: sync with upstream (busybox-1.23.0-ash.patch, busybox-1.23.0-modprobe.patch, busybox-1.23.0-vi.patch).<br>
+7) busybox: downgrade zcip code to 1.22.x version(easy fix new gcc issue, need rewrite later).<br>
+8) busybox: fix create char device /dev/mtdX as block device (child for /dev/mtdblockX).<br>
+9) reg tool: small fixup.<br>
+10) mii tool: fixup and add 7628 support.<br>
+11) gpio tool: fix 9532 mode support.<br>
+12) nvram lib: do not direct read from flash at show.<br>
+13) nvram tool: fix generate wifi config.<br>
+14) goahead: cleanup dead code and fix debug.<br>
+15) goahead: fix redirect submit-url issue (may be crash or not correct redirects).<br>
+16) goahead: boost ipaddress buffer size.<br>
+17) goahead: tune default parametrs (increase preallocated bufferss and others).<br>
+18) igmpproxy: fix init mrDesc.<br>
+19) xl2tpd: up to Nov 26, 2014 git version.<br>
+20) miniupnpd: up to 1.9.20141209 version.<br>
+21) uClibc: resolv more compliant with RFC1034.<br>
+22) pppd: fix segfault pppol2tp plugin on IPv6 disabled (broken L2TP).<br>
+23) xupnpd: update to 404r.<br>
+24) xupnpd: lua: update to 5.3.0 version.<br>
+25) igmpproxy: optimize retry timeouts.<br>
+26) kernel/configs: full disable vlan offload support for 3x5x (not correct work and not used long time).<br>
+27) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
+28) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
+29) kernel: ralink_wifi: use 64 bit traffic counters.<br>
+30) kernel: mips: Properly align the .data..init_task section.<br>
+31) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
+32) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
+33) kernel: netfilter: nf_conntrack: allow server to become a client in TW handling.<br>
+34) kernel: net: rearrange loop in net_rx_action.<br>
 <br>
 <br>
 <br>
