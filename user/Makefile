@@ -120,13 +120,10 @@ endif
 
 clean:
 	# ">>>>>>>>>>>>>>>> START FULL CLEANUP  <<<<<<<<<<<<<<<<<<<<<<"
-	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || \
-	    ($(MAKE) -C $$i clean; \
-	     $(MAKE) -C $$i dist-clean; \
-	     $(MAKE) -C $$i distclean; \
-	     $(MAKE) -C $$i mrproper) \
-	    done
 	-for i in $(SUBDIRS_APP); do $(MAKE) -C $$i clean; $(RM) -rf $(ROOTDIR)/user/$$i/filesystem/*; done
+	-for i in $(SUBDIRS_APP); do $(MAKE) -C $$i distclean; $(RM) -rf $(ROOTDIR)/user/$$i/filesystem/*; done
+	-for i in $(SUBDIRS_APP); do $(MAKE) -C $$i dist-clean; $(RM) -rf $(ROOTDIR)/user/$$i/filesystem/*; done
+	-for i in $(SUBDIRS_APP); do $(MAKE) -C $$i mrproper; $(RM) -rf $(ROOTDIR)/user/$$i/filesystem/*; done
 
 web:
 	$(MAKE) -C goahead all
