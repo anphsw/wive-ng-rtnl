@@ -443,15 +443,16 @@
 24) xupnpd: update to 404r.<br>
 25) xupnpd: lua: update to 5.3.0 version.<br>
 26) igmpproxy: optimize retry timeouts.<br>
-27) kernel/configs: full disable vlan offload support for 3x5x (not correct work and not used long time).<br>
-28) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
-29) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
-30) kernel: ralink_wifi: use 64 bit traffic counters.<br>
-31) kernel: mips: Properly align the .data..init_task section.<br>
-32) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
-33) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
-34) kernel: netfilter: nf_conntrack: allow server to become a client in TW handling.<br>
-35) kernel: net: rearrange loop in net_rx_action.<br>
+27) dropbear: up to 2015.67 version.<br>
+28) kernel/configs: full disable vlan offload support for 3x5x (not correct work and not used long time).<br>
+29) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
+30) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
+31) kernel: ralink_wifi: use 64 bit traffic counters.<br>
+32) kernel: mips: Properly align the .data..init_task section.<br>
+33) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
+34) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
+35) kernel: netfilter: nf_conntrack: allow server to become a client in TW handling.<br>
+36) kernel: net: rearrange loop in net_rx_action.<br>
 <br>
 <br>
 <br>
