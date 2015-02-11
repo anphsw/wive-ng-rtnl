@@ -439,24 +439,25 @@
 20) goahead: fix potentional security issue (extend path check in url req handler).<br>
 21) goahead: fix info leak in socket reuse code.<br>
 22) goahead: limit request ring length.<br>
-23) igmpproxy: fix init mrDesc.<br>
-24) xl2tpd: up to Nov 26, 2014 git version.<br>
-25) miniupnpd: up to 1.9.20141209 version.<br>
-26) uClibc: resolv more compliant with RFC1034.<br>
-27) pppd: fix segfault pppol2tp plugin on IPv6 disabled (broken L2TP).<br>
-28) xupnpd: update to 404r.<br>
-29) xupnpd: lua: update to 5.3.0 version.<br>
-30) igmpproxy: optimize retry timeouts.<br>
-31) dropbear: up to 2015.67 version.<br>
-32) kernel/configs: full disable vlan offload support for 3x5x (not correct work and not used long time).<br>
-33) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
-34) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
-35) kernel: ralink_wifi: use 64 bit traffic counters.<br>
-36) kernel: mips: Properly align the .data..init_task section.<br>
-37) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
-38) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
-39) kernel: netfilter: nf_conntrack: allow server to become a client in TW handling.<br>
-40) kernel: net: rearrange loop in net_rx_action.<br>
+23) goahead: fix return web error code in some case.<br>
+24) igmpproxy: fix init mrDesc.<br>
+25) xl2tpd: up to Nov 26, 2014 git version.<br>
+26) miniupnpd: up to 1.9.20141209 version.<br>
+27) uClibc: resolv more compliant with RFC1034.<br>
+28) pppd: fix segfault pppol2tp plugin on IPv6 disabled (broken L2TP).<br>
+29) xupnpd: update to 404r.<br>
+30) xupnpd: lua: update to 5.3.0 version.<br>
+31) igmpproxy: optimize retry timeouts.<br>
+32) dropbear: up to 2015.67 version.<br>
+33) kernel/configs: full disable vlan offload support for 3x5x (not correct work and not used long time).<br>
+34) kernel: ralink_wifi: update to 2.7.2.0/2.6.2.0 (20140820) AP/STA drivers.<br>
+35) kernel: ralink_wifi: backport ApCliRcvBeaconTime fix from 3.x.x.x driver.<br>
+36) kernel: ralink_wifi: use 64 bit traffic counters.<br>
+37) kernel: mips: Properly align the .data..init_task section.<br>
+38) kernel: irq: disallow commit to random entropy pool from every irq(decrease latency).<br>
+39) kernel: ralink_spi: add N25Q256A and MT25QL512AB support.<br>
+40) kernel: netfilter: nf_conntrack: allow server to become a client in TW handling.<br>
+41) kernel: net: rearrange loop in net_rx_action.<br>
 <br>
 <br>
 <br>
