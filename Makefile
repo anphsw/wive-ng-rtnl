@@ -347,12 +347,12 @@ clean:
 	find $(ROOTDIR) -type f -name 'aclocal.m4' | xargs rm -f
 	find $(ROOTDIR) -type f -name '.sgbuilt_user' | xargs rm -f
 	find $(ROOTDIR) -type f -name '.config.cmd' | xargs rm -f
-	find $(ROOTDIR)/lib -type f -name '*.o' | xargs rm -f
-	find $(ROOTDIR)/lib -type f -name '*.so' | xargs rm -f
-	find $(ROOTDIR)/user -type f -name '*.o' | xargs rm -f
-	find $(ROOTDIR)/user -type f -name '*.so' | xargs rm -f
-	find $(ROOTDIR)/user -type f -name '*.lo' | xargs rm -f
-	find $(ROOTDIR)/user -type f -name '*.la' | xargs rm -f
+	##############REMOVE UNUSED FILES 3###########################
+	find $(ROOTDIR)/lib $(ROOTDIR)/user -type f -name '*.o' | xargs rm -f
+	find $(ROOTDIR)/lib $(ROOTDIR)/user -type f -name '*.a' | xargs rm -f
+	find $(ROOTDIR)/lib $(ROOTDIR)/user -type f -name '*.so' | xargs rm -f
+	find $(ROOTDIR)/lib $(ROOTDIR)/user -type f -name '*.lo' | xargs rm -f
+	find $(ROOTDIR)/lib $(ROOTDIR)/user -type f -name '*.la' | xargs rm -f
 	##############REMOVE UNUSED FOLDERS###########################
 	find $(ROOTDIR) -type d -name 'filesystem' | xargs rm -rf
 	find $(ROOTDIR) -type d -name 'autom4te.cache' | xargs rm -rf
