@@ -159,7 +159,7 @@ function submit_apply(parm)
         </table>
         <table class="buttons">
           <tr>
-            <td><input value="/usb/Transmission.asp" name="submit-url" type="hidden">
+            <td><input value="/storage/transmission.asp" name="submit-url" type="hidden">
               <input type="button" class="normal" value="Apply" id="TransApply" onClick="submit_apply('apply')">
               &nbsp; &nbsp;
               <input type="button"  class="normal" value="Reset" id="TransReset" onClick="window.location.reload()"></td>
