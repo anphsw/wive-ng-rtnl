@@ -9,18 +9,7 @@
  */
 
 /********************************* Includes ***********************************/
-
-#ifdef UEMF
 	#include	"uemf.h"
-#else
-	#include	"basic/basicInternal.h"
-#endif
-
-/*
- * 16 Sep 03 -- added option to use memcpy() instead of strncpy() in the
- * ascToUni and uniToAsc functions. 
- */
-#define kUseMemcopy
 
 
 /********************************* Defines ************************************/
@@ -29,6 +18,7 @@
  *	a balloc can use a 64 byte block.
  */
 
+#define kUseMemcopy
 #define STR_REALLOC		0x1				/* Reallocate the buffer as required */
 #define STR_INC			64				/* Growth increment */
 
@@ -56,14 +46,11 @@ enum flag {
 
 /************************** Forward Declarations ******************************/
 
-static int 	dsnprintf(char_t **s, int size, char_t *fmt, va_list arg,
-				int msize);
+static int  dsnprintf(char_t **s, int size, char_t *fmt, va_list arg, int msize);
 static int	gstrnlen(char_t *s, unsigned int n);
 static void	put_char(strbuf_t *buf, char_t c);
-static void	put_string(strbuf_t *buf, char_t *s, int len,
-				int width, int prec, enum flag f);
-static void	put_ulong(strbuf_t *buf, unsigned long int value, int base,
-				int upper, char_t *prefix, int width, int prec, enum flag f);
+static void put_string(strbuf_t *buf, char_t *s, int len, int width, int prec, enum flag f);
+static void put_ulong(strbuf_t *buf, unsigned long int value, int base, int upper, char_t *prefix, int width, int prec, enum flag f);
 
 /************************************ Code ************************************/
 /*

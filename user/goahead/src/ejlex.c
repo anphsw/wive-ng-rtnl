@@ -16,15 +16,8 @@
  */
 
 /********************************** Includes **********************************/
-
 #include	"ejIntrn.h"
-
-#ifdef UEMF
 	#include "uemf.h"
-#else
-	#include "basic/basicInternal.h"
-#endif
-
 /********************************** Defines ***********************************/
 #define		OCTAL	8
 #define		HEX		16

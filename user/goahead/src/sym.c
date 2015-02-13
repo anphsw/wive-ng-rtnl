@@ -17,13 +17,7 @@
  */
 
 /********************************* Includes ***********************************/
-
-#ifdef UEMF
 	#include	"uemf.h"
-#else
-	#include	"basic/basicInternal.h"
-#endif
-
 /********************************* Defines ************************************/
 
 typedef struct {						/* Symbol table descriptor */

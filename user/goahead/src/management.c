@@ -808,11 +808,6 @@ error:
 }
 #endif
 
-static int getGAPBuilt(int eid, webs_t wp, int argc, char_t **argv)
-{
-	return websWrite(wp, T("0"));
-}
-
 void formDefineManagement(void)
 {
 	websFormDefine(T("setSysAdm"), setSysAdm);
@@ -821,7 +816,6 @@ void formDefineManagement(void)
 #ifdef CONFIG_DATE
 	websFormDefine(T("NTPSyncWithHost"), NTPSyncWithHost);
 #endif
-	websAspDefine(T("getGAPBuilt"), getGAPBuilt);
 #ifdef CONFIG_USER_INADYN
 	websFormDefine(T("DDNS"), DDNS);
 #endif
