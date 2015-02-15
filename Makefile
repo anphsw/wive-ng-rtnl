@@ -209,7 +209,7 @@ romfs: romfs.subdirs modules_install romfs.post
 .PHONY: romfs.subdirs
 romfs.subdirs:
 	####################PREPARE-ROMFS####################
-	[ -d $(IMAGEDIR) ] || mkdir $(IMAGEDIR)
+	[ -d $(IMAGEDIR) ] || mkdir -p $(IMAGEDIR)
 	$(MAKEARCH) -C vendors romfs
 	cd $(ROOTDIR)
 	cp -vfra $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
@@ -220,8 +220,8 @@ romfs.subdirs:
 	cp $(ROOTDIR)/version $(ROMFSDIR)/etc/version
 	cd $(ROMFSDIR)/bin && /bin/ln -fvs ../etc/scripts/* . && cd $(ROOTDIR)
 	cd $(ROOTDIR)
-	for dir in $(DIRS) ; do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir romfs || exit 1 ; done
 	#################INSTALL-APPS-ROMFS###################
+	for dir in $(DIRS) ; do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir romfs || exit 1 ; done
 
 .PHONY: modules_install
 modules_install:
@@ -249,7 +249,7 @@ romfs.post:
 
 .PHONY: image
 image:
-	[ -d $(IMAGEDIR) ] || mkdir $(IMAGEDIR)
+	[ -d $(IMAGEDIR) ] || mkdir -p $(IMAGEDIR)
 	$(MAKEARCH) -C vendors image
 
 .PHONY: release
@@ -316,61 +316,30 @@ relink:
 
 clean:
 	################PREPARE FOR CLEANUP############################
+	touch $(ROOTDIR)/lib/.config
 	touch $(ROOTDIR)/linux/.config
+	touch $(ROOTDIR)/.config
 	touch $(ROOTDIR)/config/autoconf.h
 	touch $(ROOTDIR)/config.arch
-	touch $(ROOTDIR)/.config
-	#################CLEAN ALL SUBDIRS#############################
-	for dir in $(LINUXDIR) $(DIRS); do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir clean ; done
-	$(MAKE) clean -C Uboot
-	$(MAKE) clean -C fulldump
-	$(MAKE) clean -C tools
+	################CLEAN ALL SUBDIRS 1############################
+	-for dir in $(DIRS) $(LINUXDIR) Uboot ; do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir clean ; done
+	-for dir in $(DIRS) $(LINUXDIR) Uboot ; do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir distclean ; done
+	################CLEAN ALL SUBDIRS 2############################
+	-$(MAKE) clean -C config
+	-$(MAKE) clean -C tools
+	-$(MAKE) clean -C libnvram
+	-$(MAKE) clean -C libext
+	-$(MAKE) mrproper -C Uboot
+	-$(MAKE) mrproper -C linux
 	##############REMOVE UNUSED FILES 1###########################
-	rm -rf $(ROOTDIR)/dev
-	rm -rf $(IMAGEDIR)
-	rm -rf $(ROMFSDIR)
-	rm -f $(ROOTDIR)/etc/compile-date
-	rm -f $(ROOTDIR)/etc/scripts/config.sh
-	rm -f $(ROOTDIR)/config.tk
-	rm -f $(ROOTDIR)/.tmp*
-	rm -f $(ROOTDIR)/sdk_version.h
-	rm -f $(ROOTDIR)/version
-	rm -f $(LINUXDIR)/linux
-	rm -f $(LINUXDIR)/arch/mips/ramdisk/*.gz
+	rm -f $(ROOTDIR)/etc/compile-date $(ROOTDIR)/etc/scripts/config.sh $(ROOTDIR)/config.tk $(ROOTDIR)/.tmp* $(ROOTDIR)/sdk_version.h $(ROOTDIR)/version $(LINUXDIR)/linux $(LINUXDIR)/arch/mips/ramdisk/*.gz
 	##############REMOVE UNUSED FILES 2###########################
-	find $(ROOTDIR) -type f -name '*.*~' | xargs rm -f
-	find $(ROOTDIR) -type f -name '*.ko' | xargs rm -f
-	find $(ROOTDIR) -type f -name '*.old' | xargs rm -f
-	find $(ROOTDIR) -type f -name '*.log' | xargs rm -f
-	find $(ROOTDIR) -type f -name 'config.log' | xargs rm -f
-	find $(ROOTDIR) -type f -name 'config.status' | xargs rm -f
-	find $(ROOTDIR) -type f -name 'aclocal.m4' | xargs rm -f
-	find $(ROOTDIR) -type f -name '.sgbuilt_user' | xargs rm -f
-	find $(ROOTDIR) -type f -name '.config.cmd' | xargs rm -f
+	find $(ROOTDIR) -type f -a \( -name '*.*~' -o -name '*.ko' -o -name '*.log' -o -name '*.old' -o -name 'config.log' -o -name 'aclocal.m4' -o -name '.sgbuilt_user' -o -name '.config.cmd' \) | xargs rm -f
 	##############REMOVE UNUSED FILES 3###########################
-	find $(ROOTDIR)/lib $(ROOTDIR)/user -type f -name '*.o' | xargs rm -f
-	find $(ROOTDIR)/lib $(ROOTDIR)/user -type f -name '*.a' | xargs rm -f
-	find $(ROOTDIR)/lib $(ROOTDIR)/user -type f -name '*.so' | xargs rm -f
-	find $(ROOTDIR)/lib $(ROOTDIR)/user -type f -name '*.lo' | xargs rm -f
-	find $(ROOTDIR)/lib $(ROOTDIR)/user -type f -name '*.la' | xargs rm -f
+	find $(ROOTDIR)/lib $(ROOTDIR)/libext $(ROOTDIR)/user -type f -a \( -name '*.o' -o -name '*.a' -o -name '*.so' -o -name '*.lo' -o -name '*.la' \) | xargs rm -f 
 	##############REMOVE UNUSED FOLDERS###########################
-	find $(ROOTDIR) -type d -name 'filesystem' | xargs rm -rf
-	find $(ROOTDIR) -type d -name 'autom4te.cache' | xargs rm -rf
-	find $(ROOTDIR) -type d -name 'cvs' | xargs rm -rf
-	find $(ROOTDIR) -type d -name 'CVS' | xargs rm -rf
-	find $(ROOTDIR) -type d -name '.dep' | xargs rm -rf
-	find $(ROOTDIR) -type d -name '.deps' | xargs rm -rf
-
-mrproper: clean
-	$(MAKE) mrproper -C Uboot
-	$(MAKE) mrproper -C linux
-	$(MAKE) clean -C config
-	rm -rf romfs config.in config.arch config.tk images
-	rm -f modules/config.tk
-	rm -rf .config .config.old .oldconfig autoconf.h
-
-distclean: mrproper
-	$(MAKE) -C linux distclean
+	find $(ROOTDIR) -type d -a \( -name 'filesystem' -o -name 'autom4te.cache' -o -name '.libs' -o -name 'cvs' -o -name 'CVS' -o -name '.dep' -o -name '.deps' \) | xargs rm -rf
+	rm -rf $(ROOTDIR)/dev $(IMAGEDIR) $(ROMFSDIR) romfs config.in config.arch config.tk images modules/config.tk .config .config.old .oldconfig autoconf.h
 
 %_only:
 	@case "$(@)" in \
@@ -395,21 +364,8 @@ distclean: mrproper
 	 fi
 	-$(MAKE) clean > /dev/null 2>&1
 	cp vendors/$(@:_default=)/config.device .config
-	chmod u+x config/setconfig
-	yes "" | config/setconfig defaults
-	config/setconfig final
 	$(MAKE) dep
 	$(MAKE)
-
-config_error:
-	@echo "*************************************************"
-	@echo "You have not run make config."
-	@echo "The build sequence for this source tree is:"
-	@echo "1. 'make config' or 'make xconfig'"
-	@echo "2. 'make dep'"
-	@echo "3. 'make'"
-	@echo "*************************************************"
-	@exit 1
 
 dist-prep:
 	-find $(ROOTDIR) -name 'Makefile*.bin' | while read t; do \
@@ -420,5 +376,3 @@ web: web_make romfs image
 
 web_make:
 	$(MAKE) -C user web
-
-############################################################################

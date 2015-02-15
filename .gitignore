@@ -1,3 +1,12 @@
+# all
+*.o
+*.a
+*.a.*
+*.o.*
+*.la
+*.la.*
+*.so
+*.so.*
 *.dep
 *.deps
 *.depend
@@ -14,9 +23,12 @@ autom4te.cache
 autom4te.cache/*
 config.h.in~
 config.log
+configure.log
 config.status
 filesystem
 fulldump
+
+# fullpath
 /romfs
 /romfs/*
 /images

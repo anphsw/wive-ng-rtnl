@@ -11,7 +11,7 @@ if [ "$1" != "RELEASE" ]; then
 fi
 
 echo "------------FULL_DISTCLEAN---------------"
-make distclean
+make clean
 rm -f linux
 
 echo "-------------RESTORE_DIRS----------------"
