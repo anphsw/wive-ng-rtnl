@@ -461,7 +461,7 @@
 
 <br>
 <b>5.1.x</b><br>
-
+1) ethtool: disable build vendors extensions (decrease size).<br>
 <br>
 <br>
 <br>
