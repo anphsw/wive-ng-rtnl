@@ -2166,6 +2166,7 @@
 <br>
 <b>5.1.x</b><br>
 1) ethtool: disable build vendors extensions (decrease size).<br>
+2) usb-modeswitch-data: up to up to 20150115.<br>
 <br>
 <br>
 <br>

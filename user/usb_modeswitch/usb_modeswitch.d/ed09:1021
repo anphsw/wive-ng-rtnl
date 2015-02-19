@@ -1,0 +1,4 @@
+# Aiko 81D, fw with wrong vendor ID
+TargetVendor=0xed09
+TargetProduct=0x1010
+MessageContent="5553424312345678000000000000061b000000020000000000000000000000"
