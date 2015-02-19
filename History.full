@@ -2168,6 +2168,7 @@
 1) ethtool: disable build vendors extensions (decrease size).<br>
 2) ethtool: up to 3.18 version.<br>
 3) usb-modeswitch-data: up to up to 20150115.<br>
+4) kernel: ralink_wifi fix build correct without DBG defined.<br>
 <br>
 <br>
 <br>
