@@ -2168,8 +2168,9 @@
 1) ethtool: disable build vendors extensions (decrease size).<br>
 2) ethtool: up to 3.18 version.<br>
 3) usb-modeswitch-data: up to up to 20150115.<br>
-4) kernel: ralink_wifi fix build correct without DBG defined.<br>
-5) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
+4) busybox: apply busybox-1.23.1-wget.patch.<br>
+5) kernel: ralink_wifi fix build correct without DBG defined.<br>
+6) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
 <br>
 <br>
 <br>
