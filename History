@@ -465,6 +465,7 @@
 2) ethtool: up to 3.18 version.<br>
 3) usb-modeswitch-data: up to up to 20150115.<br>
 4) kernel: ralink_wifi fix build correct without DBG defined.<br>
+5) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
 <br>
 <br>
 <br>
