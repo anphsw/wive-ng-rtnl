@@ -2167,11 +2167,12 @@
 <b>5.1.x</b><br>
 1) ethtool: disable build vendors extensions (decrease size).<br>
 2) ethtool: up to 3.18 version.<br>
-3) usb-modeswitch-data: up to up to 20150115.<br>
-4) busybox: apply busybox-1.23.1-wget.patch.<br>
-5) goahead: fix error messages at call external scripts in some case.<br>
-6) kernel: ralink_wifi fix build correct without DBG defined.<br>
-7) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
+3) quagga: up to 0.99.23.1 version.<br>
+4) usb-modeswitch-data: up to up to 20150115.<br>
+5) busybox: apply busybox-1.23.1-wget.patch.<br>
+6) goahead: fix error messages at call external scripts in some case.<br>
+7) kernel: ralink_wifi fix build correct without DBG defined.<br>
+8) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
 <br>
 <br>
 <br>
