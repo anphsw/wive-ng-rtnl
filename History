@@ -469,6 +469,7 @@
 6) goahead: fix error messages at call external scripts in some case.<br>
 7) kernel: ralink_wifi fix build correct without DBG defined.<br>
 8) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
+9) kernel: net: reject creation of netdev names with colons.<br>
 <br>
 <br>
 <br>
