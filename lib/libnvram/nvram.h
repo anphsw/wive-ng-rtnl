@@ -17,9 +17,11 @@
 #endif
 
 #define BUFSZ			1024
-#define MAX_NV_VALUE_LEN	64
-#define NV_BUFFERS_COUNT	128
 #define ENV_BLK_SIZE		0x1000
+
+/* 128kb max one variable size in nvram */
+#define MAX_NV_VALUE_LEN	131073
+#define NV_BUFFERS_COUNT	128
 
 #ifdef CONFIG_DUAL_IMAGE
 #define ENV_UBOOT_SIZE 0x1000
