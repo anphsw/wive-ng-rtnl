@@ -39,7 +39,7 @@
 #define __ARCH_SUPPORTS_LITTLE_ENDIAN__ 1
 #define __TARGET_ARCH__ "mips"
 #define __ARCH_CFLAGS__ "-ffast-math -fforce-addr -fno-stack-protector -fno-strict-overflow -fno-var-tracking-assignments -fno-aggressive-loop-optimizations -fno-tree-slsr -fomit-frame-pointer -fno-delete-null-pointer-checks -femit-struct-debug-baseonly -fno-var-tracking"
-#define __LIBGCC_CFLAGS__ "-Wall -ffast-math -fforce-addr -fno-stack-protector -fno-strict-overflow -fno-var-tracking-assignments -fno-aggressive-loop-optimizations -fno-tree-slsr -fomit-frame-pointer -fno-delete-null-pointer-checks -femit-struct-debug-baseonly -fno-var-tracking"
+#define __LIBGCC_CFLAGS__ ""
 #undef __ARCH_SUPPORTS_BIG_ENDIAN__
 #undef __CONFIG_MIPS_ISA_1__
 #undef __CONFIG_MIPS_ISA_2__

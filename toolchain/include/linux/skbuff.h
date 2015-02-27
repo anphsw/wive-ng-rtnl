@@ -316,9 +316,6 @@ struct sk_buff {
 	__be16			protocol;
 
 	void			(*destructor)(struct sk_buff *skb);
-#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
-	int                     (*skb_recycling_callback)(struct sk_buff *skb);
-#endif
 #ifdef CONFIG_NETFILTER
 	struct nf_conntrack	*nfct;
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
@@ -1342,19 +1339,6 @@ static __inline__ struct sk_buff *netdev_alloc_skb(struct net_device *dev,
 {
 	return __netdev_alloc_skb(dev, length, GFP_ATOMIC);
 }
-
-#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
-struct sk_buff *skbmgr_alloc_skb2k(void);
-int skbmgr_recycling_callback(struct sk_buff *skb);
-
-static __inline__ struct sk_buff *skbmgr_dev_alloc_skb2k(void)
-{
-        struct sk_buff *skb = skbmgr_alloc_skb2k();
-        if (likely(skb))
-                skb_reserve(skb, NET_SKB_PAD);
-        return skb;
-}
-#endif
 
 static __inline__ struct sk_buff *netdev_alloc_skb_ip_align(struct net_device *dev,
 		unsigned int length)

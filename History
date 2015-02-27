@@ -461,16 +461,17 @@
 
 <br>
 <b>5.1.x</b><br>
-1) libnvram: fix uncorrect value size limit.<br>
-2) ethtool: disable build vendors extensions (decrease size).<br>
-3) ethtool: up to 3.18 version.<br>
-4) quagga: up to 0.99.23.1 version.<br>
-5) usb-modeswitch-data: up to up to 20150115.<br>
-6) busybox: apply busybox-1.23.1-wget.patch.<br>
-7) goahead: fix error messages at call external scripts in some case.<br>
-8) kernel: ralink_wifi fix build correct without DBG defined.<br>
-9) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
-10) kernel: net: reject creation of netdev names with colons.<br>
+1) toolchain: sync uclibc patches, update gcc to 19.02.2015 4.8.5 version form git, update headers.<br>
+2) libnvram: fix uncorrect value size limit.<br>
+3) ethtool: disable build vendors extensions (decrease size).<br>
+4) ethtool: up to 3.18 version.<br>
+5) quagga: up to 0.99.23.1 version.<br>
+6) usb-modeswitch-data: up to up to 20150115.<br>
+7) busybox: apply busybox-1.23.1-wget.patch.<br>
+8) goahead: fix error messages at call external scripts in some case.<br>
+9) kernel: ralink_wifi fix build correct without DBG defined.<br>
+10) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
+11) kernel: net: reject creation of netdev names with colons.<br>
 <br>
 <br>
 <br>
