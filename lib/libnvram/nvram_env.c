@@ -288,11 +288,8 @@ char *nvram_bufget(int index, char *name)
 			FREE(fb[index].cache[idx].value);
 			fb[index].cache[idx].value = strdup(nvr.value);
 			FREE(nvr.value);
-			//Tom.Hung 2010-5-7, strdup() will cause memory leakage
-			//but if we return value directly, it will cause many other crash or delete value to nvram error.
-			ret = sstrdup(fb[index].cache[idx].value);
+			ret = fb[index].cache[idx].value;
 			LIBNV_PRINT("bufget %d '%s'->'%s'\n", index, name, ret);
-
 			//btw, we don't return NULL anymore!
 			if (!ret)
 			    ret = "";
