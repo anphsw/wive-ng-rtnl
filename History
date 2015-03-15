@@ -472,6 +472,7 @@
 9) kernel: ralink_wifi fix build correct without DBG defined.<br>
 10) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
 11) kernel: net: reject creation of netdev names with colons.<br>
+12) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
 <br>
 <br>
 <br>
