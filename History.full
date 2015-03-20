@@ -2178,6 +2178,7 @@
 11) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
 12) kernel: net: reject creation of netdev names with colons.<br>
 13) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
+14) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
 <br>
 <br>
 <br>
