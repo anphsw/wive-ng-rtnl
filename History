@@ -470,11 +470,12 @@
 7) busybox: apply busybox-1.23.1-wget.patch.<br>
 8) goahead: fix error messages at call external scripts in some case.<br>
 9) openssl up to 0.9.8zf version.<br>
-10) kernel: ralink_wifi fix build correct without DBG defined.<br>
-11) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
-12) kernel: net: reject creation of netdev names with colons.<br>
-13) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
-14) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
+10) xupnpd: switch to 5.1.x lua use (fix compat with last portable upnpd sdk with bug utf locale parse).<br>
+11) kernel: ralink_wifi fix build correct without DBG defined.<br>
+12) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
+13) kernel: net: reject creation of netdev names with colons.<br>
+14) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
+15) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
 <br>
 <br>
 <br>
