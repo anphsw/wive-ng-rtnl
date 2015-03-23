@@ -14,7 +14,6 @@ profiles['VIERA']=
     ['options']=
     {
         ['dlna_headers']=true,
-        ['dlna_extras']=true,
-	['default_mime_type']='mpeg_ts'
+        ['dlna_extras']=true
     }
 }
