@@ -35,6 +35,11 @@ calculate_and_set_mtu() {
 
 start() {
     eval `nvram_buf_get 2860 radvdEnabled dhcpv6Enabled IPv6IPAddr IPv6SrvAddr IPv6WANIPAddr IPv6PrefixLen IPv6WANPrefixLen IPv6GWAddr IPv6Dhcpc`
+    if [ "$SysLogd" != "0" ] && [ "$SysLogd" != "" ]; then
+	logto="syslog"
+    else
+	logto="stderr"
+    fi
     if [ "$IPv6OpMode" != "0" ]; then
 
 	# check wan ip set, need v4 adress at wan for tunnels config
@@ -198,7 +203,7 @@ start() {
     	    " >> /etc/radvd.conf
 
 	    $LOG "Starting radvd"
-	    radvd -C /etc/radvd.conf --debug=0 --logmethod=syslog &
+	    radvd -C /etc/radvd.conf --debug=0 --logmethod=$logto &
 	fi
 
 	if [ "$dhcpv6Enabled" = "1" ]; then
