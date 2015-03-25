@@ -415,7 +415,11 @@ cfswitch_buffer(incl)
 	incstack[incstackp].state = YY_CURRENT_BUFFER;
 	incstack[incstackp].lineno = lineno;
 
+#ifdef __linux__
+	fp = fopen(path, "re");
+#else
 	fp = fopen(path, "r");
+#endif
 	if (fp == NULL) {
 		debug_printf(LOG_ERR, FNAME, "cfparse: fopen(%s): %s",
 			path, strerror(errno));
@@ -438,7 +442,11 @@ cfparse(conf)
 	char *conf;
 {
 	configfilename = conf;
+#ifdef __linux__
+	if ((yyin = fopen(configfilename, "re")) == NULL) {
+#else
 	if ((yyin = fopen(configfilename, "r")) == NULL) {
+#endif
 		debug_printf(LOG_ERR, FNAME, "cfparse: fopen(%s): %s",
 			configfilename, strerror(errno));
 		if (errno == ENOENT)
