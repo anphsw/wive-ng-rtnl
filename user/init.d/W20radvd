@@ -35,7 +35,7 @@ calculate_and_set_mtu() {
 
 start() {
     eval `nvram_buf_get 2860 radvdEnabled dhcpv6Enabled IPv6IPAddr IPv6SrvAddr IPv6WANIPAddr IPv6PrefixLen IPv6WANPrefixLen IPv6GWAddr IPv6Dhcpc`
-    if [ "$SysLogd" != "0" ] && [ "$SysLogd" != "" ]; then
+    if [ "$SysLogd" = "1" ]; then
 	logto="syslog"
     else
 	logto="stderr"
