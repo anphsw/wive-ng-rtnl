@@ -470,21 +470,22 @@
 7) busybox: apply busybox-1.23.1-wget.patch.<br>
 8) goahead: fix error messages at call external scripts in some case.<br>
 9) openssl up to 0.9.8zf version.<br>
-10) init.d: fix logging if syslog disabled.<br>
-11) dhcpv6: fix renewal of IA NA.<br>
-12) dhcpv6: close file descriptors on exec.<br>
-13) dhcpv6: try and generate a default IFID only if an IFID is not configured.<br>
-14) dhcpv6: ignore advertise messages with none of requested data and missed status codes.<br>
-15) xupnpd: switch to 5.1.x lua use (fix compat with last portable upnpd sdk with bug utf locale parse).<br>
-16) xupnpd: use mpeg as default mime type (more devices compat whith this type).<br>
-17) xupnpd: implement base profile for Panasonic Viera(need manual default mime set to mpeg_ts now).<br>
-18) xupnpd: auto use udpxy if enabled.<br>
-19) kernel: ralink_wifi fix build correct without DBG defined.<br>
-20) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
-21) kernel: ralink_wifi: disable 40MHz intolerant support if DRAFT3 undefined.<br>
-22) kernel: net: reject creation of netdev names with colons.<br>
-23) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
-24) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
+10) goahead: fix lang select race in some situations.<br>
+11) init.d: fix logging if syslog disabled.<br>
+12) dhcpv6: fix renewal of IA NA.<br>
+13) dhcpv6: close file descriptors on exec.<br>
+14) dhcpv6: try and generate a default IFID only if an IFID is not configured.<br>
+15) dhcpv6: ignore advertise messages with none of requested data and missed status codes.<br>
+16) xupnpd: switch to 5.1.x lua use (fix compat with last portable upnpd sdk with bug utf locale parse).<br>
+17) xupnpd: use mpeg as default mime type (more devices compat whith this type).<br>
+18) xupnpd: implement base profile for Panasonic Viera(need manual default mime set to mpeg_ts now).<br>
+19) xupnpd: auto use udpxy if enabled.<br>
+20) kernel: ralink_wifi fix build correct without DBG defined.<br>
+21) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
+22) kernel: ralink_wifi: disable 40MHz intolerant support if DRAFT3 undefined.<br>
+23) kernel: net: reject creation of netdev names with colons.<br>
+24) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
+25) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
 <br>
 <br>
 <br>
