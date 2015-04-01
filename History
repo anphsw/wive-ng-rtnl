@@ -468,24 +468,25 @@
 5) usb-modeswitch-data: up to up to 20150115.<br>
 6) miniupnpd: up to 1.9.20150307 version.<br>
 7) busybox: apply busybox-1.23.1-wget.patch.<br>
-8) goahead: fix error messages at call external scripts in some case.<br>
-9) openssl up to 0.9.8zf version.<br>
-10) goahead: fix lang select race in some situations.<br>
-11) init.d: fix logging if syslog disabled.<br>
-12) dhcpv6: fix renewal of IA NA.<br>
-13) dhcpv6: close file descriptors on exec.<br>
-14) dhcpv6: try and generate a default IFID only if an IFID is not configured.<br>
-15) dhcpv6: ignore advertise messages with none of requested data and missed status codes.<br>
-16) xupnpd: switch to 5.1.x lua use (fix compat with last portable upnpd sdk with bug utf locale parse).<br>
-17) xupnpd: use mpeg as default mime type (more devices compat whith this type).<br>
-18) xupnpd: implement base profile for Panasonic Viera(need manual default mime set to mpeg_ts now).<br>
-19) xupnpd: auto use udpxy if enabled.<br>
-20) kernel: ralink_wifi fix build correct without DBG defined.<br>
-21) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
-22) kernel: ralink_wifi: disable 40MHz intolerant support if DRAFT3 undefined.<br>
-23) kernel: net: reject creation of netdev names with colons.<br>
-24) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
-25) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
+8) openssl up to 0.9.8zf version.<br>
+9) goahead: fix error messages at call external scripts in some case.<br>
+10) goahead: fix upload firmware error handling.<br>
+11) goahead: fix lang select race in some situations.<br>
+12) init.d: fix logging if syslog disabled.<br>
+13) dhcpv6: fix renewal of IA NA.<br>
+14) dhcpv6: close file descriptors on exec.<br>
+15) dhcpv6: try and generate a default IFID only if an IFID is not configured.<br>
+16) dhcpv6: ignore advertise messages with none of requested data and missed status codes.<br>
+17) xupnpd: switch to 5.1.x lua use (fix compat with last portable upnpd sdk with bug utf locale parse).<br>
+18) xupnpd: use mpeg as default mime type (more devices compat whith this type).<br>
+19) xupnpd: implement base profile for Panasonic Viera(need manual default mime set to mpeg_ts now).<br>
+20) xupnpd: auto use udpxy if enabled.<br>
+21) kernel: ralink_wifi fix build correct without DBG defined.<br>
+22) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
+23) kernel: ralink_wifi: disable 40MHz intolerant support if DRAFT3 undefined.<br>
+24) kernel: net: reject creation of netdev names with colons.<br>
+25) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
+26) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
 <br>
 <br>
 <br>

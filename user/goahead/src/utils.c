@@ -45,13 +45,14 @@ int OidQueryInformation(unsigned long OidQueryCode, int socket_id, char *DeviceN
  */
 void reboot_now(void)
 {
-	sync();
 	Sleep(2);
+	sync();
 #ifdef CONFIG_USER_STORAGE
-	doSystem("/etc/scripts/wifi_unload.sh && reboot > /dev/console 2>&1");
-#else
-	doSystem("reboot");
+	/* always send output to dev/null, fix html_error output */
+	doSystem("/etc/scripts/wifi_unload.sh > /dev/null 2>&1");
 #endif
+	sync();
+	reboot(RB_AUTOBOOT);
 }
 
 void arplookup(char *ip, char *arp)

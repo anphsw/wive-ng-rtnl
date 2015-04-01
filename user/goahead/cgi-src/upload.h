@@ -129,16 +129,18 @@ void *getMemInFile(char *filename, int offset, int len)
 
 static void html_header()
 {
-	printf
+	fprintf
 	(
+		stdout,
 		"Server: %s\n"
 		"Pragma: no-cache\n"
 		"Content-type: text/html\n",
 		getenv("SERVER_SOFTWARE")
 	);
 
-	printf
+	fprintf
 	(
+		stdout,
 		"\n<html>\n<head>\n"
 		"<title>Import Settings</title>\n"
 		"<link rel=\"stylesheet\" href=\"/style/normal_ws.css\" type=\"text/css\">\n"
@@ -152,8 +154,8 @@ static void html_header()
 	if (fd != NULL)
 	{
 		size_t count;
-		printf("<script type=\"text/javascript\">\n");
-		printf("// Here is script copied from file /js/ajax.js\n");
+		fprintf(stdout, "<script type=\"text/javascript\">\n");
+		fprintf(stdout, "// Here is script copied from file /js/ajax.js\n");
 
 		while ((count = fread(data, sizeof(char), sizeof(data)/sizeof(char), fd)) > 0)
 			fwrite(data, sizeof(char), count, stdout);
@@ -161,11 +163,12 @@ static void html_header()
 		fclose(fd);
 	}
 	else
-		printf("<script type=\"text/javascript\" src=\"/js/ajax.js\">\n");
+		fprintf(stdout, "<script type=\"text/javascript\" src=\"/js/ajax.js\">\n");
 
 	// Output end of javascript
-	printf
+	fprintf
 	(
+		stdout,
 		"</script>\n"
 		"</head>\n"
 		"<body>\n"
@@ -175,8 +178,9 @@ static void html_header()
 
 static void html_success(int timeout)
 {
-	printf
+	fprintf
 	(
+		stdout,
 		"<p>Done</p>\n"
 		"<script language=\"JavaScript\" type=\"text/javascript\">\n"
 		"ajaxReloadDelayedPage(%d000);\n"
@@ -191,8 +195,9 @@ static void html_success(int timeout)
 
 static void html_error(const char *s)
 {
-	printf
+	fprintf
 	(
+		stdout,
 		"<p>%s</p>\n"
 		"<script language=\"JavaScript\" type=\"text/javascript\">\n"
 		"alert('%s');\n"
