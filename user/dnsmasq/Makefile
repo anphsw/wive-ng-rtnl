@@ -34,9 +34,10 @@ ifndef CONFIG_IPV6
 COPTS += -DNO_IPV6
 endif
 
-ifndef CONFIG_INOTIFY_USER
+# inotify need 3.x.x kernel
+#ifndef CONFIG_INOTIFY_USER
 COPTS += -DNO_INOTIFY
-endif
+#endif
 
 LDFLAGS += -ffunction-sections -fdata-sections -Wl,--gc-sections
 
