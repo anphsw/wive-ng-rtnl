@@ -17,6 +17,7 @@
 *.gdb
 .sgbuilt_user
 .libs
+.copts_*
 libtool
 aclocal.m4
 autom4te.cache
