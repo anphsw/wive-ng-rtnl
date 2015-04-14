@@ -228,6 +228,7 @@ PPPOEConnectDevice(void)
     return conn->sessionSocket;
 
  errout:
+    conn->sessionSocket = -1;
     if (conn->discoverySocket >= 0) {
 	sendPADT(conn, NULL);
 	close(conn->discoverySocket);
@@ -263,15 +264,19 @@ PPPOEDisconnectDevice(void)
     sp.sa_addr.pppoe.sid = 0;
     memcpy(sp.sa_addr.pppoe.dev, conn->ifName, IFNAMSIZ);
     memcpy(sp.sa_addr.pppoe.remote, conn->peerEth, ETH_ALEN);
-    if (connect(conn->sessionSocket, (struct sockaddr *) &sp,
-		sizeof(struct sockaddr_pppox)) < 0)
+
+    if (connect(conn->sessionSocket, (struct sockaddr *) &sp, sizeof(struct sockaddr_pppox)) < 0)
 	if (errno != EALREADY)
-	    error("Failed to disconnect PPPoE socket: %d %m", errno);
+	    warn("Failed to disconnect PPPoE socket: %d %m", errno);
+
     close(conn->sessionSocket);
+    conn->sessionSocket = -1;
     /* Send PATD to reset the session unresponsive at buggy nas */
     sendPADT(conn, NULL);
-    if (conn->discoverySocket >= 0)
+    if (conn->discoverySocket >= 0) {
 	close(conn->discoverySocket);
+	conn->discoverySocket = -1;
+    }
 }
 
 static void
