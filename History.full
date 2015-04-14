@@ -2183,16 +2183,17 @@
 16) dhcpv6: close file descriptors on exec.<br>
 17) dhcpv6: try and generate a default IFID only if an IFID is not configured.<br>
 18) dhcpv6: ignore advertise messages with none of requested data and missed status codes.<br>
-19) xupnpd: switch to 5.1.x lua use (fix compat with last portable upnpd sdk with bug utf locale parse).<br>
-20) xupnpd: use mpeg as default mime type (more devices compat whith this type).<br>
-21) xupnpd: implement base profile for Panasonic Viera(need manual default mime set to mpeg_ts now).<br>
-22) xupnpd: auto use udpxy if enabled.<br>
-23) kernel: ralink_wifi fix build correct without DBG defined.<br>
-24) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
-25) kernel: ralink_wifi: disable 40MHz intolerant support if DRAFT3 undefined.<br>
-26) kernel: net: reject creation of netdev names with colons.<br>
-27) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
-28) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
+19) dhcpv6: do not open a routing socket that's never used.<br>
+20) xupnpd: switch to 5.1.x lua use (fix compat with last portable upnpd sdk with bug utf locale parse).<br>
+21) xupnpd: use mpeg as default mime type (more devices compat whith this type).<br>
+22) xupnpd: implement base profile for Panasonic Viera(need manual default mime set to mpeg_ts now).<br>
+23) xupnpd: auto use udpxy if enabled.<br>
+24) kernel: ralink_wifi fix build correct without DBG defined.<br>
+25) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
+26) kernel: ralink_wifi: disable 40MHz intolerant support if DRAFT3 undefined.<br>
+27) kernel: net: reject creation of netdev names with colons.<br>
+28) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
+29) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
 <br>
 <br>
 <br>
