@@ -10,9 +10,8 @@ idle 0
 maxfail 0
 holdoff 5
 
-# Disable ARP proxy and IPX protocol
+# Disable ARP proxy
 noproxyarp
-noipx
 
 # Turn off compression protocols we know won't be used
 nomp
