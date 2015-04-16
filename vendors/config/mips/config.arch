@@ -186,8 +186,6 @@ endif
 	CFLAGS  += -Dlinux -D__linux__ -Dunix -DEMBED
 	CFLAGS  += -I$(ROOTDIR)
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared
-	CFLAGS  += -I$(ROOTDIR)/lib/include
-	CFLAGS  += -I$(ROOTDIR)/linux/include
 ifdef CONFIG_LIB_NFNETLINK
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/libnfnetlink
 endif
@@ -206,29 +204,32 @@ endif
 ifdef CONFIG_USER_OPENSSL
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/openssl
 endif
-	LDFLAGS  += -L$(ROOTDIR)/lib/lib
+	# inlude system headers
+	CFLAGS  += -isystem $(ROOTDIR)/lib/include
 
 	CXXFLAGS = $(CFLAGS) $(INCCXX)
 
-  ifeq ($(findstring glibc,$(LIBCDIR)),glibc)
-	CRTI     = -nostartfiles $(ROOTDIR)/lib/crt1.o \
+	# link options
+	LDFLAGS  += -L$(ROOTDIR)/lib/lib
+	ifeq ($(findstring glibc,$(LIBCDIR)),glibc)
+	    CRTI     = -nostartfiles $(ROOTDIR)/lib/crt1.o \
 			$(ROOTDIR)/lib/crti.o \
 			$(GCC_DIR)/$(MACH_DIR)/crtbegin.o
-	SH_CRTI  = -nostartfiles $(ROOTDIR)/lib/crti.o \
+	    SH_CRTI  = -nostartfiles $(ROOTDIR)/lib/crti.o \
 			$(GCC_DIR)/$(MACH_DIR)/crtbeginS.o
-	CRAP = 		$(ROOTDIR)/lib/ld.so.1
-	CRTN     = \
+	    CRAP = 		$(ROOTDIR)/lib/ld.so.1
+	    CRTN     = \
 			$(GCC_DIR)/$(MACH_DIR)/crtend.o \
 			$(ROOTDIR)/lib/crtn.o \
 			-lc_nonshared
-	SH_CRTN  = $(GCC_DIR)/$(MACH_DIR)/crtendS.o $(ROOTDIR)/lib/crtn.o
-  else
-	CRTI     = -nostartfiles $(ROOTDIR)/lib/crt0.o
-	CRTN     =
-  endif
+	    SH_CRTN  = $(GCC_DIR)/$(MACH_DIR)/crtendS.o $(ROOTDIR)/lib/crtn.o
+	else
+	    CRTI     = -nostartfiles $(ROOTDIR)/lib/crt0.o
+	    CRTN     =
+	endif
 	SH_LDFLAGS := $(LDFLAGS) $(SH_CRTI) -nodefaultlibs
 	SH_LDLIBS  := $(LIBC) $(LIBGCC) $(SH_CRTN)
-	#LDFLAGS += $(CRTI) -nodefaultlibs
+
 	LDLIBS   = $(LIBC) $(LIBGCC) $(CRTN)
 	CXXLIBS  = -Wl,-Bstatic $(LIBSTDCPP) -Wl,-Bdynamic $(LIBC) $(LIBGCC) $(CRTN)
 
