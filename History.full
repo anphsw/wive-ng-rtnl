@@ -2190,12 +2190,13 @@
 23) xupnpd: use mpeg as default mime type (more devices compat whith this type).<br>
 24) xupnpd: implement base profile for Panasonic Viera(need manual default mime set to mpeg_ts now).<br>
 25) xupnpd: auto use udpxy if enabled.<br>
-26) kernel: ralink_wifi fix build correct without DBG defined.<br>
-27) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
-28) kernel: ralink_wifi: disable 40MHz intolerant support if DRAFT3 undefined.<br>
-29) kernel: net: reject creation of netdev names with colons.<br>
-30) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
-31) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
+26) pppd: do not build ipx support if not enabled in kernel.<br>
+27) kernel: ralink_wifi fix build correct without DBG defined.<br>
+28) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
+29) kernel: ralink_wifi: disable 40MHz intolerant support if DRAFT3 undefined.<br>
+30) kernel: net: reject creation of netdev names with colons.<br>
+31) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
+32) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
 <br>
 <br>
 <br>
