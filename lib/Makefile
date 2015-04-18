@@ -33,6 +33,7 @@ endif
 
 include Rules.mak
 
+UCLINUX_BUILD_LIB=1
 -include $(LINUX_CONFIG)
 -include $(CONFIG_CONFIG)
 
