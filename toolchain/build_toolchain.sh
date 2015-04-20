@@ -6,6 +6,7 @@ KERNELHDRS=kernel-headers
 BINUTILVER=binutils-2.24
 UCLIBCVER=uClibc-0.9.28
 GCCVER=gcc-4.8.5
+HOSTGCCVER=`gcc -dumpversion | cut -f -2 -d .`
 
 INSTALL_DEP=NO
 UNPACK=YES
@@ -41,16 +42,15 @@ export ROOTCURDIR=$CURDIR
 
 export TARGET_CURDIR=$WCURDIR/$TARGET-toolchain
 export KERNEL_HEADERS=$TARGET_CURDIR/include
-export REALKRNINC=${PREFIX}/../linux-2.6.21.x/include
-export REALLIBINC=${PREFIX}/../lib/include
-export PATH="${PATH}":${PREFIX}/bin:${PREFIX}/lib:${KERNEL_HEADERS}:${REALLIBINC}:${REALKRNINC}
+export PATH="${PATH}:${PREFIX}/bin:${PREFIX}/lib"
 export CC=gcc
 
 #install need lib`s and headers
-if [ -e /etc/release ] && [ "$INSTALL_DEP" = "YES" ]; then
-    ISOPENMANDRIVA=`grep OpenMandriva -i -c < /etc/release`
-    ISROSA=`grep ROSA -i -c < /etc/release`
-    ISMAGEIA=`grep Mageia -i -c < /etc/release`
+if [ "$INSTALL_DEP" = "YES" ]; then
+    ISOPENMANDRIVA=`grep OpenMandriva -i -c < /etc/issue`
+    ISROSA=`grep ROSA -i -c < /etc/issue`
+    ISMAGEIA=`grep Mageia -i -c < /etc/issue`
+    ISUBUNTU=`grep Ubuntu -i -c < /etc/issue`
     if [ "$ISOPENMANDRIVA" = "1" ] || [ "$ISROSA" = "1" ]; then
 	urpmi --auto -a flex --download-all --allow-force
 	urpmi --auto -a make --download-all --allow-force
@@ -64,11 +64,14 @@ if [ -e /etc/release ] && [ "$INSTALL_DEP" = "YES" ]; then
 	urpmi --auto -ay gcc-gfortran --download-all --allow-force
 	urpmi --auto -ay texinfo --download-all --allow-force
 	urpmi --auto -ay intltool --download-all --allow-force
+	urpmi --auto -ay fakeroot --download-all --allow-force
+	urpmi --auto -ay gperf --download-all --allow-force
     elif [ "$ISMAGEIA" = "1" ]; then
 	urpmi --auto bc --download-all
 	urpmi --auto flex --download-all
 	urpmi --auto make --download-all
 	urpmi --auto gcc --download-all
+	urpmi --auto libmpc3 --download-all
 	urpmi --auto glibc-devel --download-all
 	urpmi --auto binutils-devel --download-all
 	urpmi --auto bison --download-all
@@ -85,6 +88,27 @@ if [ -e /etc/release ] && [ "$INSTALL_DEP" = "YES" ]; then
 	urpmi --auto texinfo --download-all
 	urpmi --auto gettext --download-all
 	urpmi --auto intltool --download-all
+	urpmi --auto fakeroot --download-all
+	urpmi --auto gperf --download-all
+    elif [ "$ISUBUNTU" = "1" ]; then
+	sudo apt-get update
+	sudo apt-get -y install build-essential
+	sudo apt-get -y install flex
+	sudo apt-get -y install gcc
+	sudo apt-get -y install libc6
+	sudo apt-get -y install bison
+	sudo apt-get -y install libtool
+	sudo apt-get -y install libgmp-dev
+	sudo apt-get -y install libmpc-dev
+	sudo apt-get -y install libmpfr-dev
+	sudo apt-get -y install texinfo
+	sudo apt-get -y install intltool
+	sudo apt-get -y install fakeroot
+	sudo apt-get -y install gperf
+	sudo apt-get -y install zlib1g-dev	# for build tools
+	sudo apt-get -y install gcc-multilib	# for build tools
+	sudo apt-get -y install gawk	# for build tools
+	sudo apt-get -y install autopoint	# for build davfs
     else
 	urpmi --auto -a flex --download-all --allow-force
 	urpmi --auto -a make --download-all --allow-force
@@ -98,6 +122,8 @@ if [ -e /etc/release ] && [ "$INSTALL_DEP" = "YES" ]; then
 	urpmi --auto -a gcc-gfortran --download-all --allow-force
 	urpmi --auto -a texinfo- --download-all --allow-force
 	urpmi --auto -a intltool- --download-all --allow-force
+	urpmi --auto -a fakeroot- --download-all --allow-force
+	urpmi --auto -a gperf- --download-all --allow-force
     fi
 fi
 
@@ -106,24 +132,27 @@ mkdir -p $WCURDIR
 cd $WCURDIR
 mkdir -p ${TARGET}-toolchain  && cd ${TARGET}-toolchain
 
-##################################TUNE FOR CURRENT VERSION GCC BUILD####################################
-HOSTGCCVER=`gcc -dumpversion | cut -f -2 -d .`
-if [ "$HOSTGCCVER" = "4.5" ] || [ "$HOSTGCCVER" = "4.6" ] || [ "$HOSTGCCVER" = "4.7" ] || [ "$HOSTGCCVER" = "4.8" ]; then
-    WARN_OPTS="-Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security -Wno-long-long -Wno-sizeof-pointer-memaccess -fno-strict-overflow -fno-delete-null-pointer-checks"
+#################################################TUNE FOR CURRENT VERSION GCC BUILD##########################################################
+# supress some warnings
+WARN_OPTS="-Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security -Wno-long-long -Wno-sizeof-pointer-memaccess"
+# disable some optimizations
+GCC_OPTS="-fno-strict-overflow -fno-delete-null-pointer-checks -fno-var-tracking-assignments"
+if [ "$HOSTGCCVER" = "4.8" ] ||  [ "$HOSTGCCVER" = "4.9" ]; then
+    GCC_OPTS="$GCC_OPTS -fno-aggressive-loop-optimizations -fno-tree-slsr -fno-var-tracking-assignments"
 fi
-if [ "$HOSTGCCVER" = "4.8" ]; then
-    WARN_OPTS="$WARN_OPTS -fno-aggressive-loop-optimizations -fno-tree-slsr -fno-var-tracking-assignments"
-fi
-export CFLAGS="-O2 $WARN_OPTS"
-
-EXT_OPT="$EXT_OPT --disable-lto --enable-ld=yes --enable-gold=no --disable-sanity-checks --disable-werror"
-if [ "$GCCVER" = "gcc-4.6.4" ] || [ "$GCCVER" = "gcc-4.7.4" ] || [ "$GCCVER" = "gcc-4.8.5" ]; then
-    EXT_OPT="$EXT_OPT --disable-biendian --disable-softfloat --disable-libquadmath --disable-libquadmath-support"
-fi
-if [ "$GCCVER" = "gcc-4.8.5" ]; then
+export CFLAGS="-O2 $GCC_OPTS $WARN_OPTS"
+# configure toolchain
+EXT_OPT="--disable-lto --disable-gold --enable-ld=yes --enable-gold=no --disable-sanity-checks --disable-werror"
+EXT_OPT="$EXT_OPT --disable-biendian --disable-softfloat --disable-libquadmath --disable-libquadmath-support"
+if [ "$GCCVER" = "gcc-4.8.5" ] || [ "$GCCVER" = "gcc-4.9.2" ]; then
     EXT_OPT="$EXT_OPT --disable-libatomic --with-pic"
 fi
-#########################################################################################################
+# for gcc < 4.9.2 need tls disable
+if [ "$GCCVER" != "gcc-4.9.2" ]; then
+    EXT_OPT="$EXT_OPT --disable-tls"
+fi
+export EXT_OPT="$EXT_OPT"
+##############################################################################################################################################
 
 if [ "$UNPACK" = "YES" ]; then
     echo "=================REMOVE-OLD-BUILD-TREE=================="
@@ -156,14 +185,14 @@ if [ "$HEADERS" = "YES" ]; then
     cp -rf $KERNEL_HEADERS $CURDIR/usr
     ln -sf $CURDIR/usr/include $CURDIR/include
 fi
+export KERNEL_HEADERS=$CURDIR/usr/include
 
 if [ "$BINUTILS" = "YES" ]; then
     echo "=====================BUILD-BINUTILS====================="
     mkdir -p build-binutils && cd build-binutils
     (../$BINUTILVER/configure --target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
-	--with-sysroot=$PREFIX --with-build-sysroot=$PREFIX \
-	--disable-gold --disable-libquadmath --disable-libquadmath-support --disable-lto --disable-werror && \
-    make -j4 KERNEL_HEADERS=$KERNEL_HEADERS && \
+	--with-sysroot=$PREFIX --with-build-sysroot=$PREFIX $EXT_OPT && \
+    make -j8 KERNEL_HEADERS=$KERNEL_HEADERS && \
     make install) || exit 1
     cd ..
 fi
@@ -172,15 +201,15 @@ if [ "$GCC" = "YES" ]; then
     echo "=====================BUILD-GCC-C========================"
     mkdir -p build-gcc-bootstrap && cd build-gcc-bootstrap
     (../$GCCVER/configure \
-	--target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
+	--target=$TARGET --prefix=$PREFIX \
 	--with-gnu-ld --with-gnu-as \
 	--disable-shared \
-	--disable-tls --disable-libmudflap --disable-libssp \
-	--disable-libgomp --disable-threads \
-	--with-sysroot=$PREFIX \
+	--disable-libmudflap --disable-libssp \
+	--disable-libgomp --disable-threads --disable-nls \
+	--with-sysroot=$PREFIX --with-headers=$KERNEL_HEADERS \
 	--enable-version-specific-runtime-libs --enable-languages=c \
 	$EXT_OPT && \
-    make -j4 && \
+    make -j8 && \
     make install) || exit 1
     cd ..
 fi
@@ -189,9 +218,9 @@ if [ "$UCLIB" = "YES" ]; then
     echo "=====================BUILD-C-UCLIBC===================="
     cp -fv uclibc-config $UCLIBCVER/.config
     cd $UCLIBCVER
-    (make oldconfig ROOTDIR="$CURDIR" && \
-    make -j4 ROOTDIR="$CURDIR" && \
-    make install) || exit 1
+    (make oldconfig ROOTDIR=$CURDIR PREFIX=$CURDIR CROSS_COMPILER_PREFIX=$CURDIR/bin/mipsel-linux-uclibc- && \
+    make -j8 ROOTDIR=$CURDIR PREFIX=$CURDIR CROSS_COMPILER_PREFIX=$CURDIR/bin/mipsel-linux-uclibc- && \
+    make install ROOTDIR=$CURDIR PREFIX=$CURDIR CROSS_COMPILER_PREFIX=$CURDIR/bin/mipsel-linux-uclibc-) || exit 1
     cd ..
 fi
 
@@ -199,14 +228,14 @@ if [ "$GCCCPP" = "YES" ]; then
     echo "====================BUILD-GCC-CPP======================="
     mkdir -p build-gcc-bootstrap-cpp && cd build-gcc-bootstrap-cpp
     (../$GCCVER/configure \
-	--target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
+	--target=$TARGET --prefix=$PREFIX \
 	--with-gnu-ld --with-gnu-as \
-	--disable-tls --disable-libmudflap --disable-libssp \
-	--disable-libgomp --disable-threads \
-	--with-sysroot=$PREFIX \
+	--disable-libmudflap --disable-libssp \
+	--disable-libgomp --disable-threads --disable-nls \
+	--with-sysroot=$PREFIX --with-headers=$KERNEL_HEADERS \
 	--enable-version-specific-runtime-libs --enable-languages=c++ \
 	$EXT_OPT && \
-    make -j4 all-host all-target-libgcc all-target-libstdc++-v3  && \
+    make -j8 all-host all-target-libgcc all-target-libstdc++-v3  && \
     make install-host install-target-libgcc install-target-libstdc++-v3) || exit 1
     cd ..
 fi

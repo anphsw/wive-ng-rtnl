@@ -2165,7 +2165,7 @@
 
 <br>
 <b>5.1.x</b><br>
-1) toolchain: sync uclibc patches, update gcc to 12.03.2015 4.8.5 version form git, update headers.<br>
+1) toolchain: sync uclibc patches, update gcc to 07.04.2015 4.8.5 version form git, update headers.<br>
 2) build_system: fix build libc headers (use -isystem instead of -I for correct dependency).<br>
 3) ethtool: disable build vendors extensions (decrease size).<br>
 4) ethtool: up to 3.18 version.<br>
