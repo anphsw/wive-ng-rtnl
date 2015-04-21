@@ -493,6 +493,7 @@
 30) kernel: net: reject creation of netdev names with colons.<br>
 31) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
 32) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
+33) kernel: pppoe: lacks DST MAC address check.<br>
 <br>
 <br>
 <br>
