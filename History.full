@@ -2171,34 +2171,36 @@
 4) ethtool: up to 3.18 version.<br>
 5) quagga: up to 0.99.24.1 version.<br>
 6) usb-modeswitch-data: up to up to 20150115.<br>
-7) busybox: apply busybox-1.23.1-wget.patch.<br>
-8) openssl up to 0.9.8zf version.<br>
-9) dnsmasq: up to 2.73rc7.<br>
-10) miniupnpd: up to 1.9.20150427 version.<br>
-11) goahead: fix error messages at call external scripts in some case.<br>
-12) goahead: fix upload firmware error handling.<br>
-13) goahead: fix lang select race in some situations.<br>
-14) init.d: fix logging if syslog disabled.<br>
-15) udhcpc: fix static routes apply in some cases.<br>
-16) dhcpv6: fix renewal of IA NA.<br>
-17) dhcpv6: close file descriptors on exec.<br>
-18) dhcpv6: try and generate a default IFID only if an IFID is not configured.<br>
-19) dhcpv6: ignore advertise messages with none of requested data and missed status codes.<br>
-20) dhcpv6: do not open a routing socket that's never used.<br>
-21) dhcpv6: more compath with new uclibc/glibc.<br>
-22) xupnpd: switch to 5.1.x lua use (fix compat with last portable upnpd sdk with bug utf locale parse).<br>
-23) xupnpd: use mpeg as default mime type (more devices compat whith this type).<br>
-24) xupnpd: implement base profile for Panasonic Viera(need manual default mime set to mpeg_ts now).<br>
-25) xupnpd: auto use udpxy if enabled.<br>
-26) pppd: do not build ipx support if not enabled in kernel.<br>
-27) kernel: ralink_wifi fix build correct without DBG defined.<br>
-28) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
-29) kernel: ralink_wifi: disable 40MHz intolerant support if DRAFT3 undefined.<br>
-30) kernel: net: reject creation of netdev names with colons.<br>
-31) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
-32) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
-33) kernel: pppoe: lacks DST MAC address check.<br>
-34) kernel: ppp: unset skb checksum complete in ppp_receive_frame.<br>
+7) miniupnpd: up to 1.9.20150307 version.<br>
+8) busybox: apply busybox-1.23.1-wget.patch.<br>
+9) openssl up to 0.9.8zf version.<br>
+10) dnsmasq: up to 2.73rc7.<br>
+11) miniupnpd: up to 1.9.20150427 version.<br>
+12) goahead: fix error messages at call external scripts in some case.<br>
+13) goahead: fix upload firmware error handling.<br>
+14) goahead: fix lang select race in some situations.<br>
+15) init.d: fix logging if syslog disabled.<br>
+16) udhcpc: fix static routes apply in some cases.<br>
+17) dhcpv6: fix renewal of IA NA.<br>
+18) dhcpv6: close file descriptors on exec.<br>
+19) dhcpv6: try and generate a default IFID only if an IFID is not configured.<br>
+20) dhcpv6: ignore advertise messages with none of requested data and missed status codes.<br>
+21) dhcpv6: do not open a routing socket that's never used.<br>
+22) dhcpv6: more compath with new uclibc/glibc.<br>
+23) xupnpd: switch to 5.1.x lua use (fix compat with last portable upnpd sdk with bug utf locale parse).<br>
+24) xupnpd: use mpeg as default mime type (more devices compat whith this type).<br>
+25) xupnpd: implement base profile for Panasonic Viera(need manual default mime set to mpeg_ts now).<br>
+26) xupnpd: auto use udpxy if enabled.<br>
+27) pppd: do not build ipx support if not enabled in kernel.<br>
+28) kernel: ralink_wifi fix build correct without DBG defined.<br>
+29) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
+30) kernel: ralink_wifi: disable 40MHz intolerant support if DRAFT3 undefined.<br>
+31) kernel: net: reject creation of netdev names with colons.<br>
+32) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
+33) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
+34) kernel: pppoe: lacks DST MAC address check.<br>
+35) kernel: ppp: unset skb checksum complete in ppp_receive_frame.<br>
+36) kernel: nvram: fix check part size in commit.<br>
 <br>
 <br>
 <br>

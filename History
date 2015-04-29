@@ -496,6 +496,7 @@
 33) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
 34) kernel: pppoe: lacks DST MAC address check.<br>
 35) kernel: ppp: unset skb checksum complete in ppp_receive_frame.<br>
+36) kernel: nvram: fix check part size in commit.<br>
 <br>
 <br>
 <br>
