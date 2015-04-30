@@ -472,7 +472,7 @@
 9) busybox: apply busybox-1.23.1-wget.patch.<br>
 10) openssl up to 0.9.8zf version.<br>
 11) dnsmasq: up to 2.73rc7.<br>
-12) miniupnpd: up to 1.9.20150427 version.<br>
+12) miniupnpd: up to 1.9.20150430 version.<br>
 13) goahead: fix error messages at call external scripts in some case.<br>
 14) goahead: fix upload firmware error handling.<br>
 15) goahead: fix lang select race in some situations.<br>

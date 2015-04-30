@@ -2171,7 +2171,7 @@
 4) ethtool: up to 3.18 version.<br>
 5) quagga: up to 0.99.24.1 version.<br>
 6) usb-modeswitch-data: up to up to 20150115.<br>
-7) miniupnpd: up to 1.9.20150307 version.<br>
+7) miniupnpd: up to 1.9.20150430 version.<br>
 8) busybox: apply busybox-1.23.1-wget.patch.<br>
 9) openssl up to 0.9.8zf version.<br>
 10) dnsmasq: up to 2.73rc7.<br>
