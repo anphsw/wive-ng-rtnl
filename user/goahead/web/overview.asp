@@ -89,7 +89,7 @@ function setLanguage()
             <hr /><br />
             WIVE FIRMWARE IS FREE FOR THE NON-COMMERCIAL USE ONLY.
             <br />
-	    Conditions of commercial use non GPL (or other viral license) components are discussed individually.
+	    Conditions of commercial use non GPL (or other not viral license) components are discussed individually.
             <br /><br />
             News and changes in Russian:
             <a href="http://wive-ng.sf.net">wive-ng.sf.net - development opensource routers firmware</a><br />
