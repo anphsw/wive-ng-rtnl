@@ -1,0 +1,16 @@
+#############################################################################################################
+# EULA:
+#
+# WIVE FIRMWARE IS FREE FOR THE NON-COMMERCIAL USE ONLY.
+#
+# Conditions of commercial use non GPL (or other not viral license) components are discussed individually.
+# For a more detailed discussion please mail me.
+# News and changes in Russian: http://wive-ng.sf.net
+# Bug report please send to sfstudio[at]mail.ru
+#############################################################################################################
+
+BUILD:
+1) cd toolchain and start build_toolchain.sh as root
+2) cd in projectroot (/opt/Wive-MT) and start compile <target name> or compile-releases for build all targets
+
+#############################################################################################################
