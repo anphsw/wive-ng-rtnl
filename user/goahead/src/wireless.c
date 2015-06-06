@@ -53,9 +53,7 @@ int deleteNthValueMulti(int index[], int count, char *value, char delimit);		/* 
 static void APDeleteAccessPolicyList(webs_t wp, char_t *path, char_t *query);
 void DeleteAccessPolicyList(int nvram, webs_t wp, char_t *path, char_t *query);
 static int  isAntennaDiversityBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int dumpBSS(int eid, webs_t wp, int argc, char_t **argv);
 static int get802_1XBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int dumpBSSKeys(int eid, webs_t wp, int argc, char_t **argv);
 #if defined(CONFIG_RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY) || defined(CONFIG_RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY)
 static void AntennaDiversity(webs_t wp, char_t *path, char_t *query);
 static void getAntenna(webs_t wp, char_t *path, char_t *query);
@@ -185,9 +183,7 @@ void formDefineWireless(void)
 	websAspDefine(T("getWlanChannel"), getWlanChannel);
 	websAspDefine(T("getWlanCurrentMac"), getWlanCurrentMac);
 	websAspDefine(T("getWlanStaInfo"), getWlanStaInfo);
-	websAspDefine(T("dumpBSS"), dumpBSS);
 	websAspDefine(T("get802_1XBuilt"), get802_1XBuilt);
-	websAspDefine(T("dumpBSSKeys"), dumpBSSKeys);
 	websAspDefine(T("getWlanM2UBuilt"), getWlanM2UBuilt);
 	websAspDefine(T("getGreenAPBuilt"), getGreenAPBuilt);
 	websAspDefine(T("listCountryCodes"), listCountryCodes);
@@ -639,74 +635,6 @@ const mbss_param_t mbss_params[] =
 	{ "RekeyMethod", 1 },
 	{ NULL, 0 }
 };
-
-static int dumpBSSKeys(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int count = 0;
-
-	const mbss_param_t *parm = mbss_params;
-	while ((parm->name) != NULL)
-	{
-		if ((count++) > 0)
-			websWrite(wp, ", ");
-		websWrite(wp, "'%s'", parm->name);
-		parm++;
-	}
-	return 0;
-}
-
-static int dumpBSS(int eid, webs_t wp, int argc, char_t **argv)
-{
-	if (argc < 1)
-		return 0;
-	int bssnum = (argv[0][0] - '0') + 1;
-	if ((bssnum < 1) || (bssnum > 8))
-		return 0;
-
-	html_buffer_t buf;
-	char tempbuf[32], tmpvalue[128];
-
-	initHTMLBuffer(&buf);
-
-	// Write begin
-	websWrite(wp, "\t\t<div style=\"display: none;\" id=\"MBSSHidden%d\">\n", bssnum);
-	nvram_init(RT2860_NVRAM);
-
-	const mbss_param_t *parm = mbss_params;
-	while ((parm->name) != NULL)
-	{
-		catIndex(tempbuf, parm->name, bssnum);
-		if (parm->is_comp)
-		{
-			char *value = nvram_bufget(RT2860_NVRAM, parm->name);
-			if (value == NULL)
-				value = "";
-
-			// Fetch parameter
-			fetchIndexedParam(value, bssnum-1, tmpvalue);
-			encodeHTMLContent(tmpvalue, &buf);
-		}
-		else
-		{
-			char *value = nvram_bufget(RT2860_NVRAM, tempbuf);
-			if (value == NULL)
-				value = "";
-			encodeHTMLContent(value, &buf);
-		}
-
-		websWrite(wp, "\t\t\t<input name=\"%s\" value=\"%s\">\n", tempbuf, buf.data);
-		resetHTMLBuffer(&buf);
-		parm++;
-	}
-
-	nvram_close(RT2860_NVRAM);
-	websWrite(wp, "\t\t</div>\n");
-	// Write end
-
-	freeHTMLBuffer(&buf);
-
-	return 0;
-}
 
 static void revise_mbss_updated_values(webs_t wp, int bssnum)
 {
