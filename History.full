@@ -2174,7 +2174,7 @@
 7) miniupnpd: up to 1.9.20150430 version.<br>
 8) busybox: apply busybox-1.23.1-wget.patch.<br>
 9) openssl up to 0.9.8zf version.<br>
-10) dnsmasq: up to 2.73rc8.<br>
+10) dnsmasq: up to 2.73rc9.<br>
 11) miniupnpd: up to 1.9.20150427 version.<br>
 12) goahead: fix error messages at call external scripts in some case.<br>
 13) goahead: fix upload firmware error handling.<br>
