@@ -476,29 +476,30 @@
 13) goahead: fix upload firmware error handling.<br>
 14) goahead: fix lang select race in some situations.<br>
 15) goahead: fix memory leak at wireless->basic page parse.<br>
-16) init.d: fix logging if syslog disabled.<br>
-17) init.d: dnsmasq: remove -f (--filterwin2k) no needed now (need only for ppp dial-on-demand support now).<br>
-18) udhcpc: fix static routes apply in some cases.<br>
-19) dhcpv6: fix renewal of IA NA.<br>
-20) dhcpv6: close file descriptors on exec.<br>
-21) dhcpv6: try and generate a default IFID only if an IFID is not configured.<br>
-22) dhcpv6: ignore advertise messages with none of requested data and missed status codes.<br>
-23) dhcpv6: do not open a routing socket that's never used.<br>
-24) dhcpv6: more compath with new uclibc/glibc.<br>
-25) xupnpd: switch to 5.1.x lua use (fix compat with last portable upnpd sdk with bug utf locale parse).<br>
-26) xupnpd: use mpeg as default mime type (more devices compat whith this type).<br>
-27) xupnpd: implement base profile for Panasonic Viera(need manual default mime set to mpeg_ts now).<br>
-28) xupnpd: auto use udpxy if enabled.<br>
-29) pppd: do not build ipx support if not enabled in kernel.<br>
-30) kernel: ralink_wifi fix build correct without DBG defined.<br>
-31) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
-32) kernel: ralink_wifi: disable 40MHz intolerant support if DRAFT3 undefined.<br>
-33) kernel: net: reject creation of netdev names with colons.<br>
-34) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
-35) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
-36) kernel: pppoe: lacks DST MAC address check.<br>
-37) kernel: ppp: unset skb checksum complete in ppp_receive_frame.<br>
-38) kernel: nvram: fix check part size in commit.<br>
+16) goahead: fix drop security settings after mode change.<br>
+17) init.d: fix logging if syslog disabled.<br>
+18) init.d: dnsmasq: remove -f (--filterwin2k) no needed now (need only for ppp dial-on-demand support now).<br>
+19) udhcpc: fix static routes apply in some cases.<br>
+20) dhcpv6: fix renewal of IA NA.<br>
+21) dhcpv6: close file descriptors on exec.<br>
+22) dhcpv6: try and generate a default IFID only if an IFID is not configured.<br>
+23) dhcpv6: ignore advertise messages with none of requested data and missed status codes.<br>
+24) dhcpv6: do not open a routing socket that's never used.<br>
+25) dhcpv6: more compath with new uclibc/glibc.<br>
+26) xupnpd: switch to 5.1.x lua use (fix compat with last portable upnpd sdk with bug utf locale parse).<br>
+27) xupnpd: use mpeg as default mime type (more devices compat whith this type).<br>
+28) xupnpd: implement base profile for Panasonic Viera(need manual default mime set to mpeg_ts now).<br>
+29) xupnpd: auto use udpxy if enabled.<br>
+30) pppd: do not build ipx support if not enabled in kernel.<br>
+31) kernel: ralink_wifi fix build correct without DBG defined.<br>
+32) kernel: ralink_wifi: desintegrate AP_QLOAD and chanbusytime in ap_autoChSel.<br>
+33) kernel: ralink_wifi: disable 40MHz intolerant support if DRAFT3 undefined.<br>
+34) kernel: net: reject creation of netdev names with colons.<br>
+35) kernel: fastpaths: clear in ip_input CB only for loopback packets.<br>
+36) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
+37) kernel: pppoe: lacks DST MAC address check.<br>
+38) kernel: ppp: unset skb checksum complete in ppp_receive_frame.<br>
+39) kernel: nvram: fix check part size in commit.<br>
 <br>
 <br>
 <br>

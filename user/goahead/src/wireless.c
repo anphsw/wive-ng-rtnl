@@ -636,52 +636,6 @@ const mbss_param_t mbss_params[] =
 	{ NULL, 0 }
 };
 
-static void revise_mbss_updated_values(webs_t wp, int bssnum)
-{
-	const mbss_param_t *parm = mbss_params;
-	char tempbuf[32], tmpvalue[128];
-	int i;
-
-	nvram_init(RT2860_NVRAM);
-
-	while (parm->name != NULL)
-	{
-		if (parm->is_comp)
-		{
-			tmpvalue[0] = '\0';
-			for (i=0; i<bssnum; i++) /* Build string from parameters */
-			{
-				catIndex(tempbuf, parm->name, (i+1));
-				char *v = websGetVar(wp, tempbuf, T(""));
-				if (v == NULL)
-					v = "";
-				if (bssnum > 1)
-				    sprintf(tmpvalue, "%s%s;", tmpvalue, v); /* multiple ssid by ; as separator */
-				else
-				    sprintf(tmpvalue, "%s%s", tmpvalue, v); /* separator ; not need if only one ssid enabled */
-			}
-			printf("%s = %s\n", parm->name, tmpvalue);
-			nvram_bufset(RT2860_NVRAM, parm->name, tmpvalue);
-		}
-		else
-		{
-			for (i=0; i<bssnum; i++) /* set-up parameter by parameter */
-			{
-				catIndex(tempbuf, parm->name, (i+1));
-				char *v = websGetVar(wp, tempbuf, T(""));
-				if (v == NULL)
-					v = "";
-				printf("%s = %s\n", tempbuf, v);
-				nvram_bufset(RT2860_NVRAM, tempbuf, v);
-			}
-		}
-		parm++;
-	}
-
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
-}
-
 static void setupSecurityLed(void)
 {
 	int i, bss_num, led_on;
@@ -902,7 +856,6 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	revise_mbss_updated_values(wp, new_bssid_num);
 	setupSecurityLed();
 
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
