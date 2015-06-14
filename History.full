@@ -2204,6 +2204,7 @@
 37) kernel: pppoe: lacks DST MAC address check.<br>
 38) kernel: ppp: unset skb checksum complete in ppp_receive_frame.<br>
 39) kernel: nvram: fix check part size in commit.<br>
+40) kernel: udp: fix behavior of wrong checksums.<br>
 <br>
 <br>
 <br>
