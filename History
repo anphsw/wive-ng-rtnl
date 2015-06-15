@@ -507,8 +507,9 @@
 44) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
 <br>
 <b>5.2.x</b><br>
-1) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
-2) kernel: mips: irq: Use DECLARE_BITMAP.<br>
+1) dnsmasq: up to 2.73.<br>
+2) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
+3) kernel: mips: irq: Use DECLARE_BITMAP.<br>
 <br>
 <br>
 <br>
