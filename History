@@ -508,6 +508,7 @@
 <br>
 <b>5.2.x</b><br>
 1) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
+2) kernel: mips: irq: Use DECLARE_BITMAP.<br>
 <br>
 <br>
 <br>
