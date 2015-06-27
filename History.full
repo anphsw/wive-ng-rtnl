@@ -2211,11 +2211,11 @@
 44) kernel: mips: iomap: use __mem_{read,write}{b,w,l} for MMIO.<br>
 <br>
 <b>5.2.x</b><br>
-1) toolchain: update gcc to 20150614 4.8.5-RC version form git, update headers.<br>
-1) dnsmasq: up to 2.73.<br>
-2) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
-3) kernel: mips: irq: Use DECLARE_BITMAP.<br>
-4) kernel: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
+1) toolchain: update gcc to 4.8.5 release, update headers.<br>
+2) dnsmasq: up to 2.73.<br>
+3) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
+4) kernel: mips: irq: Use DECLARE_BITMAP.<br>
+5) kernel: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
 <br>
 <br>
 <br>
