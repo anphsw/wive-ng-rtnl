@@ -142,8 +142,9 @@ if [ "$HOSTGCCVER" = "4.8" ] ||  [ "$HOSTGCCVER" = "4.9" ]; then
 fi
 export CFLAGS="-O2 $GCC_OPTS $WARN_OPTS"
 # configure toolchain
-EXT_OPT="--disable-lto --disable-gold --enable-ld=yes --enable-gold=no --disable-sanity-checks --disable-werror"
-EXT_OPT="$EXT_OPT --disable-biendian --disable-softfloat --disable-libquadmath --disable-libquadmath-support"
+EXT_OPT="--disable-lto --disable-gold --enable-ld=yes --enable-gold=no --disable-sanity-checks --disable-werror --disable-nls"
+EXT_OPT="$EXT_OPT --disable-biendian --disable-softfloat --disable-libquadmath --disable-libquadmath-support --disable-libmudflap"
+EXT_OPT="$EXT_OPT --disable-libssp --disable-libgomp --disable-threads --with-gnu-ld --with-gnu-as"
 if [ "$GCCVER" = "gcc-4.8.5" ] || [ "$GCCVER" = "gcc-4.9.2" ]; then
     EXT_OPT="$EXT_OPT --disable-libatomic --with-pic"
 fi
@@ -191,7 +192,9 @@ if [ "$BINUTILS" = "YES" ]; then
     echo "=====================BUILD-BINUTILS====================="
     mkdir -p build-binutils && cd build-binutils
     (../$BINUTILVER/configure --target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
-	--with-sysroot=$PREFIX --with-build-sysroot=$PREFIX $EXT_OPT && \
+	--with-sysroot=$PREFIX --with-build-sysroot=$PREFIX $EXT_OPT \
+	--enable-deterministic-archives --enable-plugins --disable-libssp --disable-libada \
+	--disable-multilib --disable-werror --disable-lto --disable-nls && \
     make -j8 KERNEL_HEADERS=$KERNEL_HEADERS && \
     make install) || exit 1
     cd ..
@@ -202,10 +205,7 @@ if [ "$GCC" = "YES" ]; then
     mkdir -p build-gcc-bootstrap && cd build-gcc-bootstrap
     (../$GCCVER/configure \
 	--target=$TARGET --prefix=$PREFIX \
-	--with-gnu-ld --with-gnu-as \
 	--disable-shared \
-	--disable-libmudflap --disable-libssp \
-	--disable-libgomp --disable-threads --disable-nls \
 	--with-sysroot=$PREFIX --with-headers=$KERNEL_HEADERS \
 	--enable-version-specific-runtime-libs --enable-languages=c \
 	$EXT_OPT && \
@@ -229,9 +229,6 @@ if [ "$GCCCPP" = "YES" ]; then
     mkdir -p build-gcc-bootstrap-cpp && cd build-gcc-bootstrap-cpp
     (../$GCCVER/configure \
 	--target=$TARGET --prefix=$PREFIX \
-	--with-gnu-ld --with-gnu-as \
-	--disable-libmudflap --disable-libssp \
-	--disable-libgomp --disable-threads --disable-nls \
 	--with-sysroot=$PREFIX --with-headers=$KERNEL_HEADERS \
 	--enable-version-specific-runtime-libs --enable-languages=c++ \
 	$EXT_OPT && \

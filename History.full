@@ -2212,10 +2212,11 @@
 <br>
 <b>5.2.x</b><br>
 1) toolchain: update gcc to 4.8.5 release, update headers.<br>
-2) dnsmasq: up to 2.73.<br>
-3) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
-4) kernel: mips: irq: Use DECLARE_BITMAP.<br>
-5) kernel: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
+2) toolchain: enhance build reproducability.<br>
+3) dnsmasq: up to 2.73.<br>
+4) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
+5) kernel: mips: irq: Use DECLARE_BITMAP.<br>
+6) kernel: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
 <br>
 <br>
 <br>
