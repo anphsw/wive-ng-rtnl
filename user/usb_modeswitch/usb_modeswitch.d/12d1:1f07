@@ -1,0 +1,5 @@
+# Huawei/Vodafone R226
+TargetVendor=0x12d1
+TargetProduct=0x15bf
+MessageContent="55534243123456780000000000000011062000000101000100000000000000"
+NoDriverLoading=1
