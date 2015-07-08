@@ -512,11 +512,12 @@
 3) dnsmasq: up to 2.73.<br>
 4) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
 5) kernel: mips: irq: Use DECLARE_BITMAP.<br>
-6) kernel: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
-7) kernel: do_sigaction: don't worry about signal_pending().<br>
-8) kernel: sigwait eats blocked default-ignore signals.<br>
-9) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
-10) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
+6) kernel: do_sigaction: don't worry about signal_pending().<br>
+7) kernel: sigwait eats blocked default-ignore signals.<br>
+8) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
+9) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
+10) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
+11) kernel: net: Kill sock->sk_protinfo.<br>
 <br>
 <br>
 <br>
