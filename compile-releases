@@ -5,22 +5,14 @@ PWD=`pwd`
 rm -rf $PWD/releases
 mkdir -p $PWD/releases
 
-DEVLIST="RT3050-1T1R RT3052-2T2R RT3052-2T2R-USB"
-DEVLIST27="RT3662-2T2R-5G-USB"
+DEVLIST="RT3052-2T2R-USB RT3052-2T2R RT3050-1T1R"
 
 # i`m not have sample with this chips - not release build
-DEVLISTUNUSED="RT3350-1T1R RT3352-2T2R-USB MT7620-2T2R-USB-8M"
+DEVLISTUNUSED="RT3350-1T1R RT3352-2T2R-USB RT3662-2T2R-5G-USB"
 
 ./clear
 
 for devname in $DEVLIST
-do
-    ./clear RELEASE
-    nice -19 ./compile "$devname"
-    cp -f $PWD/images/*.zip $PWD/releases
-done
-
-for devname in $DEVLIST27
 do
     ./clear RELEASE
     nice -19 ./compile "$devname"
