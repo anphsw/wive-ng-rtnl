@@ -516,6 +516,7 @@
 7) kernel: do_sigaction: don't worry about signal_pending().<br>
 8) kernel: sigwait eats blocked default-ignore signals.<br>
 9) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
+10) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
 <br>
 <br>
 <br>
