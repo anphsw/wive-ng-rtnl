@@ -514,6 +514,7 @@
 5) kernel: mips: irq: Use DECLARE_BITMAP.<br>
 6) kernel: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
 7) kernel: do_sigaction: don't worry about signal_pending().<br>
+8) kernel: sigwait eats blocked default-ignore signals.<br>
 <br>
 <br>
 <br>
