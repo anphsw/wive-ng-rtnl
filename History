@@ -519,6 +519,7 @@
 10) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
 11) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
 12) kernel: net: Kill sock->sk_protinfo.<br>
+13) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
 <br>
 <br>
 <br>
