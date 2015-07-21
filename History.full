@@ -2213,18 +2213,19 @@
 <b>5.2.x</b><br>
 1) toolchain: update gcc to 4.8.5 release, update headers.<br>
 2) toolchain: enhance build reproducability.<br>
-3) dnsmasq: up to 2.73.<br>
-4) usb-modeswitch-data: up to 2015-06-27.<br>
-5) igmpproxy: silence downstream interface igmp messages.<br>
-6) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
-7) kernel: mips: irq: Use DECLARE_BITMAP.<br>
-8) kernel: do_sigaction: don't worry about signal_pending().<br>
-9) kernel: sigwait eats blocked default-ignore signals.<br>
-10) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
-11) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
-12) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
-13) kernel: net: Kill sock->sk_protinfo.<br>
-14) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
+3) toolchain: apply some regressions fix backports to gcc, update headers.<br>
+4) dnsmasq: up to 2.73.<br>
+5) usb-modeswitch-data: up to 2015-06-27.<br>
+6) igmpproxy: silence downstream interface igmp messages.<br>
+7) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
+8) kernel: mips: irq: Use DECLARE_BITMAP.<br>
+9) kernel: do_sigaction: don't worry about signal_pending().<br>
+10) kernel: sigwait eats blocked default-ignore signals.<br>
+11) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
+12) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
+13) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
+14) kernel: net: Kill sock->sk_protinfo.<br>
+15) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
 <br>
 <br>
 <br>
