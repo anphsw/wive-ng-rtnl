@@ -513,16 +513,17 @@
 4) dnsmasq: up to 2.73.<br>
 5) usb-modeswitch-data: up to 2015-06-27.<br>
 6) miniupnpd: up to 1.9.20150721 version.<br>
-7) igmpproxy: silence downstream interface igmp messages.<br>
-8) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
-9) kernel: mips: irq: Use DECLARE_BITMAP.<br>
-10) kernel: do_sigaction: don't worry about signal_pending().<br>
-11) kernel: sigwait eats blocked default-ignore signals.<br>
-12) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
-13) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
-14) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
-15) kernel: net: Kill sock->sk_protinfo.<br>
-16) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
+7) xl2tpd: sync with devel tree Jul 21, 2015.<br>
+8) igmpproxy: silence downstream interface igmp messages.<br>
+9) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
+10) kernel: mips: irq: Use DECLARE_BITMAP.<br>
+11) kernel: do_sigaction: don't worry about signal_pending().<br>
+12) kernel: sigwait eats blocked default-ignore signals.<br>
+13) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
+14) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
+15) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
+16) kernel: net: Kill sock->sk_protinfo.<br>
+17) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
 <br>
 <br>
 <br>
