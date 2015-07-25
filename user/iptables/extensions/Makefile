@@ -8,7 +8,7 @@
 
 PF_EXT_SLIB:=ah addrtype comment connlimit connmark conntrack dscp ecn esp hashlimit helper icmp iprange length limit mac mark multiport
 PF_EXT_SLIB+=pkttype policy standard state tcp tcpmss tos webstr time ttl udp unclean account
-PF_EXT_SLIB+=CLASSIFY CONNMARK DNAT DSCP ECN LOG MARK MASQUERADE MIRROR NETMAP NFQUEUE NOTRACK REDIRECT REJECT SAME SNAT TARPIT TCPMSS
+PF_EXT_SLIB+=CLASSIFY CONNMARK DNAT DSCP ECN LOG MARK MASQUERADE MIRROR NETMAP NFQUEUE NOTRACK REDIRECT REJECT SNAT TARPIT TCPMSS
 PF_EXT_SLIB+=CONNLOG IMQ TOS TRACE TTL ULOG
 #PF_EXT_SLIB+=owner physdev realm rpc sctp string
 
