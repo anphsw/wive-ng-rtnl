@@ -510,7 +510,7 @@
 1) toolchain: update gcc to 4.8.5 release, update headers.<br>
 2) toolchain: enhance build reproducability.<br>
 3) toolchain: apply some regressions fix backports to gcc, update headers.<br>
-4) dnsmasq: up to 2.73.<br>
+4) dnsmasq: up to 2.75.<br>
 5) usb-modeswitch-data: up to 2015-06-27.<br>
 6) miniupnpd: up to 1.9.20150721 version.<br>
 7) xl2tpd: sync with devel tree Jul 22, 2015 (commit eae6793).<br>
