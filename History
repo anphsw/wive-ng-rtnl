@@ -2220,15 +2220,16 @@
 7) xl2tpd: sync with devel tree Jul 22, 2015 (commit eae6793).<br>
 8) igmpproxy: silence downstream interface igmp messages.<br>
 9) init.d: fix vpn server work regression.<br>
-10) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
-11) kernel: mips: irq: Use DECLARE_BITMAP.<br>
-12) kernel: do_sigaction: don't worry about signal_pending().<br>
-13) kernel: sigwait eats blocked default-ignore signals.<br>
-14) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
-15) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
-16) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
-17) kernel: net: Kill sock->sk_protinfo.<br>
-18) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
+10) init.d: fix xl2tp client/server restart infinity stop at some cases.<br>
+11) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
+12) kernel: mips: irq: Use DECLARE_BITMAP.<br>
+13) kernel: do_sigaction: don't worry about signal_pending().<br>
+14) kernel: sigwait eats blocked default-ignore signals.<br>
+15) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
+16) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
+17) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
+18) kernel: net: Kill sock->sk_protinfo.<br>
+19) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
 <br>
 <br>
 <br>
