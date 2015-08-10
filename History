@@ -2219,18 +2219,19 @@
 6) miniupnpd: up to 1.9.20150721 version.<br>
 7) xl2tpd: sync with devel tree Jul 22, 2015 (commit eae6793).<br>
 8) xl2tpd: fix double free regression at death signal.<br>
-9) igmpproxy: silence downstream interface igmp messages.<br>
-10) init.d: fix vpn server work regression.<br>
-11) init.d: fix xl2tp client/server restart infinity stop at some cases.<br>
-12) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
-13) kernel: mips: irq: Use DECLARE_BITMAP.<br>
-14) kernel: do_sigaction: don't worry about signal_pending().<br>
-15) kernel: sigwait eats blocked default-ignore signals.<br>
-16) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
-17) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
-18) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
-19) kernel: net: Kill sock->sk_protinfo.<br>
-20) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
+9) xl2tpd: fix redial regression.<br>
+10) igmpproxy: silence downstream interface igmp messages.<br>
+11) init.d: fix vpn server work regression.<br>
+12) init.d: fix xl2tp client/server restart infinity stop at some cases.<br>
+13) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
+14) kernel: mips: irq: Use DECLARE_BITMAP.<br>
+15) kernel: do_sigaction: don't worry about signal_pending().<br>
+16) kernel: sigwait eats blocked default-ignore signals.<br>
+17) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
+18) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
+19) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
+20) kernel: net: Kill sock->sk_protinfo.<br>
+21) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
 <br>
 <br>
 <br>
