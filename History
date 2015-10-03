@@ -2235,6 +2235,7 @@
 22) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
 23) kernel: net: fix nlmsg len size for skb when error bit is set.<br>
 24) kernel: net: arp: filter NOARP neighbours for SIOCGARP.<br>
+25) kernel: net: ipv6: send NEWLINK on RA managed/otherconf changes.<br>
 <br>
 <br>
 <br>
