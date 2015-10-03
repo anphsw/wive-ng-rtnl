@@ -2233,6 +2233,7 @@
 20) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
 21) kernel: net: Kill sock->sk_protinfo.<br>
 22) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
+23) kernel: net: fix nlmsg len size for skb when error bit is set.<br>
 <br>
 <br>
 <br>
