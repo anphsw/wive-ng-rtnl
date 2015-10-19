@@ -2214,29 +2214,30 @@
 1) toolchain: update gcc to 4.8.5 release, update headers.<br>
 2) toolchain: enhance build reproducability.<br>
 3) toolchain: apply some regressions fix backports to gcc, update headers.<br>
-4) dnsmasq: up to 2.75.<br>
-5) dropbear: up to 2015.68 version.<br>
-6) miniupnpd: workaround issue with Windows 10 (UDA 2.0 devices and control points SHALL implement IPv4 and IPv6).<br>
-7) usb-modeswitch-data: up to 2015-06-27.<br>
-8) miniupnpd: up to 1.9.20150721 version.<br>
-9) xl2tpd: sync with devel tree 12 Aug 2015 (commit 5674a58).<br>
-10) xl2tpd: fix double free regression at death signal.<br>
-11) xl2tpd: fix redial regression.<br>
-12) igmpproxy: silence downstream interface igmp messages.<br>
-13) init.d: fix vpn server work regression.<br>
-14) init.d: fix xl2tp client/server restart infinity stop at some cases.<br>
-15) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
-16) kernel: mips: irq: Use DECLARE_BITMAP.<br>
-17) kernel: do_sigaction: don't worry about signal_pending().<br>
-18) kernel: sigwait eats blocked default-ignore signals.<br>
-19) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
-20) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
-21) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
-22) kernel: net: Kill sock->sk_protinfo.<br>
-23) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
-24) kernel: net: fix nlmsg len size for skb when error bit is set.<br>
-25) kernel: net: arp: filter NOARP neighbours for SIOCGARP.<br>
-26) kernel: net: ipv6: send NEWLINK on RA managed/otherconf changes.<br>
+4) busybox: update to 1.24.0 version.<br>
+5) dnsmasq: up to 2.75.<br>
+6) dropbear: up to 2015.68 version.<br>
+7) miniupnpd: workaround issue with Windows 10 (UDA 2.0 devices and control points SHALL implement IPv4 and IPv6).<br>
+8) usb-modeswitch-data: up to 2015-06-27.<br>
+9) miniupnpd: up to 1.9.20150721 version.<br>
+10) xl2tpd: sync with devel tree 12 Aug 2015 (commit 5674a58).<br>
+11) xl2tpd: fix double free regression at death signal.<br>
+12) xl2tpd: fix redial regression.<br>
+13) igmpproxy: silence downstream interface igmp messages.<br>
+14) init.d: fix vpn server work regression.<br>
+15) init.d: fix xl2tp client/server restart infinity stop at some cases.<br>
+16) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
+17) kernel: mips: irq: Use DECLARE_BITMAP.<br>
+18) kernel: do_sigaction: don't worry about signal_pending().<br>
+19) kernel: sigwait eats blocked default-ignore signals.<br>
+20) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
+21) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
+22) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
+23) kernel: net: Kill sock->sk_protinfo.<br>
+24) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
+25) kernel: net: fix nlmsg len size for skb when error bit is set.<br>
+26) kernel: net: arp: filter NOARP neighbours for SIOCGARP.<br>
+27) kernel: net: ipv6: send NEWLINK on RA managed/otherconf changes.<br>
 <br>
 <br>
 <br>

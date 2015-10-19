@@ -11,7 +11,7 @@ zero_conf() {
     . /etc/scripts/global.sh
 
     if [ "$wan_is_not_null" = "0" ]; then
-	zcip $wan_if /etc/scripts/zcip.script > /dev/null 2>&1
+	export LOGGING=syslog; zcip $wan_if /etc/scripts/zcip.script > /dev/null 2>&1
     fi
 }
 
