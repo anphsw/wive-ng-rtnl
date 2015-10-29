@@ -2227,18 +2227,19 @@
 14) igmpproxy: silence downstream interface igmp messages.<br>
 15) init.d: fix vpn server work regression.<br>
 16) init.d: fix xl2tp client/server restart infinity stop at some cases.<br>
-17) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
-18) kernel: mips: irq: Use DECLARE_BITMAP.<br>
-19) kernel: do_sigaction: don't worry about signal_pending().<br>
-20) kernel: sigwait eats blocked default-ignore signals.<br>
-21) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
-22) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
-23) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
-24) kernel: net: Kill sock->sk_protinfo.<br>
-25) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
-26) kernel: net: fix nlmsg len size for skb when error bit is set.<br>
-27) kernel: net: arp: filter NOARP neighbours for SIOCGARP.<br>
-28) kernel: net: ipv6: send NEWLINK on RA managed/otherconf changes.<br>
+17) kernel: wifi: backport dequeue TX condition.<br>
+18) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
+19) kernel: mips: irq: Use DECLARE_BITMAP.<br>
+20) kernel: do_sigaction: don't worry about signal_pending().<br>
+21) kernel: sigwait eats blocked default-ignore signals.<br>
+22) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
+23) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
+24) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
+25) kernel: net: Kill sock->sk_protinfo.<br>
+26) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
+27) kernel: net: fix nlmsg len size for skb when error bit is set.<br>
+28) kernel: net: arp: filter NOARP neighbours for SIOCGARP.<br>
+29) kernel: net: ipv6: send NEWLINK on RA managed/otherconf changes.<br>
 <br>
 <br>
 <br>
