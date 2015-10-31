@@ -2240,6 +2240,7 @@
 27) kernel: net: fix nlmsg len size for skb when error bit is set.<br>
 28) kernel: net: arp: filter NOARP neighbours for SIOCGARP.<br>
 29) kernel: net: ipv6: send NEWLINK on RA managed/otherconf changes.<br>
+30) kernel: net: pppoe: drop PPPOX_ZOMBIEs in pppoe_flush_dev.<br>
 <br>
 <br>
 <br>
