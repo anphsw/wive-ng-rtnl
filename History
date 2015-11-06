@@ -2221,28 +2221,26 @@
 8) usb-modeswitch-data: up to 2015-06-27.<br>
 9) miniupnpd: up to 1.9.20150721 version.<br>
 10) xupnpd: up to 1.033 version commit 5c3ff1.<br>
-11) xl2tpd: sync with devel tree 12 Aug 2015 (commit 5674a58).<br>
-12) xl2tpd: fix double free regression at death signal.<br>
-13) xl2tpd: fix redial regression.<br>
-14) igmpproxy: silence downstream interface igmp messages.<br>
-15) wireless_tool: sync with internal x86 router tree.<br>
-16) init.d: fix vpn server work regression.<br>
-17) init.d: fix xl2tp client/server restart infinity stop at some cases.<br>
-18) kernel: wifi: backport dequeue TX condition.<br>
-19) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
-20) kernel: mips: irq: Use DECLARE_BITMAP.<br>
-21) kernel: do_sigaction: don't worry about signal_pending().<br>
-22) kernel: sigwait eats blocked default-ignore signals.<br>
-23) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
-24) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
-25) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
-26) kernel: net: Kill sock->sk_protinfo.<br>
-27) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
-28) kernel: net: fix nlmsg len size for skb when error bit is set.<br>
-29) kernel: net: arp: filter NOARP neighbours for SIOCGARP.<br>
-30) kernel: net: ipv6: send NEWLINK on RA managed/otherconf changes.<br>
-31) kernel: net: pppoe: drop PPPOX_ZOMBIEs in pppoe_flush_dev.<br>
-32) kernel: net: unix: sk_socket can disappear when state is unlocked.<br>
+11) xl2tpd: sync with devel tree 06 Nov 2015.<br>
+12) igmpproxy: silence downstream interface igmp messages.<br>
+13) wireless_tool: sync with internal x86 router tree.<br>
+14) init.d: fix vpn server work regression.<br>
+15) init.d: fix xl2tp client/server restart infinity stop at some cases.<br>
+16) kernel: wifi: backport dequeue TX condition.<br>
+17) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
+18) kernel: mips: irq: Use DECLARE_BITMAP.<br>
+19) kernel: do_sigaction: don't worry about signal_pending().<br>
+20) kernel: sigwait eats blocked default-ignore signals.<br>
+21) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
+22) kernel: pipe: iovec: Fix memory corruption when retrying atomic copy as non-atomic.<br>
+23) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
+24) kernel: net: Kill sock->sk_protinfo.<br>
+25) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
+26) kernel: net: fix nlmsg len size for skb when error bit is set.<br>
+27) kernel: net: arp: filter NOARP neighbours for SIOCGARP.<br>
+28) kernel: net: ipv6: send NEWLINK on RA managed/otherconf changes.<br>
+29) kernel: net: pppoe: drop PPPOX_ZOMBIEs in pppoe_flush_dev.<br>
+30) kernel: net: unix: sk_socket can disappear when state is unlocked.<br>
 <br>
 <br>
 <br>
