@@ -206,6 +206,7 @@ SECTIONS
 
 	/* ABI crap starts here */
 	*(.comment)
+	*(.MIPS.abiflags)
 	*(.MIPS.options)
 	*(.note)
 	*(.options)
