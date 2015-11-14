@@ -2218,7 +2218,7 @@
 5) dnsmasq: up to 2.75.<br>
 6) dropbear: up to 2015.68 version.<br>
 7) miniupnpd: workaround issue with Windows 10 (UDA 2.0 devices and control points SHALL implement IPv4 and IPv6).<br>
-8) usb-modeswitch-data: up to 2015-06-27.<br>
+8) usb-modeswitch-data: up to 2015-11-01.<br>
 9) miniupnpd: up to 1.9.20150721 version.<br>
 10) xupnpd: up to 1.033 version commit 5c3ff1.<br>
 11) xl2tpd: sync with devel tree 06 Nov 2015.<br>
