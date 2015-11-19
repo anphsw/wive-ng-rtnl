@@ -2235,15 +2235,16 @@
 22) kernel: sigwait eats blocked default-ignore signals.<br>
 23) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
 24) kernel: pipe: iovec: fix memory corruption when retrying atomic copy as non-atomic.<br>
-25) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
-26) kernel: net: Kill sock->sk_protinfo.<br>
-27) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
-28) kernel: net: fix nlmsg len size for skb when error bit is set.<br>
-29) kernel: net: arp: filter NOARP neighbours for SIOCGARP.<br>
-30) kernel: net: ipv6: send NEWLINK on RA managed/otherconf changes.<br>
-31) kernel: net: pppoe: drop PPPOX_ZOMBIEs in pppoe_flush_dev.<br>
-32) kernel: net: unix: sk_socket can disappear when state is unlocked.<br>
-33) kernel: net: netfilter: fix removal of GRE expectation entries created by PPTP.<br>
+25) kernel: sd: clear PS bit before Mode Select.<br>
+26) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
+27) kernel: net: Kill sock->sk_protinfo.<br>
+28) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
+29) kernel: net: fix nlmsg len size for skb when error bit is set.<br>
+30) kernel: net: arp: filter NOARP neighbours for SIOCGARP.<br>
+31) kernel: net: ipv6: send NEWLINK on RA managed/otherconf changes.<br>
+32) kernel: net: pppoe: drop PPPOX_ZOMBIEs in pppoe_flush_dev.<br>
+33) kernel: net: unix: sk_socket can disappear when state is unlocked.<br>
+34) kernel: net: netfilter: fix removal of GRE expectation entries created by PPTP.<br>
 <br>
 <br>
 <br>
