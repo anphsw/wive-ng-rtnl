@@ -2243,6 +2243,7 @@
 30) kernel: net: ipv6: send NEWLINK on RA managed/otherconf changes.<br>
 31) kernel: net: pppoe: drop PPPOX_ZOMBIEs in pppoe_flush_dev.<br>
 32) kernel: net: unix: sk_socket can disappear when state is unlocked.<br>
+33) kernel: net: netfilter: fix removal of GRE expectation entries created by PPTP.<br>
 <br>
 <br>
 <br>
