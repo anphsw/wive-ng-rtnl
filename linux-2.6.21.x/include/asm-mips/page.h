@@ -30,7 +30,7 @@
 #define PAGE_SHIFT	16
 #endif
 #define PAGE_SIZE	(1UL << PAGE_SHIFT)
-#define PAGE_MASK	(~((1 << PAGE_SHIFT) - 1))
+#define PAGE_MASK	(~(PAGE_SIZE - 1))
 
 #ifndef __ASSEMBLY__
 
