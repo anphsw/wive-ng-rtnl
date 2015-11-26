@@ -2221,7 +2221,7 @@
 8) miniupnpd: up to 1.9.20151118 version.<br>
 9) usb-modeswitch-data: up to 2015-11-01.<br>
 10) xupnpd: up to 1.033 version commit 5c3ff1.<br>
-11) xl2tpd: sync with devel tree 06 Nov 2015.<br>
+11) xl2tpd: sync with devel tree 26 Nov 2015.<br>
 12) igmpproxy: silence downstream interface igmp messages.<br>
 13) wireless_tool: sync with internal x86 router tree.<br>
 14) init.d: fix vpn server work regression.<br>

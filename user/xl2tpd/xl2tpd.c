@@ -16,7 +16,7 @@
 
 #define _ISOC99_SOURCE
 #define _XOPEN_SOURCE
-#define _BSD_SOURCE
+#define _DEFAULT_SOURCE
 #define _XOPEN_SOURCE_EXTENDED
 #define _GNU_SOURCE
 
@@ -771,18 +771,15 @@ void magic_lac_tunnel (void *data)
     {
         /* FIXME: I should try different LNS's if I get failures */
         l2tp_call (lac->lns->hostname, lac->lns->port, lac, NULL);
-        return;
     }
     else if (deflac && deflac->lns)
     {
         l2tp_call (deflac->lns->hostname, deflac->lns->port, lac, NULL);
-        return;
     }
     else
     {
         l2tp_log (LOG_WARNING, "%s: Unable to find hostname to dial for '%s'\n",
              __FUNCTION__, lac->entname);
-        return;
     }
 }
 
@@ -1088,7 +1085,7 @@ int control_handle_available(FILE* resf, char* bufp){
 	st = tunnels.head;
 	while (st)
 	{
-		write_res (resf, "%02i AVAILABLE tunnel %p, id %d has %d calls and self %p\n", 0, st, st->tid, st->count, st->self);
+		write_res (resf, "%02i AVAILABLE tunnel %p, id %d, ourtid %d has %d calls and self %p\n", 0, st, st->tid, st->ourtid, st->count, st->self);
 		st = st->next;
 	}
 
@@ -1513,10 +1510,34 @@ int control_handle_lac_remove(FILE* resf, char* bufp){
     // disconnect lac
     lac->active = 0;
     lac->rtries = 0;
+    /* destroy_tunnel may clear lac->t */
     if (lac->t)
     {
-        lac_disconnect (lac->t->ourtid);
+	lac_disconnect (lac->t->ourtid);
+	lac->t->lac = NULL;
+	if(lac->t->self)
+	    lac->t->self->lac = NULL;
     }
+    if (lac->c)
+    {
+        struct call *c = lac->c;
+        while (c)
+        {
+            c->lac = NULL;
+            c = c->next;
+        }
+    }
+    if (lac->lns)
+    {
+        struct host *t, *h = lac->lns;
+        while (h)
+        {
+            t = h->next;
+            free(h);
+            h = t;
+        }
+    }
+
     // removes lac from laclist
     if (prev_lac == NULL)
         laclist = lac->next;
@@ -1819,7 +1840,6 @@ static void open_controlfd()
 void init (int argc,char *argv[])
 {
     struct lac *lac;
-    struct in_addr listenaddr;
     struct utsname uts;
 
     init_args (argc,argv);
@@ -1866,10 +1886,8 @@ void init (int argc,char *argv[])
     l2tp_log (LOG_INFO, "Forked by Scott Balmos and David Stipp, (C) 2001\n");
     l2tp_log (LOG_INFO, "Inherited by Jeff McAdams, (C) 2002\n");
     l2tp_log (LOG_INFO, "Forked again by Xelerance (www.xelerance.com) (C) 2006\n");
-    l2tp_log (LOG_INFO, "Listening on IP address %s, port %d\n", inet_ntoa(listenaddr), gconfig.port);
 #endif
 
-    listenaddr.s_addr = gconfig.listenaddr;
     lac = laclist;
     while (lac)
     {
