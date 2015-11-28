@@ -2246,6 +2246,7 @@
 33) kernel: net: unix: sk_socket can disappear when state is unlocked.<br>
 34) kernel: net: netfilter: fix removal of GRE expectation entries created by PPTP.<br>
 35) kernel: net: add dev_loopback_xmit() to avoid duplicate code.<br>
+36) kernel: net: ipmr: fix vif/tunnel failure race condition.<br>
 <br>
 <br>
 <br>
