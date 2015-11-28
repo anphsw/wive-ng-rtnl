@@ -2216,7 +2216,7 @@
 3) toolchain: apply some regressions fix backports to gcc, update headers.<br>
 4) busybox: update to 1.24.1 version.<br>
 5) dnsmasq: up to 2.75.<br>
-6) dropbear: up to 2015.68 version.<br>
+6) dropbear: up to 2015.70 version.<br>
 7) miniupnpd: workaround issue with Windows 10 (UDA 2.0 devices and control points SHALL implement IPv4 and IPv6).<br>
 8) miniupnpd: up to 1.9.20151118 version.<br>
 9) usb-modeswitch-data: up to 2015-11-01.<br>
