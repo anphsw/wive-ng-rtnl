@@ -2221,32 +2221,33 @@
 8) miniupnpd: up to 1.9.20151118 version.<br>
 9) usb-modeswitch-data: up to 2015-11-01.<br>
 10) xupnpd: up to 1.033 version commit 5c3ff1.<br>
-11) xl2tpd: sync with devel tree 26 Nov 2015.<br>
-12) igmpproxy: silence downstream interface igmp messages.<br>
-13) wireless_tool: sync with internal x86 router tree.<br>
-14) init.d: fix vpn server work regression.<br>
-15) init.d: fix xl2tp client/server restart infinity stop at some cases.<br>
-16) kernel: wifi: backport dequeue TX condition.<br>
-17) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
-18) kernel: mips: irq: Use DECLARE_BITMAP.<br>
-19) kernel: mips: vmlinux: discard .MIPS.abiflags.<br>
-20) kernel: mips: fix PAGE_MASK definition.<br>
-21) kernel: do_sigaction: don't worry about signal_pending().<br>
-22) kernel: sigwait eats blocked default-ignore signals.<br>
-23) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
-24) kernel: pipe: iovec: fix memory corruption when retrying atomic copy as non-atomic.<br>
-25) kernel: sd: clear PS bit before Mode Select.<br>
-26) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
-27) kernel: net: Kill sock->sk_protinfo.<br>
-28) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
-29) kernel: net: fix nlmsg len size for skb when error bit is set.<br>
-30) kernel: net: arp: filter NOARP neighbours for SIOCGARP.<br>
-31) kernel: net: ipv6: send NEWLINK on RA managed/otherconf changes.<br>
-32) kernel: net: pppoe: drop PPPOX_ZOMBIEs in pppoe_flush_dev.<br>
-33) kernel: net: unix: sk_socket can disappear when state is unlocked.<br>
-34) kernel: net: netfilter: fix removal of GRE expectation entries created by PPTP.<br>
-35) kernel: net: add dev_loopback_xmit() to avoid duplicate code.<br>
-36) kernel: net: ipmr: fix vif/tunnel failure race condition.<br>
+11) xupnpd: move TTK-IPTV to feed and cleanup RTK-TV.<br>
+12) xl2tpd: sync with devel tree 26 Nov 2015.<br>
+13) igmpproxy: silence downstream interface igmp messages.<br>
+14) wireless_tool: sync with internal x86 router tree.<br>
+15) init.d: fix vpn server work regression.<br>
+16) init.d: fix xl2tp client/server restart infinity stop at some cases.<br>
+17) kernel: wifi: backport dequeue TX condition.<br>
+18) kernel: mips: c-r4k: Fix typo in probe_scache().<br>
+19) kernel: mips: irq: Use DECLARE_BITMAP.<br>
+20) kernel: mips: vmlinux: discard .MIPS.abiflags.<br>
+21) kernel: mips: fix PAGE_MASK definition.<br>
+22) kernel: do_sigaction: don't worry about signal_pending().<br>
+23) kernel: sigwait eats blocked default-ignore signals.<br>
+24) kernel: uglify kill_pid_info() to fix kill() vs exec() race.<br>
+25) kernel: pipe: iovec: fix memory corruption when retrying atomic copy as non-atomic.<br>
+26) kernel: sd: clear PS bit before Mode Select.<br>
+27) kernel: net: netfilter: ipv6: fix afinfo->route refcnt leak on error.<br>
+28) kernel: net: Kill sock->sk_protinfo.<br>
+29) kernel: net: inet: remove BUG_ON() in twsk_destructor().<br>
+30) kernel: net: fix nlmsg len size for skb when error bit is set.<br>
+31) kernel: net: arp: filter NOARP neighbours for SIOCGARP.<br>
+32) kernel: net: ipv6: send NEWLINK on RA managed/otherconf changes.<br>
+33) kernel: net: pppoe: drop PPPOX_ZOMBIEs in pppoe_flush_dev.<br>
+34) kernel: net: unix: sk_socket can disappear when state is unlocked.<br>
+35) kernel: net: netfilter: fix removal of GRE expectation entries created by PPTP.<br>
+36) kernel: net: add dev_loopback_xmit() to avoid duplicate code.<br>
+37) kernel: net: ipmr: fix vif/tunnel failure race condition.<br>
 <br>
 <br>
 <br>

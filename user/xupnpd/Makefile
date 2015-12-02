@@ -1,6 +1,3 @@
-# xupnpd top-level include
--include ../../config.arch
-
 DIRLIST_ETC=playlists
 DIRLIST_SHR=ui www profiles plugins
 
@@ -19,9 +16,10 @@ romfs:
 	cp -fv src/xupnpd $(ROMFSDIR)/bin/xupnpd
 	rm -rf $(ROMFSDIR)/etc/xupnpd
 	mkdir -p $(ROMFSDIR)/etc/xupnpd
-	cp -fv src/*.lua $(ROMFSDIR)/etc/xupnpd
 	mkdir -p $(ROMFSDIR)/etc/xupnpd/config
 	mkdir -p $(ROMFSDIR)/etc/xupnpd/config/postinit
-	for i in $(DIRLIST_ETC); do cp -apr src/$$i $(ROMFSDIR)/etc/xupnpd/$$i; done
 	mkdir -p $(ROMFSDIR)/share/xupnpd
-	for i in $(DIRLIST_SHR); do cp -apr src/$$i $(ROMFSDIR)/share/xupnpd/$$i; done
+	cp -fv src/*.lua $(ROMFSDIR)/etc/xupnpd
+	cp -frv src/config/* $(ROMFSDIR)/etc/xupnpd/config
+	for i in $(DIRLIST_ETC); do cp -aprf src/$$i $(ROMFSDIR)/etc/xupnpd/$$i; done
+	for i in $(DIRLIST_SHR); do cp -aprf src/$$i $(ROMFSDIR)/share/xupnpd/$$i; done
