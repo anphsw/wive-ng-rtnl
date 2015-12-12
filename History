@@ -2218,7 +2218,7 @@
 5) dnsmasq: up to 2.75.<br>
 6) dropbear: up to 2015.70 version.<br>
 7) miniupnpd: workaround issue with Windows 10 (UDA 2.0 devices and control points SHALL implement IPv4 and IPv6).<br>
-8) miniupnpd: up to 1.9.20151118 version.<br>
+8) miniupnpd: up to 1.9.20151212 version.<br>
 9) usb-modeswitch-data: up to 2015-11-01.<br>
 10) xupnpd: up to 1.033 version commit 5c3ff1.<br>
 11) xupnpd: move TTK-IPTV to feed and cleanup RTK-TV.<br>
