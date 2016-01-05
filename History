@@ -2249,6 +2249,7 @@
 36) kernel: net: add dev_loopback_xmit() to avoid duplicate code.<br>
 37) kernel: net: ipmr: fix vif/tunnel failure race condition.<br>
 38) kernel: net: add validation for the socket syscall protocol argument.<br>
+39) kernel: net: pptp: verify sockaddr_len in pptp_bind() and pptp_connect().<br>
 <br>
 <br>
 <br>
