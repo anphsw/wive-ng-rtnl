@@ -202,6 +202,7 @@ struct sock {
 				sk_no_check : 2,
 				sk_userlocks : 4;
 	unsigned char		sk_protocol;
+#define SK_PROTOCOL_MAX U8_MAX
 	unsigned short		sk_type;
 	int			sk_rcvbuf;
 	socket_lock_t		sk_lock;

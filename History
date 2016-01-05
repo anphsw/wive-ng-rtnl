@@ -2248,6 +2248,7 @@
 35) kernel: net: netfilter: fix removal of GRE expectation entries created by PPTP.<br>
 36) kernel: net: add dev_loopback_xmit() to avoid duplicate code.<br>
 37) kernel: net: ipmr: fix vif/tunnel failure race condition.<br>
+38) kernel: net: add validation for the socket syscall protocol argument.<br>
 <br>
 <br>
 <br>
