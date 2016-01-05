@@ -2251,6 +2251,7 @@
 38) kernel: net: add validation for the socket syscall protocol argument.<br>
 39) kernel: net: pptp: verify sockaddr_len in pptp_bind() and pptp_connect().<br>
 40) kernel: net: af_unix: Revert 'lock_interruptible' in stream receive code.<br>
+41) kernel: net: scm: fix PaX detected msg_controllen overflow in scm_detach_fds.<br>
 <br>
 <br>
 <br>
