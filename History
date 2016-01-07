@@ -2256,6 +2256,10 @@
 <b>5.3.x</b><br>
 1) dropbear: up to 2015.71 version.<br>
 2) dropbear: small revert fix regression break work in inetd mode.<br>
+3) dropbear: add force proto famaly set (IPv4/6).<br>
+4) dropbear: fix signature check.<br>
+5) dropbear: increase kex hash cache size.<br>
+6) dropbear: allow 3des,rsa,ecdsa,ecdh for compat.<br>
 <br>
 <br>
 <br>
