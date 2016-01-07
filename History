@@ -2255,6 +2255,7 @@
 <br>
 <b>5.3.x</b><br>
 1) dropbear: up to 2015.71 version.<br>
+2) dropbear: small revert fix regression break work in inetd mode.<br>
 <br>
 <br>
 <br>
