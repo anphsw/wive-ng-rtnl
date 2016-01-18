@@ -2261,7 +2261,8 @@
 5) dropbear: increase kex hash cache size.<br>
 6) dropbear: allow 3des,rsa,ecdsa,ecdh for compat.<br>
 7) miniupnpd: up to 1.9.20160113 version.<br>
-8) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
+8) busybox: truncate: always set mode when opening file to avoid fortify errors.<br>
+9) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
 <br>
 <br>
 <br>
