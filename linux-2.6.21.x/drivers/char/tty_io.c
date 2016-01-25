@@ -3669,9 +3669,11 @@ static void flush_to_ldisc(struct work_struct *work)
 			char_buf = head->char_buf_ptr + head->read;
 			flag_buf = head->flag_buf_ptr + head->read;
 			head->read += count;
-			spin_unlock_irqrestore(&tty->buf.lock, flags);
-			disc->receive_buf(tty, char_buf, flag_buf, count);
-			spin_lock_irqsave(&tty->buf.lock, flags);
+			if (disc->receive_buf) {
+				spin_unlock_irqrestore(&tty->buf.lock, flags);
+				disc->receive_buf(tty, char_buf, flag_buf, count);
+				spin_lock_irqsave(&tty->buf.lock, flags);
+			}
 		}
 		tty->buf.head = head;
 	}

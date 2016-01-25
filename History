@@ -2263,6 +2263,7 @@
 7) miniupnpd: up to 1.9.20160113 version.<br>
 8) busybox: truncate: always set mode when opening file to avoid fortify errors.<br>
 9) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
+10) kernel: tty: fix GPF in flush_to_ldisc().<bt>
 <br>
 <br>
 <br>
