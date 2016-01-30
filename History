@@ -2262,9 +2262,10 @@
 6) dropbear: allow 3des,rsa,ecdsa,ecdh for compat.<br>
 7) usb_modeswitch: up data files to 20160112 version.<br>
 8) miniupnpd: up to 1.9.20160113 version.<br>
-9) busybox: truncate: always set mode when opening file to avoid fortify errors.<br>
-10) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
-11) kernel: tty: fix GPF in flush_to_ldisc().<bt>
+9) dnsmasq: up to 2.76test8 version.<br>
+10) busybox: truncate: always set mode when opening file to avoid fortify errors.<br>
+11) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
+12) kernel: tty: fix GPF in flush_to_ldisc().<bt>
 <br>
 <br>
 <br>
