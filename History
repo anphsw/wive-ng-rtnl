@@ -2267,6 +2267,7 @@
 11) busybox: truncate: always set mode when opening file to avoid fortify errors.<br>
 12) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
 13) kernel: tty: fix GPF in flush_to_ldisc().<bt>
+14) kernel: proc: return -ENOMEM when inode allocation failed.<br>
 <br>
 <br>
 <br>
