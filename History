@@ -2268,6 +2268,7 @@
 12) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
 13) kernel: tty: fix GPF in flush_to_ldisc().<bt>
 14) kernel: proc: return -ENOMEM when inode allocation failed.<br>
+15) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
 <br>
 <br>
 <br>
