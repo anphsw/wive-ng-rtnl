@@ -2269,6 +2269,7 @@
 13) kernel: tty: fix GPF in flush_to_ldisc().<bt>
 14) kernel: proc: return -ENOMEM when inode allocation failed.<br>
 15) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
+16) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
 <br>
 <br>
 <br>
