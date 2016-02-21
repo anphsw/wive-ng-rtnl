@@ -2265,11 +2265,12 @@
 9) dnsmasq: up to 2.76test10 version.<br>
 10) xl2tpd: fix #98 by checking if a valid PID is being killed.<br>
 11) busybox: truncate: always set mode when opening file to avoid fortify errors.<br>
-12) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
-13) kernel: tty: fix GPF in flush_to_ldisc().<bt>
-14) kernel: proc: return -ENOMEM when inode allocation failed.<br>
-15) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
-16) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
+12) cpdtool, igmpproxy, lldt, pppd, xupnpd, udpxy, p910nd fix some issues found by cppcheck.<br>
+13) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
+14) kernel: tty: fix GPF in flush_to_ldisc().<bt>
+15) kernel: proc: return -ENOMEM when inode allocation failed.<br>
+16) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
+17) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
 <br>
 <br>
 <br>
