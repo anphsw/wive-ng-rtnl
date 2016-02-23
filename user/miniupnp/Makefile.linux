@@ -1,4 +1,4 @@
-# $Id: Makefile.linux,v 1.91 2015/10/26 16:53:25 nanard Exp $
+# $Id: Makefile.linux,v 1.93 2016/02/12 14:28:01 nanard Exp $
 # MiniUPnP project
 # (c) 2006-2015 Thomas Bernard
 # http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
@@ -146,6 +146,13 @@ LIBS += $(shell pkg-config --static --libs-only-l libnetfilter_conntrack)
 endif # ($(TEST),1)
 
 #LIBS += $(shell pkg-config --static --libs-only-l libssl)
+
+#TEST := $(shell $(PKG_CONFIG) --exists uuid && echo 1)
+#ifeq ($(TEST),1)
+#LDLIBS += $(shell $(PKG_CONFIG) --static --libs-only-l uuid)
+#else
+#$(info please install uuid-dev package / libuuid)
+#endif # ($(TEST),1)
 
 TESTUPNPDESCGENOBJS = testupnpdescgen.o upnpdescgen.o
 
