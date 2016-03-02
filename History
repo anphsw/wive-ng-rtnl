@@ -2262,7 +2262,7 @@
 6) dropbear: allow 3des,rsa,ecdsa,ecdh for compat.<br>
 7) usb_modeswitch: up data files to 20160112 version.<br>
 8) miniupnpd: up to 1.9.20160222 version.<br>
-9) dnsmasq: up to 2.76test10 version.<br>
+9) dnsmasq: up to 2.76test11 version.<br>
 10) xl2tpd: fix #98 by checking if a valid PID is being killed.<br>
 11) busybox: truncate: always set mode when opening file to avoid fortify errors.<br>
 12) cpdtool, igmpproxy, lldt, pppd, xupnpd, udpxy, p910nd fix some issues found by cppcheck.<br>
