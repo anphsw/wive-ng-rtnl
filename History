@@ -2264,13 +2264,14 @@
 8) miniupnpd: up to 1.9.20160222 version.<br>
 9) dnsmasq: up to 2.76test12 version.<br>
 10) xl2tpd: fix #98 by checking if a valid PID is being killed.<br>
-11) busybox: truncate: always set mode when opening file to avoid fortify errors.<br>
-12) cpdtool, igmpproxy, lldt, pppd, xupnpd, udpxy, p910nd fix some issues found by cppcheck.<br>
-13) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
-14) kernel: tty: fix GPF in flush_to_ldisc().<bt>
-15) kernel: proc: return -ENOMEM when inode allocation failed.<br>
-16) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
-17) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
+11) xl2tpd: sync with devel tree 10 Mar 2016.<br>
+12) busybox: truncate: always set mode when opening file to avoid fortify errors.<br>
+13) cpdtool, igmpproxy, lldt, pppd, xupnpd, udpxy, p910nd fix some issues found by cppcheck.<br>
+14) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
+15) kernel: tty: fix GPF in flush_to_ldisc().<bt>
+16) kernel: proc: return -ENOMEM when inode allocation failed.<br>
+17) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
+18) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
 <br>
 <br>
 <br>
