@@ -2254,7 +2254,7 @@
 41) kernel: net: scm: fix PaX detected msg_controllen overflow in scm_detach_fds.<br>
 <br>
 <b>5.3.x</b><br>
-1) dropbear: up to 2015.71 version.<br>
+1) dropbear: up to 2016.72 version.<br>
 2) dropbear: small revert fix regression break work in inetd mode.<br>
 3) dropbear: add force proto famaly set (IPv4/6).<br>
 4) dropbear: fix signature check.<br>
