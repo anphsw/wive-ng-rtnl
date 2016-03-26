@@ -221,7 +221,6 @@ start() {
 	    if [ "$parproutedEnabled" != "1" ]; then
 		# enable forward only from local network to wan/ppp
 		iptables -A FORWARD -i $lan_if -s $lan_ipaddr/$lan_netmask -j ACCEPT
-		iptables -A FORWARD -o $wan_if -s $lan_ipaddr/$lan_netmask -j ACCEPT
 		if [ "$OperationMode" = "4" ]; then
 		    iptables -A FORWARD -o $wan_if -s $chilli_net -j ACCEPT
 		    iptables -t nat -A POSTROUTING -o $phys_wan_if -s $chilli_net -j MASQUERADE
