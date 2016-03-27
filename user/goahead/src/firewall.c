@@ -559,6 +559,46 @@ static int checkNatEnabled()
 	return ((strcmp(wan_nat_ena, "1") == 0) || (strcasecmp(vpn_nat_ena, "on") == 0)) ? 1 : 0;
 }
 
+static void makePortForwardAccesRule(char *buf, int len, char *wan_name, char *ip_address, int proto, int prf_int, int prt_int, int rprf_int, int rprt_int, int inat_loopback)
+{
+	int rc = 0;
+	char *pos = buf;
+	char *lan_if = getLanIfName();
+
+	// Add forwarding rule
+	rc = snprintf(pos, len, "iptables -A FORWARD -i %s -o %s -d %s ", wan_name, lan_if, ip_address);
+
+	pos += rc;
+	len -= rc;
+
+	// write protocol type
+	if (proto == PROTO_TCP)
+		rc = snprintf(pos, len, "-p tcp ");
+	else if (proto == PROTO_UDP)
+		rc = snprintf(pos, len, "-p udp ");
+	else if (proto == PROTO_TCP_UDP)
+		rc = snprintf(pos, len, " ");
+	pos += rc;
+	len -= rc;
+
+	// write dst port
+	if (rprf_int != 0)
+	{
+		rc = (prt_int != 0) ?
+			snprintf(pos, len, "--dport %d:%d ", rprf_int, rprt_int) :
+			snprintf(pos, len, "--dport %d ", rprf_int);
+		pos += rc;
+		len -= rc;
+	}
+
+	// write remote ip
+	rc = snprintf(pos, len, "-j ACCEPT");
+	pos += rc;
+	len -= rc;
+
+	rc = snprintf(pos, len, "\n");
+}
+
 static void iptablesIPPortFilterBuildScript(void)
 {
 	int i=0;
@@ -759,9 +799,10 @@ static void iptablesPortForwardBuildScript(void)
 	char cmd[1024];
 	char wan_name[16];
 	char ip_address[32], prf[8], prt[8], rprf[9], rprt[8], protocol[8], interface[8], nat_loopback[8];
-	char *rule, *c_if;
-	char *firewall_enable;
-	int i=0, prf_int, prt_int, rprf_int, rprt_int, proto, inat_loopback;
+	char *rule;
+	char *c_if, *a_if, *firewall_enable;
+	int i=0, prf_int, prt_int, rprf_int, rprt_int, proto, inat_loopback, nat_loopback_on;
+	FILE *fd, *fd_vpn, *fd_access;
 
 	//Remove portforward script
 	firewall_enable = nvram_get(RT2860_NVRAM, "PortForwardEnable");
@@ -783,13 +824,13 @@ static void iptablesPortForwardBuildScript(void)
 	else
 		return;
 
-	int nat_loopback_on = checkNatLoopback(rule);
+	nat_loopback_on = checkNatLoopback(rule);
 
 	// get wan name
 	strncpy(wan_name, getWanIfName(), sizeof(wan_name)-1);
 
 	// Generate portforward script file
-	FILE *fd = fopen(_PATH_PFW_FILE, "w");
+	fd = fopen(_PATH_PFW_FILE, "w");
 	if (fd == NULL)
 		return;
 
@@ -810,7 +851,7 @@ static void iptablesPortForwardBuildScript(void)
 	chmod(_PATH_PFW_FILE, S_IXGRP | S_IXUSR | S_IRUSR | S_IWUSR | S_IRGRP);
 
 	// Open file for VPN
-	FILE *fd_vpn = fopen(_PATH_PFW_FILE_VPN, "w");
+	fd_vpn = fopen(_PATH_PFW_FILE_VPN, "w");
 	if (fd_vpn == NULL)
 	{
 		fclose(fd);
@@ -832,6 +873,20 @@ static void iptablesPortForwardBuildScript(void)
 			PORT_FORWARD_POST_CHAIN_VPN, PORT_FORWARD_POST_CHAIN_VPN);
 
 	chmod(_PATH_PFW_FILE_VPN, S_IXGRP | S_IXUSR | S_IRUSR | S_IWUSR | S_IRGRP);
+
+	// Open file for ACCESS
+	fd_access = fopen(_PATH_PFW_FILE_ACCESS, "w");
+	if (fd_access == NULL)
+	{
+		fclose(fd);
+		fclose(fd_vpn);
+		return;
+	}
+
+	// Print header for ACESS
+	fputs("#!/bin/sh\n\n", fd_access);
+
+	chmod(_PATH_PFW_FILE_ACCESS, S_IXGRP | S_IXUSR | S_IRUSR | S_IWUSR | S_IRGRP);
 
 	// Now write all rules
 	while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) )
@@ -923,14 +978,17 @@ static void iptablesPortForwardBuildScript(void)
 		int is_vpn = 0;
 		// Patch interface
 		if (strcmp(interface, "LAN")==0)
-			c_if = "br0";
+			a_if = c_if = "br0";
 		else if (strcmp(interface, "VPN")==0)
 		{
 			c_if = "$2";
+			a_if = "ppp+";
 			is_vpn = 1;
 		}
 		else
-			c_if = wan_name;
+		{
+			a_if = c_if = wan_name;
+		}
 
 		switch(proto)
 		{
@@ -946,8 +1004,9 @@ static void iptablesPortForwardBuildScript(void)
 					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, proto, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
 					fputs(cmd, fd);
 				}
+				makePortForwardAccesRule(cmd, sizeof(cmd), a_if, ip_address, proto, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
+				fputs(cmd, fd_access);
 				break;
-
 			case PROTO_TCP_UDP:
 				if (is_vpn)
 				{
@@ -963,11 +1022,16 @@ static void iptablesPortForwardBuildScript(void)
 					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, PROTO_UDP, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
 					fputs(cmd, fd);
 				}
+				makePortForwardAccesRule(cmd, sizeof(cmd), a_if, ip_address, PROTO_TCP, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
+				fputs(cmd, fd_access);
+				makePortForwardAccesRule(cmd, sizeof(cmd), a_if, ip_address, PROTO_UDP, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
+				fputs(cmd, fd_access);
 				break;
 		}
 	}
 
 	// Close files
+	fclose(fd_access);
 	fclose(fd_vpn);
 	fclose(fd);
 }
