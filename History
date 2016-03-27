@@ -2264,7 +2264,7 @@
 8) miniupnpd: up to 1.9.20160222 version.<br>
 9) dnsmasq: up to 2.76test12 version.<br>
 10) xl2tpd: fix #98 by checking if a valid PID is being killed.<br>
-11) xl2tpd: sync with devel tree 10 Mar 2016.<br>
+11) xl2tpd: sync with devel tree 28 Mar 2016.<br>
 12) xupnpd: generic plugin fix.<br>
 13) busybox: truncate: always set mode when opening file to avoid fortify errors.<br>
 14) cpdtool, igmpproxy, lldt, pppd, xupnpd, udpxy, p910nd fix some issues found by cppcheck.<br>
