@@ -101,3 +101,9 @@ elif [ "$dnsPEnabled" != "1" -a "$wan_static_dns" != "on" ] && [ "$MODE" = "pppd
     sleep 3
     service dhcpd restart
 fi
+
+##########################################################
+# need restart L2TP server every netfilter rules replaced
+# or ppp session to uplink restarted or new adress recived
+##########################################################
+service vpnserver restart
