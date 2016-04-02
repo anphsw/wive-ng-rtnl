@@ -2278,6 +2278,7 @@
 22) kernel: proc: return -ENOMEM when inode allocation failed.<br>
 23) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
 24) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
+25) kernel: pppoe: fix reference counting in PPPoE proxy.<br>
 <br>
 <br>
 <br>
