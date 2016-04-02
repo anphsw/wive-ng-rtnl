@@ -2279,6 +2279,7 @@
 23) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
 24) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
 25) kernel: pppoe: fix reference counting in PPPoE proxy.<br>
+26) kernel: pipe: Fix buffer offset after partially failed read.<br>
 <br>
 <br>
 <br>
