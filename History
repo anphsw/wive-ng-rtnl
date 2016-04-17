@@ -2274,7 +2274,7 @@
 18) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
 19) init.d: portforward allow forward packets only for needed ports and ip, if nat enabled and portforward rules really generate.<br>
 20) init.d: move l2tp server form S to W runlevel for correct restart after apply new changes.<br>
-21) init.d: l2tp server ip-up: fix masqrade rules.<br>
+21) init.d: l2tp server ip-up: split masqrade rules.<br>
 22) kernel: tty: fix GPF in flush_to_ldisc().<bt>
 23) kernel: proc: return -ENOMEM when inode allocation failed.<br>
 24) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
