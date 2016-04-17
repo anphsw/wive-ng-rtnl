@@ -3,6 +3,8 @@
 #include global config
 . /etc/scripts/global.sh
 
+LOG="logger -t vpn-server"
+
 PPP_IFACE="$1"
 PPP_TTY="$2"
 PPP_SPEED="$3"
