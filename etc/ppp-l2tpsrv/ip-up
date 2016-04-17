@@ -27,7 +27,7 @@ $LOG "Allow forward for $PPP_IFACE interface"
 iptables -A l2tpsrvfwd -i $PPP_IFACE -j ACCEPT
 iptables -A l2tpsrvfwd -o $PPP_IFACE -j ACCEPT
 
-if [ "$l2tp_srv_nat_enabled" != "" ] && [ "$l2tp_srv_nat_enabled" != "0" ]; then
+if [ "$l2tp_srv_nat_enabled" = "1" ]; then
     if [ "$vpnNAT" != "off" ]; then
 	$LOG "Add masqrade for client $PPP_REMOTE to VPN client net over any ppp interfaces"
 	iptables -t nat -A POSTROUTING -i $PPP_IFACE -o ppp+ -j MASQUERADE
