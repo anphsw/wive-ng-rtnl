@@ -2270,16 +2270,17 @@
 14) xupnpd: generic plugin fix.<br>
 15) busybox: truncate: always set mode when opening file to avoid fortify errors.<br>
 16) cpdtool, igmpproxy, lldt, pppd, xupnpd, udpxy, p910nd fix some issues found by cppcheck.<br>
-17) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
-18) init.d: portforward allow forward packets only for needed ports and ip, if nat enabled and portforward rules really generate.<br>
-19) init.d: move l2tp server form S to W runlevel for correct restart after apply new changes.<br>
-20) goahead: generate /etc/portforward_access for forward allow only for needed ip of portforward activate.<br>
-21) kernel: tty: fix GPF in flush_to_ldisc().<bt>
-22) kernel: proc: return -ENOMEM when inode allocation failed.<br>
-23) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
-24) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
-25) kernel: pppoe: fix reference counting in PPPoE proxy.<br>
-26) kernel: pipe: Fix buffer offset after partially failed read.<br>
+17) goahead: generate /etc/portforward_access for forward allow only for needed ip of portforward activate.<br>
+18) init.d: vpnserver: remove unneded second dgw to clients network (unused).<br>
+19) init.d: portforward allow forward packets only for needed ports and ip, if nat enabled and portforward rules really generate.<br>
+20) init.d: move l2tp server form S to W runlevel for correct restart after apply new changes.<br>
+21) init.d: l2tp server ip-up: fix masqrade rule.<br>
+22) kernel: tty: fix GPF in flush_to_ldisc().<bt>
+23) kernel: proc: return -ENOMEM when inode allocation failed.<br>
+24) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
+25) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
+26) kernel: pppoe: fix reference counting in PPPoE proxy.<br>
+27) kernel: pipe: Fix buffer offset after partially failed read.<br>
 <br>
 <br>
 <br>
