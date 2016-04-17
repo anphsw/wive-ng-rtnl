@@ -28,8 +28,9 @@ iptables -A l2tpsrvfwd -i $PPP_IFACE -j ACCEPT
 iptables -A l2tpsrvfwd -o $PPP_IFACE -j ACCEPT
 
 if [ "$l2tp_srv_nat_enabled" != "" ] && [ "$l2tp_srv_nat_enabled" != "0" ]; then
-    $LOG "Add masqrade for client $PPP_REMOTE"
-    iptables -A POSTROUTING -t nat -i $PPP_IFACE -o $lan_if -j MASQUERADE
+    $LOG "Add masqrade from client $PPP_REMOTE over $PPP_IFACE to $wan_if and $lan_if"
+    iptables -t nat -A POSTROUTING -i $PPP_IFACE -o $wan_if -j MASQUERADE
+    iptables -t nat -A POSTROUTING -i $PPP_IFACE -o $lan_if -j MASQUERADE
 fi
 
 # allow udpxy for l2tp clients

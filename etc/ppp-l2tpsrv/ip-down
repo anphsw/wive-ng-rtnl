@@ -20,7 +20,8 @@ sysctl -wq net.ipv4.conf.$PPP_IFACE.forwarding=0
 # del rules
 iptables -D l2tpsrvfwd -i $PPP_IFACE -j ACCEPT > /dev/null 2>&1
 iptables -D l2tpsrvfwd -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
-iptables -A POSTROUTING -t nat -i $PPP_IFACE -o $lan_if -j MASQUERADE > /dev/null 2>&1
+iptables -t nat -D POSTROUTING -i $PPP_IFACE -o $wan_if -j MASQUERADE > /dev/null 2>&1
+iptables -t nat -D POSTROUTING -i $PPP_IFACE -o $lan_if -j MASQUERADE > /dev/null 2>&1
 
 # udpxy
 iptables -D servicelimit -i $PPP_IFACE -m state --state NEW -p tcp --dport $UDPXYPort -j ACCEPT > /dev/null 2>&1
