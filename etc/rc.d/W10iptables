@@ -254,18 +254,21 @@ start() {
 	fi
 ###########################################NAT-NAPTM#######################################
 	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
-	    $LOG "Add NAT rules"
 	    ####################PORTFORWARD#############################
 	    # allow forward packets for portfw rules only if nat enabled
 	    # and portforward rules really generated
-	    if [ "$PortForwardEnable" = "1" ] && [ -e /etc/portforward ] && [ "$wan_ipaddr" != "" ]; then
-		$LOG "Add portforward NAT rules"
-		/etc/portforward "$wan_ipaddr"
+	    if [ "$PortForwardEnable" = "1" ]; then
+		if [ -e /etc/portforward ] && [ "$wan_ipaddr" != "" ]; then
+		    $LOG "Add portforward NAT rules over $wan_ipaddr"
+		    /etc/portforward "$wan_ipaddr"
+		fi
+		# allways add allow forward rules at portforward enabled
 		if [ -e /etc/portforward_access ]; then
 		    $LOG "Add portforward FORWARD rules"
 		    /etc/portforward_access
 		fi
 	    fi
+	    $LOG "Add NAT rules"
 	    #######################NAT##################################
 	    if [ "$ROUTE_MODE" = "on" ] && [ "$natEnabled" = "1" ]; then
 		if [ "$OperationMode" != "4" ]; then
