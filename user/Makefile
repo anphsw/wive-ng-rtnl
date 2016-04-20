@@ -119,7 +119,7 @@ romfs:
 ifeq ($(CONFIG_USER_OPENSSL),y)
 	if [ -e openssl/libssl.so ]; then  cd openssl ; $(MAKE) romfs ; cd .. ; fi
 endif
-	for i in $(sort $(dir_y)) ; do \
+	for i in $(dir_y) ; do \
 		[ ! -d $$i ] || $(MAKE) -C $$i romfs || exit $$? ; \
 	done
 
