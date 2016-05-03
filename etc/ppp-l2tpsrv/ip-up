@@ -41,6 +41,13 @@ if [ "$l2tp_srv_nat_enabled" = "1" ]; then
     iptables -t nat -A POSTROUTING -s $PPP_REMOTE -o $lan_if -j MASQUERADE
 fi
 
+# allow dns for l2tp clients
+if [ "$dnsPEnabled" = "1" ]; then
+    $LOG "Dnsproxy allow from $PPP_IFACE"
+    iptables -A servicelimit -i $PPP_IFACE -p udp --dport 53 -j ACCEPT
+    iptables -A servicelimit -i $PPP_IFACE -m state --state NEW -p tcp --dport 53 -j ACCEPT
+fi
+
 # allow udpxy for l2tp clients
 if [ "$UDPXYMode" != "0" ]; then
     $LOG "Udpxy allow from $PPP_IFACE"

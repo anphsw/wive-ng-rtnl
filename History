@@ -2276,12 +2276,13 @@
 20) init.d: move l2tp server form S to W runlevel for correct restart after apply new changes.<br>
 21) init.d: l2tp server ip-up: split masqrade rules.<br>
 22) init.d: fix portforward regression in wan_if without real address case.<br>
-23) kernel: tty: fix GPF in flush_to_ldisc().<bt>
-24) kernel: proc: return -ENOMEM when inode allocation failed.<br>
-25) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
-26) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
-27) kernel: pppoe: fix reference counting in PPPoE proxy.<br>
-28) kernel: pipe: Fix buffer offset after partially failed read.<br>
+23) init.d: fix dns for l2tp server clients work.<br>
+24) kernel: tty: fix GPF in flush_to_ldisc().<bt>
+25) kernel: proc: return -ENOMEM when inode allocation failed.<br>
+26) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
+27) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
+28) kernel: pppoe: fix reference counting in PPPoE proxy.<br>
+29) kernel: pipe: Fix buffer offset after partially failed read.<br>
 <br>
 <br>
 <br>
