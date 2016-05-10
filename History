@@ -2278,12 +2278,13 @@
 22) init.d: fix portforward regression in wan_if without real address case.<br>
 23) init.d: fix dns for l2tp server clients work.<br>
 24) init.d: udhcpc-script: fix parse routes in some case.<br>
-25) kernel: tty: fix GPF in flush_to_ldisc().<bt>
-26) kernel: proc: return -ENOMEM when inode allocation failed.<br>
-27) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
-28) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
-29) kernel: pppoe: fix reference counting in PPPoE proxy.<br>
-30) kernel: pipe: Fix buffer offset after partially failed read.<br>
+25) init.d: udhcpc-script: add workaound for ISP with DGW over others net.<br>
+26) kernel: tty: fix GPF in flush_to_ldisc().<bt>
+27) kernel: proc: return -ENOMEM when inode allocation failed.<br>
+28) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
+29) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
+30) kernel: pppoe: fix reference counting in PPPoE proxy.<br>
+31) kernel: pipe: Fix buffer offset after partially failed read.<br>
 <br>
 <br>
 <br>
