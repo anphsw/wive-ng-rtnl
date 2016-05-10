@@ -2277,6 +2277,7 @@
 21) init.d: l2tp server ip-up: split masqrade rules.<br>
 22) init.d: fix portforward regression in wan_if without real address case.<br>
 23) init.d: fix dns for l2tp server clients work.<br>
+24) init.d: udhcpc-script: fix parse routes in some case.<br>
 24) kernel: tty: fix GPF in flush_to_ldisc().<bt>
 25) kernel: proc: return -ENOMEM when inode allocation failed.<br>
 26) kernel: ipv6/udp: use sticky pktinfo egress ifindex on connect().<br>
