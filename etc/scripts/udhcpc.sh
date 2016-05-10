@@ -215,7 +215,7 @@ case "$1" in
 	    # default gateways need replace/add at end route parces
 	    # replace dgw must be replaced only if ip selected
 	    if [ "$REPLACE_DGW" = "1" ] && [ "$FULL_RENEW" = "1" ]; then
-		ROUTELIST="$ROUTELIST_FGW $ROUTELIST_DGW $ROUTELIST_ST $ROUTELIST_CS $ROUTELIST_DGW"
+		ROUTELIST="$ROUTELIST_FGW $ROUTELIST_DGW $ROUTELIST_ST $ROUTELIST_CS"
 		$LOG "Apply route list. And replace DGW."
 	    else
 		ROUTELIST="$ROUTELIST_FGW $ROUTELIST_ST $ROUTELIST_CS"
