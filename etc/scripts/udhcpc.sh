@@ -186,14 +186,14 @@ case "$1" in
 		for i in $routes; do
 		    NW=`echo $i | sed 's,/.*,,'`
 		    GW=`echo $i | sed 's,.*/,,'`
+		    if [ -z "$GW" ]; then
+			GW="0.0.0.0"
+                    fi
 		    shift 1
 		    MASK=`echo $NW | awk '{w=32; split($0,a,"."); \
 			for (i=4; i>0; i--) {if (a[i]==0) w-=8; else {\
 			while (a[i]%2==0) {w--; a[i]=a[i]/2}; break}\
 			}; print w }'`
-		    if [ -z "$GW" ]; then
-			GW="0.0.0.0"
-                    fi
 		    ROUTELIST_CS="$ROUTELIST_CS $NW/$MASK:$GW:$interface:"
 		done
 	    fi
