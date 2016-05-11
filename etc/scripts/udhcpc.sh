@@ -168,9 +168,9 @@ case "$1" in
 		# always parse router variable
 		metric=0
 		for i in $router ; do
-		    # add route stubs $raddr/32:0.0.0.0 dev $interface metric 100 to route list
+		    # add route stubs $i/32:0.0.0.0 dev $interface metric 100 to route list
 		    # this stubs need add with low cost
-		    ROUTELIST_FGW="$ROUTELIST_FGW $raddr/32:0.0.0.0:$interface:100"
+		    ROUTELIST_FGW="$ROUTELIST_FGW $i/32:0.0.0.0:$interface:100"
 		    if [ "$REPLACE_DGW" = "1" ]; then
 		        # add default $i dev $interface metric $metric to route dgw list
 		        ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
