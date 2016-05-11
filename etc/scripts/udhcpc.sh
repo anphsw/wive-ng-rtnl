@@ -189,7 +189,7 @@ case "$1" in
 		for i in $routes; do
 		    NW=`echo $i | sed 's,/.*,,'`
 		    GW=`echo $i | sed 's,.*/,,'`
-		    if [ -z "$GW" ]; then
+		    if [ ! -z "$NW" ] && [ -z "$GW" ]; then
 			GW="0.0.0.0"
                     fi
 		    shift 1
@@ -207,7 +207,7 @@ case "$1" in
 		while [ -n "$1" ]; do
 		    NW="$1"
 		    GW="$2"
-		    if [ -z "$GW" ]; then
+		    if [ ! -z "$NW" ] && [ -z "$GW" ]; then
 			GW="0.0.0.0"
                     fi
 		    shift 2
