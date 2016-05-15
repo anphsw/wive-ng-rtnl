@@ -2287,6 +2287,6 @@
 31) kernel: net: af_unix: don't set err in unix_stream_read_generic unless there was an error.<br>
 32) kernel: pppoe: fix reference counting in PPPoE proxy.<br>
 33) kernel: pipe: Fix buffer offset after partially failed read.<br>
-<br>
+34) kernel: csum: Update csum_block_add to use rotate instead of byteswap.<br>
 <br>
 <br>
