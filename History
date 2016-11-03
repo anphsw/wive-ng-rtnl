@@ -2290,5 +2290,6 @@
 34) kernel: pipe: fix buffer offset after partially failed read.<br>
 35) kernel: csum: update csum_block_add to use rotate instead of byteswap.<br>
 36) kernel: mips: make flush_thread and exit_thread inline.<br>
+37) kernel: net: af_packet: move strict addr_len check right before dev_[mc/unicast]_[add/del].<br>
 <br>
 <br>
