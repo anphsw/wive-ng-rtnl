@@ -1,3 +1,21 @@
+Wive-NG-RTNL for ASUS DSL-N12U
+- NO DSL support
+- Ethernet WAN port is near the usb connector
+- very good pppoe and wifi performance
+- can be flashed via asus tftp recovery
+
+asus tftp recovery:
+push reset on router while power on until power led blinks
+ifconfig eth0 192.168.1.20 netmask 255.255.255.0 up
+atftp -p -l <image name> 192.168.1.1
+ASUS router expects only ip 192.168.1.20, others will not work.
+
+Other build targets broken for now due to patched files:
+linux-2.6.21.x/drivers/mtd/ralink/ralink-flash.h
+linux-2.6.21.x/include/linux/ralink_gpio.h
+
+you can roll back it if you want to build another targets
+
 #############################################################################################################
 # EULA:
 #

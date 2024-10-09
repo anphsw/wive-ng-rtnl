@@ -32,8 +32,10 @@ start() {
 		OLDMACWAN=`eth_mac r wan | egrep "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$"`
 		OLDMACLAN=`eth_mac r lan | egrep "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$"`
 	    else
-		OLDMACWAN=""
-		OLDMACLAN=""
+		OLDMACWAN="$(hexdump -s 4 -n 6 -v -e '6/1 "%02X " "\n"' /dev/mtd2 |awk '{print $1 ":" $2 ":" $3 ":" $4 ":" $5 ":" $6; exit;}')"
+		OLDMACLAN="${OLDMACWAN}"
+#		OLDMACWAN=""
+#		OLDMACLAN=""
 	    fi
 	    if [ $FIRSTBITSW = "FF" ] || [ $FIRSTBITSL = "FF" ]; then
 		    $LOG "Clear and load defaults to nvram."
@@ -43,10 +45,10 @@ start() {
 		    # force rebuild mac if reset to defaults
 		    ########################################
 		    FORCE_REBUILD_MAC="YES"
+		    $LOG "Burn RF template to flash"
+		    fs burnrf
 	    fi
 	fi
-	$LOG "Burn RF template to flash"
-	fs burnrf
 	$LOG ">>>> RESTORE NVRAM <<<<"
 	if [ -f /etc/backup/nvram_backup.dat ]; then
 	    $LOG "Load backuped setting to nvram."
@@ -57,7 +59,7 @@ start() {
 	    ########################################
 	    # force rebuild mac if reset to defaults
 	    ########################################
-	    FORCE_REBUILD_MAC="YES"
+#	    FORCE_REBUILD_MAC="YES"
 	fi
 	$LOG "Reset OK. Continue boot..."
 	########################################
